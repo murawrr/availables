@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mura - Tattoo Artist Portfolio</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Language Toggle -->
+    <div class="lang-toggle">
+        <button onclick="setLanguage('en')" class="lang-btn active" data-lang="en">EN</button>
+        <button onclick="setLanguage('ko')" class="lang-btn" data-lang="ko">KO</button>
+        <button onclick="setLanguage('jp')" class="lang-btn" data-lang="jp">JP</button>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 data-en="mura" data-ko="뮤라" data-jp="ムラ">mura</h1>
+            <p data-en="tattoo artist" data-ko="타투 아티스트" data-jp="タトゥーアーティスト">tattoo artist</p>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Episodes Section -->
+            <section class="design-section">
+                <h2 data-en="Episodes" data-ko="에피소드" data-jp="エピソード">Episodes</h2>
+                <p class="section-desc" data-en="Each episode is a collection of designs on one sheet" data-ko="각 에피소드는 한 장의 시트에 여러 디자인이 들어있습니다" data-jp="各エピソードは1枚のシートに複数のデザインが含まれています">Each episode is a collection of designs on one sheet</p>
+                <a href="episodes.html" class="btn btn-primary" data-en="View Episodes" data-ko="에피소드 보기" data-jp="エピソードを表示">View Episodes</a>
+            </section>
+
+            <!-- Mura-Types Section -->
+            <section class="design-section">
+                <h2 data-en="Mura-Types" data-ko="뮤라-타입" data-jp="ムラ-タイプ">Mura-Types</h2>
+                <p class="section-desc" data-en="Typographical experimentation with Hangul words" data-ko="한글 단어의 타이포그래피 실험" data-jp="ハングル単語のタイポグラフィー実験">Typographical experimentation with Hangul words</p>
+                <a href="mura-types.html" class="btn btn-primary" data-en="View Mura-Types" data-ko="뮤라-타입 보기" data-jp="ムラ-タイプを表示">View Mura-Types</a>
+            </section>
+        </main>
+
+        <!-- Booking Guide Section -->
+        <section class="booking-guide">
+            <h2 data-en="Booking Guide" data-ko="예약 가이드" data-jp="予約ガイド">Booking Guide</h2>
+            <div class="guide-content">
+                <!-- Add your Notion booking guide content here -->
+                <p data-en="Coming soon" data-ko="곧 업데이트 예정" data-jp="近日中に更新予定">Coming soon</p>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <footer class="contact">
+            <h2 data-en="Get in Touch" data-ko="연락하기" data-jp="お問い合わせ">Get in Touch</h2>
+            <div class="contact-links">
+                <a href="#" class="contact-link" data-en="Instagram: @murarctic" data-ko="인스타그램: @murarctic" data-jp="Instagram: @murarctic">Instagram: @murarctic</a>
+                <a href="#" class="contact-link" data-en="Kakao OpenChat" data-ko="카카오 오픈챗" data-jp="Kakao OpenChat">Kakao OpenChat</a>
+                <a href="mailto:#" class="contact-link" data-en="Email" data-ko="이메일" data-jp="メール">Email</a>
+            </div>
+            <div class="contact-info">
+                <p data-en="For bookings, enquiries, and waitlisting" data-ko="예약, 문의, 대기 신청" data-jp="予約、お問い合わせ、ウェイトリスト">For bookings, enquiries, and waitlisting</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

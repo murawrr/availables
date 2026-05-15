@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mura-Type 03 - Mura Portfolio</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Language Toggle -->
+    <div class="lang-toggle">
+        <button onclick="setLanguage('en')" class="lang-btn active" data-lang="en">EN</button>
+        <button onclick="setLanguage('ko')" class="lang-btn" data-lang="ko">KO</button>
+        <button onclick="setLanguage('jp')" class="lang-btn" data-lang="jp">JP</button>
+    </div>
+
+    <div class="container">
+        <!-- Back Button -->
+        <a href="mura-types.html" class="back-btn" data-en="← Back" data-ko="← 뒤로" data-jp="← 戻る">← Back</a>
+
+        <!-- Title -->
+        <header class="header">
+            <h1 data-en="Mura-Type 03" data-ko="뮤라-타입 03" data-jp="ムラ-タイプ 03">Mura-Type 03</h1>
+        </header>
+
+        <!-- Gallery -->
+        <div class="gallery">
+            <div class="carousel" id="carousel-mura-03">
+                <!-- Images will be added here -->
+                <!-- Format: <img src="DROPBOX_URL" alt="Design"> -->
+                <!-- Replace DROPBOX_URL with your Dropbox PNG URLs -->
+            </div>
+            <div class="carousel-controls">
+                <button class="carousel-btn" onclick="prevSlide('carousel-mura-03')" data-en="← Prev" data-ko="← 이전" data-jp="← 前へ">← Prev</button>
+                <button class="carousel-btn" onclick="nextSlide('carousel-mura-03')" data-en="Next →" data-ko="다음 →" data-jp="次へ →">Next →</button>
+            </div>
+        </div>
+
+        <!-- Description -->
+        <section class="description">
+            <h2 data-en="Description" data-ko="설명" data-jp="説明">Description</h2>
+            <p class="desc-text" data-en="Add your description here" data-ko="여기에 설명을 추가하세요" data-jp="ここに説明を追加してください">Add your description here</p>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
