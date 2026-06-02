@@ -365,9 +365,13 @@ body.modal-open { overflow: hidden; }
     font-weight: 600;
 }
 
-.contact-btn.ig { background: var(--ink); color: var(--white); }
-.contact-btn.kakao { background: #FEE500; color: #191600; }
+.contact-btn.ig { background: var(--ink); color: var(--white); order: 1; }
+.contact-btn.kakao { background: #FEE500; color: #191600; order: 2; }
 .contact-btn.kakao.disabled { background: #eee; color: #999; cursor: not-allowed; }
+
+/* Korean site: KakaoTalk first/primary, Instagram second. */
+body.lang-ko .contact-btn.kakao { order: 1; }
+body.lang-ko .contact-btn.ig { order: 2; }
 
 /* ===== Footer ===== */
 .footer {
