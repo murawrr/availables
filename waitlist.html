@@ -3,28 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Waitlist - Mura Portfolio</title>
+    <title>Waitlist - mura</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Language Toggle -->
-    <div class="lang-toggle">
-        <button onclick="setLanguage('en')" class="lang-btn active" data-lang="en">EN</button>
-        <button onclick="setLanguage('ko')" class="lang-btn" data-lang="ko">KO</button>
-        <button onclick="setLanguage('jp')" class="lang-btn" data-lang="jp">JP</button>
-    </div>
+    <div id="site-header" data-back="index.html"></div>
 
-    <div class="container">
-        <!-- Back Button -->
-        <a href="index.html" class="back-btn" data-en="← Back" data-ko="← 뒤로" data-jp="← 戻る">← Back</a>
-
-        <!-- Header -->
-        <header class="header">
-            <h1 data-en="Join the Waitlist" data-ko="대기열에 참가하세요" data-jp="ウェイトリストに参加">Join the Waitlist</h1>
-        </header>
-
-        <!-- Waitlist Form Section -->
+    <main class="container">
         <section class="waitlist-section" id="waitlist">
+            <div class="project-desc">
+                <span class="desc-label">
+                    <span class="dot"></span>
+                    <span data-en="Join the Waitlist" data-ko="대기열에 참가하세요" data-jp="ウェイトリストに参加">Join the Waitlist</span>
+                </span>
+                <p data-en="Fill in the form below and I'll get back to you." data-ko="아래 양식을 작성해 주시면 연락드리겠습니다." data-jp="下のフォームにご記入いただければ、ご連絡いたします。">Fill in the form below and I'll get back to you.</p>
+            </div>
+
             <!-- Success/Error Messages -->
             <div class="form-status">
                 <div data-fs-success class="success-message" style="display: none;">
@@ -76,7 +70,7 @@
                 <button type="submit" class="submit-btn" data-fs-submit-btn data-en="Join Waitlist" data-ko="대기열 참가" data-jp="ウェイトリストに参加">Join Waitlist</button>
             </form>
         </section>
-    </div>
+    </main>
 
     <!-- Formspree Library -->
     <script>

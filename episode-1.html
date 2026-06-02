@@ -3,45 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Episode 1 - Mura Portfolio</title>
+    <title>Episode 1 - mura</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Language Toggle -->
-    <div class="lang-toggle">
-        <button onclick="setLanguage('en')" class="lang-btn active" data-lang="en">EN</button>
-        <button onclick="setLanguage('ko')" class="lang-btn" data-lang="ko">KO</button>
-        <button onclick="setLanguage('jp')" class="lang-btn" data-lang="jp">JP</button>
-    </div>
+    <div id="site-header" data-back="episodes.html"></div>
 
-    <div class="container">
-        <!-- Back Button -->
-        <a href="episodes.html" class="back-btn" data-en="← Back" data-ko="← 뒤로" data-jp="← 戻る">← Back</a>
-
-        <!-- Title -->
-        <header class="header">
-            <h1 data-en="Episode 1" data-ko="에피소드 1" data-jp="エピソード 1">Episode 1</h1>
-        </header>
-
-        <!-- Gallery -->
-        <div class="gallery">
-            <div class="carousel" id="carousel-episode-1">
-                <!-- Images will be added here -->
-                <!-- Format: <img src="DROPBOX_URL" alt="Design"> -->
-                <!-- Replace DROPBOX_URL with your Dropbox PNG URLs -->
+    <main class="container">
+        <section class="project">
+            <div class="project-desc">
+                <span class="desc-label">
+                    <span class="dot"></span>
+                    <span data-en="Episode 1" data-ko="에피소드 1" data-jp="エピソード 1">Episode 1</span>
+                </span>
+                <p data-en="A short description of Episode 1 goes here. Replace this with your own text."
+                   data-ko="에피소드 1 에 대한 짧은 설명을 여기에 작성하세요. 자신의 텍스트로 교체하세요."
+                   data-jp="エピソード 1 の短い説明をここに記載します。ご自身のテキストに置き換えてください。">A short description of Episode 1 goes here. Replace this with your own text.</p>
             </div>
-            <div class="carousel-controls">
-                <button class="carousel-btn" onclick="prevSlide('carousel-episode-1')" data-en="← Prev" data-ko="← 이전" data-jp="← 前へ">← Prev</button>
-                <button class="carousel-btn" onclick="nextSlide('carousel-episode-1')" data-en="Next →" data-ko="다음 →" data-jp="次へ →">Next →</button>
-            </div>
-        </div>
 
-        <!-- Description -->
-        <section class="description">
-            <h2 data-en="Description" data-ko="설명" data-jp="説明">Description</h2>
-            <p class="desc-text" data-en="Add your description here" data-ko="여기에 설명을 추가하세요" data-jp="ここに説明を追加してください">Add your description here</p>
+            <!-- Add images: drop files into images/episodes/ then replace a tile with:
+                 <figure class="image-tile"><img src="images/episodes/01.jpg" alt="Episode 1"></figure> -->
+            <div class="image-grid">
+                <figure class="image-tile is-placeholder"><span class="placeholder-label">Image 01</span></figure>
+                <figure class="image-tile is-placeholder"><span class="placeholder-label">Image 02</span></figure>
+                <figure class="image-tile is-placeholder"><span class="placeholder-label">Image 03</span></figure>
+                <figure class="image-tile is-placeholder"><span class="placeholder-label">Image 04</span></figure>
+            </div>
         </section>
-    </div>
+    </main>
 
     <script src="script.js"></script>
 </body>

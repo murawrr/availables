@@ -3,42 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mura-Types - Mura Portfolio</title>
+    <title>Mura-Types - mura</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Language Toggle -->
-    <div class="lang-toggle">
-        <button onclick="setLanguage('en')" class="lang-btn active" data-lang="en">EN</button>
-        <button onclick="setLanguage('ko')" class="lang-btn" data-lang="ko">KO</button>
-        <button onclick="setLanguage('jp')" class="lang-btn" data-lang="jp">JP</button>
-    </div>
+    <div id="site-header" data-back="index.html"></div>
 
-    <div class="container">
-        <!-- Back Button -->
-        <a href="index.html" class="back-btn" data-en="← Back" data-ko="← 뒤로" data-jp="← 戻る">← Back</a>
+    <main class="container">
+        <section class="project">
+            <div class="project-desc">
+                <span class="desc-label">
+                    <span class="dot"></span>
+                    <span data-en="Mura-Types" data-ko="뮤라-타입" data-jp="ムラ-タイプ">Mura-Types</span>
+                </span>
+                <p data-en="A short introduction to the Mura-Types series goes here. Replace this text with your own description of the work below."
+                   data-ko="뮤라-타입 시리즈에 대한 짧은 소개를 여기에 작성하세요. 아래 작업에 대한 설명으로 이 텍스트를 교체하세요."
+                   data-jp="ムラ-タイプシリーズの短い紹介をここに記載します。下の作品の説明文に置き換えてください。">A short introduction to the Mura-Types series goes here. Replace this text with your own description of the work below.</p>
+            </div>
 
-        <!-- Header -->
-        <header class="header">
-            <h1 data-en="Mura-Types" data-ko="뮤라-타입" data-jp="ムラ-タイプ">Mura-Types</h1>
-        </header>
-
-        <!-- Mura-Types Grid -->
-        <div class="mura-types-grid">
-            <a href="mura-type-01.html" class="mura-card">
-                <h3 data-en="Mura-Type 01" data-ko="뮤라-타입 01" data-jp="ムラ-タイプ 01">Mura-Type 01</h3>
-            </a>
-            <a href="mura-type-02.html" class="mura-card">
-                <h3 data-en="Mura-Type 02" data-ko="뮤라-타입 02" data-jp="ムラ-タイプ 02">Mura-Type 02</h3>
-            </a>
-            <a href="mura-type-03.html" class="mura-card">
-                <h3 data-en="Mura-Type 03" data-ko="뮤라-타입 03" data-jp="ムラ-タイプ 03">Mura-Type 03</h3>
-            </a>
-            <a href="mura-type-04.html" class="mura-card">
-                <h3 data-en="Mura-Type 04" data-ko="뮤라-타입 04" data-jp="ムラ-タイプ 04">Mura-Type 04</h3>
-            </a>
-        </div>
-    </div>
+            <!-- Add images: drop files into images/mura-types/ then replace a tile with:
+                 <figure class="image-tile"><img src="images/mura-types/01.jpg" alt="Mura-Type work"></figure> -->
+            <div class="image-grid">
+                <figure class="image-tile is-placeholder"><span class="placeholder-label">Image 01</span></figure>
+                <figure class="image-tile is-placeholder"><span class="placeholder-label">Image 02</span></figure>
+                <figure class="image-tile is-placeholder"><span class="placeholder-label">Image 03</span></figure>
+                <figure class="image-tile is-placeholder"><span class="placeholder-label">Image 04</span></figure>
+                <figure class="image-tile is-placeholder"><span class="placeholder-label">Image 05</span></figure>
+                <figure class="image-tile is-placeholder"><span class="placeholder-label">Image 06</span></figure>
+            </div>
+        </section>
+    </main>
 
     <script src="script.js"></script>
 </body>
