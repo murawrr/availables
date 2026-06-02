@@ -68,18 +68,17 @@ a { color: inherit; }
 .header-center { flex: 0 0 auto; }
 
 .book-now-btn {
-    background: var(--ink);
-    color: var(--white);
+    background: none;
     border: none;
-    border-radius: 50px;
-    padding: 0.4rem 1.1rem;
+    padding: 0;
     font: inherit;
-    font-weight: 600;
+    color: var(--ink);
     cursor: pointer;
+    letter-spacing: 0.2px;
     transition: opacity 0.2s ease;
 }
 
-.book-now-btn:hover { opacity: 0.85; }
+.book-now-btn:hover { opacity: 0.55; }
 
 .lang-selector {
     flex: 1;
@@ -223,6 +222,50 @@ a { color: inherit; }
     font-size: 0.85rem;
     letter-spacing: 0.5px;
 }
+
+/* ===== Work listing (episodes.html / mura-types.html) ===== */
+.work-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem 1.25rem;
+}
+
+.work-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.work-card .thumb {
+    aspect-ratio: 4 / 3;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #f1f1f1;
+    border: 1px dashed #cfcfcf;
+    background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
+    background-size: 16px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.work-card .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.work-meta {
+    display: flex;
+    gap: 0.6rem;
+    align-items: baseline;
+    margin-top: 0.7rem;
+    font-size: 0.95rem;
+}
+
+.work-num { color: var(--muted); }
+.work-title { color: var(--ink); }
+.work-card:hover .work-title { opacity: 0.55; }
 
 /* ===== Booking modal ===== */
 body.modal-open { overflow: hidden; }
@@ -455,6 +498,7 @@ body.modal-open { overflow: hidden; }
     .menu-text { height: 6rem; }
 
     .image-grid { grid-template-columns: 1fr; }
+    .work-grid { grid-template-columns: 1fr; }
 
     .form-row { grid-template-columns: 1fr; gap: 1.25rem; }
 }
