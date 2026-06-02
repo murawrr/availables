@@ -3,61 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mura - Tattoo Artist Portfolio</title>
+    <title>무라 - Mura Tattoo Artist</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <!-- Language Toggle -->
-    <div class="lang-toggle">
-        <button onclick="setLanguage('en')" class="lang-btn active" data-lang="en">EN</button>
-        <button onclick="setLanguage('ko')" class="lang-btn" data-lang="ko">KO</button>
-        <button onclick="setLanguage('jp')" class="lang-btn" data-lang="jp">JP</button>
+    <div class="lang-selector">
+        <button class="lang-btn active" onclick="setLanguage('ko')" data-lang="ko">한국어</button>
+        <button class="lang-btn" onclick="setLanguage('en')" data-lang="en">English</button>
+        <button class="lang-btn" onclick="setLanguage('jp')" data-lang="jp">日本語</button>
     </div>
 
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1 data-en="mura" data-ko="뮤라" data-jp="ムラ">mura</h1>
-            <p data-en="tattoo artist" data-ko="타투 아티스트" data-jp="タトゥーアーティスト">tattoo artist</p>
+            <h1>무라</h1>
+            <p class="tagline" data-en="Tattoo Artist" data-ko="타투 아티스트" data-jp="タトゥーアーティスト">타투 아티스트</p>
         </header>
+
+        <!-- Horizontal Scroll Menu -->
+        <div class="menu-scroll">
+            <div class="menu-items">
+                <div class="menu-item" style="background-color: #6B5B95;">
+                    <span data-en="Episodes" data-ko="에피소드" data-jp="エピソード">에피소드</span>
+                </div>
+                <div class="menu-item" style="background-color: #9B8BA8;">
+                    <span data-en="Mura-Types" data-ko="뮤라-타입" data-jp="ムラ-タイプ">뮤라-타입</span>
+                </div>
+                <div class="menu-item" style="background-color: #8B7BA8;">
+                    <span data-en="Gallery" data-ko="갤러리" data-jp="ギャラリー">갤러리</span>
+                </div>
+                <div class="menu-item" style="background-color: #A8D5D5;">
+                    <span data-en="About" data-ko="소개" data-jp="について">소개</span>
+                </div>
+                <div class="menu-item" style="background-color: #B8D5C8;">
+                    <span data-en="Contact" data-ko="연락" data-jp="お問い合わせ">연락</span>
+                </div>
+                <div class="menu-item" style="background-color: #CAFCE1;">
+                    <span data-en="Join Waitlist" data-ko="대기열 참가" data-jp="ウェイトリストに参加">대기열 참가</span>
+                </div>
+            </div>
+        </div>
 
         <!-- Main Content -->
         <main>
-            <!-- Episodes Section -->
-            <section class="design-section">
-                <h2 data-en="Episodes" data-ko="에피소드" data-jp="エピソード">Episodes</h2>
-                <p class="section-desc" data-en="Each episode is a collection of designs on one sheet" data-ko="각 에피소드는 한 장의 시트에 여러 디자인이 들어있습니다" data-jp="各エピソードは1枚のシートに複数のデザインが含まれています">Each episode is a collection of designs on one sheet</p>
-                <a href="episodes.html" class="btn btn-primary" data-en="View Episodes" data-ko="에피소드 보기" data-jp="エピソードを表示">View Episodes</a>
+            <!-- Intro Section -->
+            <section class="intro-section">
+                <p data-en="Welcome to 무라's tattoo design studio. Custom designs, custom stories." data-ko="무라의 타투 디자인 스튜디오에 오신 것을 환영합니다." data-jp="무라のタトゥーデザインスタジオへようこそ。">무라의 타투 디자인 스튜디오에 오신 것을 환영합니다.</p>
             </section>
 
-            <!-- Mura-Types Section -->
-            <section class="design-section">
-                <h2 data-en="Mura-Types" data-ko="뮤라-타입" data-jp="ムラ-タイプ">Mura-Types</h2>
-                <p class="section-desc" data-en="Typographical experimentation with Hangul words" data-ko="한글 단어의 타이포그래피 실험" data-jp="ハングル単語のタイポグラフィー実験">Typographical experimentation with Hangul words</p>
-                <a href="mura-types.html" class="btn btn-primary" data-en="View Mura-Types" data-ko="뮤라-타입 보기" data-jp="ムラ-タイプを表示">View Mura-Types</a>
+            <!-- Waitlist Form Section -->
+            <section class="waitlist-section">
+                <h2 data-en="Join the Waitlist" data-ko="대기열에 참가하세요" data-jp="ウェイトリストに参加">대기열에 참가하세요</h2>
+                
+                <form class="waitlist-form" id="waitlistForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name" data-en="Name" data-ko="이름" data-jp="名前">이름</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="instagram" data-en="Instagram @" data-ko="인스타그램 @" data-jp="Instagram @">인스타그램 @</label>
+                            <input type="text" id="instagram" name="instagram" placeholder="@username" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="city" data-en="City" data-ko="도시" data-jp="都市">도시</label>
+                            <input type="text" id="city" name="city" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="country" data-en="Country" data-ko="국가" data-jp="国">국가</label>
+                            <input type="text" id="country" name="country" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="design" data-en="Design You Want & Approx Size" data-ko="원하는 디자인 및 대략적인 크기" data-jp="欲しいデザインと大まかなサイズ">원하는 디자인 및 대략적인 크기</label>
+                        <textarea id="design" name="design" rows="4" placeholder="Describe the design and size..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn" data-en="Join Waitlist" data-ko="대기열 참가" data-jp="ウェイトリストに参加">대기열 참가</button>
+                </form>
+
+                <p class="form-message" data-en="I'll get back to you soon!" data-ko="곧 연락드리겠습니다!" data-jp="すぐにお返事します！">곧 연락드리겠습니다!</p>
             </section>
         </main>
 
-        <!-- Booking Guide Section -->
-        <section class="booking-guide">
-            <h2 data-en="Booking Guide" data-ko="예약 가이드" data-jp="予約ガイド">Booking Guide</h2>
-            <div class="guide-content">
-                <!-- Add your Notion booking guide content here -->
-                <p data-en="Coming soon" data-ko="곧 업데이트 예정" data-jp="近日中に更新予定">Coming soon</p>
-            </div>
-        </section>
-
-        <!-- Contact Section -->
-        <footer class="contact">
-            <h2 data-en="Get in Touch" data-ko="연락하기" data-jp="お問い合わせ">Get in Touch</h2>
-            <div class="contact-links">
-                <a href="#" class="contact-link" data-en="Instagram: @murarctic" data-ko="인스타그램: @murarctic" data-jp="Instagram: @murarctic">Instagram: @murarctic</a>
-                <a href="#" class="contact-link" data-en="Kakao OpenChat" data-ko="카카오 오픈챗" data-jp="Kakao OpenChat">Kakao OpenChat</a>
-                <a href="mailto:#" class="contact-link" data-en="Email" data-ko="이메일" data-jp="メール">Email</a>
-            </div>
-            <div class="contact-info">
-                <p data-en="For bookings, enquiries, and waitlisting" data-ko="예약, 문의, 대기 신청" data-jp="予約、お問い合わせ、ウェイトリスト">For bookings, enquiries, and waitlisting</p>
-            </div>
+        <!-- Footer -->
+        <footer class="footer">
+            <p data-en="무라 © 2025" data-ko="무라 © 2025" data-jp="무라 © 2025">무라 © 2025</p>
+            <p data-en="Custom Tattoo Designs" data-ko="커스텀 타투 디자인" data-jp="カスタムタトゥーデザイン">커스텀 타투 디자인</p>
         </footer>
     </div>
 
