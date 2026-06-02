@@ -1,87 +1,187 @@
-// Language switching functionality
-let currentLanguage = 'ko'; // Default to Korean
+// ===== Booking template (copied to clipboard from the Book Now popup) =====
+const BOOKING_TEMPLATE = `Name:
+Instagram: @
+City / Country:
+Design idea:
+Approx. size (cm):
+Placement on body:
+Budget:
+Preferred dates:
+(Attach reference images in your message)`;
+
+// KakaoTalk open-chat / channel link. Leave empty until provided.
+const KAKAO_URL = '';
+const INSTAGRAM_URL = 'https://instagram.com/murarctic';
+
+// ===== Language switching =====
+let currentLanguage = localStorage.getItem('preferredLanguage') || 'ko';
+
+function applyLanguage(lang) {
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    });
+
+    document.querySelectorAll('[data-en], [data-ko], [data-jp]').forEach(el => {
+        // .menu-bar carries labels for the marquee builder; its children are
+        // managed by buildMarquees(), so never overwrite its textContent here.
+        if (el.classList.contains('menu-bar')) return;
+        const val = el.getAttribute('data-' + lang);
+        if (val !== null) el.textContent = val;
+    });
+}
 
 function setLanguage(lang) {
     currentLanguage = lang;
-    
-    // Update active button
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.getAttribute('data-lang') === lang) {
-            btn.classList.add('active');
-        }
-    });
-    
-    // Update all content with data attributes
-    document.querySelectorAll('[data-en], [data-ko], [data-jp]').forEach(element => {
-        if (lang === 'en' && element.getAttribute('data-en')) {
-            element.textContent = element.getAttribute('data-en');
-        } else if (lang === 'ko' && element.getAttribute('data-ko')) {
-            element.textContent = element.getAttribute('data-ko');
-        } else if (lang === 'jp' && element.getAttribute('data-jp')) {
-            element.textContent = element.getAttribute('data-jp');
-        }
-    });
-    
-    // Save to localStorage
     localStorage.setItem('preferredLanguage', lang);
+    applyLanguage(lang);
+    buildMarquees(); // labels may have changed length -> rebuild
 }
 
-// Load saved language preference on page load
-window.addEventListener('load', () => {
-    const savedLanguage = localStorage.getItem('preferredLanguage') || 'ko';
-    setLanguage(savedLanguage);
-});
+// ===== Shared header (injected into #site-header on every page) =====
+function renderHeader() {
+    const mount = document.getElementById('site-header');
+    if (!mount) return;
 
-// Scroll to section function for menu items
-function scrollToSection(sectionId) {
-    const element = document.getElementById(sectionId);
-    if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
+    const back = mount.getAttribute('data-back');
+    const backHtml = back
+        ? `<a href="${back}" class="back-link" data-en="← Back" data-ko="← 뒤로" data-jp="← 戻る">← Back</a>`
+        : '';
+
+    mount.className = 'site-header';
+    mount.innerHTML = `
+        <div class="header-left">
+            <a href="index.html" class="site-name">mura</a>
+            <a href="${INSTAGRAM_URL}" target="_blank" rel="noopener" class="site-handle">@murarctic</a>
+            ${backHtml}
+        </div>
+        <div class="header-center">
+            <button type="button" class="book-now-btn" onclick="openBooking()" data-en="Book Now" data-ko="예약하기" data-jp="予約する">Book Now</button>
+        </div>
+        <nav class="lang-selector">
+            <button class="lang-btn" onclick="setLanguage('en')" data-lang="en">EN</button>
+            <button class="lang-btn" onclick="setLanguage('ko')" data-lang="ko">KO</button>
+            <button class="lang-btn" onclick="setLanguage('jp')" data-lang="jp">JP</button>
+        </nav>`;
+}
+
+// ===== Booking modal =====
+function renderBookingModal() {
+    if (document.getElementById('booking-modal')) return;
+
+    const kakaoBtn = KAKAO_URL
+        ? `<a class="contact-btn kakao" href="${KAKAO_URL}" target="_blank" rel="noopener">KakaoTalk</a>`
+        : `<span class="contact-btn kakao disabled" title="Link coming soon">KakaoTalk (soon)</span>`;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'booking-modal';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+        <div class="modal" role="dialog" aria-modal="true" aria-label="Booking">
+            <button class="modal-close" onclick="closeBooking()" aria-label="Close">&times;</button>
+            <h2 class="modal-title" data-en="Book with mura" data-ko="무라와 예약하기" data-jp="muraと予約">Book with mura</h2>
+            <p class="modal-intro" data-en="Copy the template, fill it in, and send it to me on Instagram DM or KakaoTalk." data-ko="아래 양식을 복사해 작성한 뒤 인스타그램 DM 또는 카카오톡으로 보내주세요." data-jp="テンプレートをコピーして記入し、InstagramのDMまたはKakaoTalkで送ってください。">Copy the template, fill it in, and send it to me on Instagram DM or KakaoTalk.</p>
+            <div class="booking-template-wrap">
+                <textarea id="booking-template" class="booking-template" rows="9" readonly></textarea>
+                <button class="copy-btn" onclick="copyTemplate()" data-en="Copy template" data-ko="양식 복사" data-jp="テンプレートをコピー">Copy template</button>
+            </div>
+            <div class="contact-options">
+                <a class="contact-btn ig" href="${INSTAGRAM_URL}" target="_blank" rel="noopener">Instagram DM</a>
+                ${kakaoBtn}
+            </div>
+        </div>`;
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeBooking(); });
+    document.body.appendChild(overlay);
+    document.getElementById('booking-template').value = BOOKING_TEMPLATE;
+}
+
+function openBooking() {
+    const m = document.getElementById('booking-modal');
+    if (m) { m.classList.add('open'); document.body.classList.add('modal-open'); }
+}
+
+function closeBooking() {
+    const m = document.getElementById('booking-modal');
+    if (m) { m.classList.remove('open'); document.body.classList.remove('modal-open'); }
+}
+
+async function copyTemplate() {
+    const ta = document.getElementById('booking-template');
+    const btn = document.querySelector('.copy-btn');
+    try {
+        await navigator.clipboard.writeText(ta.value);
+    } catch (e) {
+        ta.select();
+        document.execCommand('copy');
+    }
+    if (btn) {
+        const prev = btn.textContent;
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = prev; btn.classList.remove('copied'); }, 1500);
     }
 }
 
-// Form submission handler
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('waitlistForm');
-    
-    if (form) {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            // Create FormData to handle file uploads
-            const formData = new FormData(form);
-            
-            // Convert FormData to plain object for easier handling
-            const data = {
-                name: formData.get('name'),
-                instagram: formData.get('instagram'),
-                city: formData.get('city'),
-                country: formData.get('country'),
-                design: formData.get('design'),
-                _subject: 'New Waitlist Submission from murarctic.kr'
-            };
-            
-            // Send email via EmailJS (you can use this free service)
-            // For now, let's use a simple validation and message
-            console.log('Form data:', data);
-            
-            // Show success message
-            alert('Thank you! Your submission has been received. I will get back to you soon!');
-            
-            // Reset form
-            form.reset();
-        });
-    }
-    
-    // Set initial language
-    const savedLanguage = localStorage.getItem('preferredLanguage') || 'ko';
-    setLanguage(savedLanguage);
-});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBooking(); });
 
-// Menu item interactions
-document.querySelectorAll('.menu-item').forEach(item => {
-    item.addEventListener('click', function() {
-        console.log('Menu item clicked:', this.textContent);
+// ===== Seamless looping menu marquee =====
+// Each .menu-bar carries data-en/ko/jp labels. We render two identical
+// segments side by side and slide the track by exactly one segment width,
+// so the loop never visibly "refreshes".
+const MARQUEE_SPEED = 120; // px per second
+
+function buildMarquees() {
+    document.querySelectorAll('.menu-bar').forEach(bar => {
+        const label = bar.getAttribute('data-' + currentLanguage) || bar.getAttribute('data-en') || '';
+        const menuText = bar.querySelector('.menu-text');
+        if (!menuText) return;
+
+        const makeSegment = () => {
+            const seg = document.createElement('span');
+            seg.className = 'marquee-seg';
+            for (let i = 0; i < 8; i++) {
+                const word = document.createElement('span');
+                word.className = 'marquee-word';
+                word.textContent = label;
+                seg.appendChild(word);
+            }
+            return seg;
+        };
+
+        const track = document.createElement('div');
+        track.className = 'marquee';
+        const seg1 = makeSegment();
+        const seg2 = makeSegment();
+        seg2.setAttribute('aria-hidden', 'true');
+        track.appendChild(seg1);
+        track.appendChild(seg2);
+
+        menuText.innerHTML = '';
+        menuText.appendChild(track);
+
+        // Constant speed regardless of word length: duration scales with width.
+        const segWidth = seg1.getBoundingClientRect().width;
+        if (segWidth > 0) {
+            track.style.animationDuration = (segWidth / MARQUEE_SPEED) + 's';
+        }
     });
-});
+}
+
+// ===== Init =====
+function init() {
+    renderHeader();
+    renderBookingModal();
+    applyLanguage(currentLanguage);
+    buildMarquees();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
+
+// Fonts can load after first paint and change text width; rebuild once ready.
+if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(buildMarquees);
+}
+window.addEventListener('resize', buildMarquees);

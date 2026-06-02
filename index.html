@@ -7,49 +7,29 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <h1 id="header-name" data-en="'mura" data-ko="무라" data-jp="ムラ">'mura</h1>
-            <div class="lang-selector">
-                <button class="lang-btn active" onclick="setLanguage('en')" data-lang="en">English</button>
-                <button class="lang-btn" onclick="setLanguage('ko')" data-lang="ko">한국어</button>
-                <button class="lang-btn" onclick="setLanguage('jp')" data-lang="jp">日本語</button>
-            </div>
-        </header>
+    <!-- Shared header (rendered by script.js) -->
+    <div id="site-header"></div>
 
-        <!-- Menu Bars -->
-        <nav class="menu-bars">
-            <a href="episodes.html" class="menu-bar">
-                <div class="menu-text">
-                    <span data-en="EPISODES EPISODES EPISODES EPISODES" data-ko="에피소드 에피소드 에피소드 에피소드" data-jp="エピソード エピソード エピソード エピソード">EPISODES EPISODES EPISODES EPISODES</span>
-                </div>
-            </a>
+    <!-- Menu Bars -->
+    <nav class="menu-bars">
+        <a href="episodes.html" class="menu-bar" data-en="EPISODES" data-ko="에피소드" data-jp="エピソード">
+            <div class="menu-text"></div>
+        </a>
+        <a href="mura-types.html" class="menu-bar" data-en="MURA-TYPES" data-ko="뮤라-타입" data-jp="ムラ-タイプ">
+            <div class="menu-text"></div>
+        </a>
+        <a href="contact.html" class="menu-bar" data-en="CONTACT" data-ko="연락" data-jp="お問い合わせ">
+            <div class="menu-text"></div>
+        </a>
+        <a href="waitlist.html" class="menu-bar" data-en="WAITLIST" data-ko="대기열" data-jp="ウェイトリスト">
+            <div class="menu-text"></div>
+        </a>
+    </nav>
 
-            <a href="mura-types.html" class="menu-bar">
-                <div class="menu-text">
-                    <span data-en="MURA-TYPES MURA-TYPES MURA-TYPES MURA-TYPES" data-ko="뮤라-타입 뮤라-타입 뮤라-타입 뮤라-타입" data-jp="ムラ-タイプ ムラ-タイプ ムラ-タイプ ムラ-タイプ">MURA-TYPES MURA-TYPES MURA-TYPES MURA-TYPES</span>
-                </div>
-            </a>
-
-            <a href="contact.html" class="menu-bar">
-                <div class="menu-text">
-                    <span data-en="CONTACT CONTACT CONTACT CONTACT" data-ko="연락 연락 연락 연락" data-jp="お問い合わせ お問い合わせ お問い合わせ お問い合わせ">CONTACT CONTACT CONTACT CONTACT</span>
-                </div>
-            </a>
-
-            <a href="waitlist.html" class="menu-bar">
-                <div class="menu-text">
-                    <span data-en="WAITLIST WAITLIST WAITLIST WAITLIST" data-ko="대기열 대기열 대기열 대기열" data-jp="ウェイトリスト ウェイトリスト ウェイトリスト ウェイトリスト">WAITLIST WAITLIST WAITLIST WAITLIST</span>
-                </div>
-            </a>
-        </nav>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <p data-en="mura © 2025" data-ko="무라 © 2025" data-jp="무라 © 2025">mura © 2025</p>
-        </footer>
-    </div>
+    <!-- Footer -->
+    <footer class="footer">
+        <p data-en="mura © 2025" data-ko="무라 © 2025" data-jp="무라 © 2025">mura © 2025</p>
+    </footer>
 
     <script src="script.js"></script>
 </body>
