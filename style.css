@@ -87,12 +87,17 @@ body {
     letter-spacing: 1px;
 }
 
-/* Horizontal Scroll Menu */
+/* Horizontal Scroll Menu - FIXED */
+.menu-scroll-wrapper {
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 4rem;
+}
+
 .menu-scroll {
     width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
-    margin-bottom: 4rem;
     padding: 1rem 0;
     scroll-behavior: smooth;
 }
@@ -115,12 +120,12 @@ body {
     display: flex;
     gap: 1rem;
     min-width: max-content;
-    animation: scroll 20s linear infinite;
+    padding: 0 1rem;
 }
 
 .menu-item {
     flex-shrink: 0;
-    padding: 1.5rem 2rem;
+    padding: 4.5rem 2rem;
     border-radius: 50px;
     display: flex;
     align-items: center;
@@ -139,13 +144,8 @@ body {
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
-@keyframes scroll {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-50%);
-    }
+.menu-item span {
+    text-align: center;
 }
 
 /* Main Content */
@@ -173,29 +173,34 @@ main {
 /* Waitlist Section */
 .waitlist-section {
     background-color: #f9f9f9;
-    padding: 3rem;
+    padding: 4rem 3rem;
     border-radius: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin: 3rem 0;
 }
 
 .waitlist-section h2 {
     font-size: 2.5rem;
-    margin-bottom: 2rem;
+    margin-bottom: 3rem;
     color: var(--black);
     text-align: center;
 }
 
 /* Form Styles */
 .waitlist-form {
-    max-width: 600px;
+    max-width: 700px;
     margin: 0 auto;
+    background: var(--white);
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
+    gap: 2rem;
+    margin-bottom: 2rem;
 }
 
 .form-group {
@@ -205,18 +210,19 @@ main {
 
 .form-group.full-width {
     grid-column: 1 / -1;
+    margin-bottom: 2rem;
 }
 
 .form-group label {
     font-weight: 600;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
     color: var(--black);
     font-size: 0.95rem;
 }
 
 .form-group input,
 .form-group textarea {
-    padding: 0.75rem 1rem;
+    padding: 1rem;
     border: 2px solid var(--jade-muted);
     border-radius: 8px;
     font-family: 'Helvetica', sans-serif;
@@ -235,12 +241,24 @@ main {
 
 .form-group textarea {
     resize: vertical;
-    min-height: 100px;
+    min-height: 120px;
+}
+
+.form-group input[type="file"] {
+    padding: 0.75rem;
+    cursor: pointer;
+}
+
+.file-help {
+    font-size: 0.85rem;
+    color: #999;
+    margin-top: 0.5rem;
+    font-style: italic;
 }
 
 .submit-btn {
     width: 100%;
-    padding: 1rem;
+    padding: 1.2rem;
     background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple-mid) 100%);
     color: var(--white);
     border: none;
@@ -248,7 +266,7 @@ main {
     font-weight: 700;
     font-size: 1.1rem;
     cursor: pointer;
-    margin-top: 1.5rem;
+    margin-top: 1rem;
     font-family: 'Helvetica', sans-serif;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     box-shadow: 0 4px 12px rgba(107, 91, 149, 0.3);
@@ -265,7 +283,7 @@ main {
 
 .form-message {
     text-align: center;
-    margin-top: 2rem;
+    margin-top: 2.5rem;
     font-size: 1.1rem;
     color: #666;
     font-weight: 500;
@@ -308,16 +326,20 @@ main {
 
     .form-row {
         grid-template-columns: 1fr;
-        gap: 1rem;
+        gap: 1.5rem;
     }
 
     .menu-item {
-        min-width: 150px;
-        padding: 1rem 1.5rem;
+        min-width: 140px;
+        padding: 3rem 1.5rem;
     }
 
     .waitlist-section {
         padding: 2rem 1rem;
+    }
+
+    .waitlist-form {
+        padding: 2rem 1.5rem;
     }
 
     .container {
@@ -344,5 +366,11 @@ main {
 
     .waitlist-section h2 {
         font-size: 1.8rem;
+    }
+
+    .menu-item {
+        min-width: 120px;
+        padding: 2.5rem 1rem;
+        font-size: 0.85rem;
     }
 }
