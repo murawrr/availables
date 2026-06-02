@@ -1,5 +1,8 @@
 // ===== Booking template (copied to clipboard from the Book Now popup) =====
-const BOOKING_TEMPLATE = `Name:
+// One per language. The Korean text below is a DRAFT — replace with the
+// wording you give me.
+const BOOKING_TEMPLATE = {
+    en: `Name:
 Instagram: @
 City / Country:
 Design idea:
@@ -7,7 +10,17 @@ Approx. size (cm):
 Placement on body:
 Budget:
 Preferred dates:
-(Attach reference images in your message)`;
+(Attach reference images in your message)`,
+    ko: `이름:
+인스타그램: @
+도시 / 국가:
+디자인 아이디어:
+대략적인 크기 (cm):
+시술 부위:
+예산:
+희망 날짜:
+(메시지에 참고 이미지를 첨부해 주세요)`
+};
 
 // KakaoTalk open-chat / channel link. Leave empty until provided.
 const KAKAO_URL = 'https://open.kakao.com/me/murarctic';
@@ -34,6 +47,14 @@ function applyLanguage(lang) {
     document.querySelectorAll('.en-only').forEach(el => {
         el.style.display = (lang === 'en') ? '' : 'none';
     });
+
+    // Language class drives the contact-button order (Kakao first in Korean).
+    document.body.classList.toggle('lang-ko', lang === 'ko');
+    document.body.classList.toggle('lang-en', lang !== 'ko');
+
+    // Swap the copyable booking template to the current language.
+    const ta = document.getElementById('booking-template');
+    if (ta) ta.value = BOOKING_TEMPLATE[lang] || BOOKING_TEMPLATE.en;
 }
 
 function setLanguage(lang) {
@@ -91,7 +112,7 @@ function renderBookingModal() {
         </div>`;
     overlay.addEventListener('click', (e) => { if (e.target === overlay) closeBooking(); });
     document.body.appendChild(overlay);
-    document.getElementById('booking-template').value = BOOKING_TEMPLATE;
+    document.getElementById('booking-template').value = BOOKING_TEMPLATE[currentLanguage] || BOOKING_TEMPLATE.en;
 }
 
 function openBooking() {
