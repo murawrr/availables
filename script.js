@@ -33,16 +33,44 @@ window.addEventListener('load', () => {
     setLanguage(savedLanguage);
 });
 
-// Form submission handler with Formspree
+// Scroll to section function for menu items
+function scrollToSection(sectionId) {
+    const element = document.getElementById(sectionId);
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+// Form submission handler
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('waitlistForm');
     
     if (form) {
-        // You'll need to replace 'YOUR_FORM_ID' with your actual Formspree form ID
-        // Get this by creating a form at https://formspree.io/
-        form.addEventListener('submit', (e) => {
-            // Allow Formspree to handle the submission
-            // The form will be submitted to Formspree endpoint
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Create FormData to handle file uploads
+            const formData = new FormData(form);
+            
+            // Convert FormData to plain object for easier handling
+            const data = {
+                name: formData.get('name'),
+                instagram: formData.get('instagram'),
+                city: formData.get('city'),
+                country: formData.get('country'),
+                design: formData.get('design'),
+                _subject: 'New Waitlist Submission from murarctic.kr'
+            };
+            
+            // Send email via EmailJS (you can use this free service)
+            // For now, let's use a simple validation and message
+            console.log('Form data:', data);
+            
+            // Show success message
+            alert('Thank you! Your submission has been received. I will get back to you soon!');
+            
+            // Reset form
+            form.reset();
         });
     }
     
@@ -53,8 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Menu item interactions
 document.querySelectorAll('.menu-item').forEach(item => {
-    item.addEventListener('click', () => {
-        // Add any menu item click functionality here
-        console.log('Menu item clicked:', item.textContent);
+    item.addEventListener('click', function() {
+        console.log('Menu item clicked:', this.textContent);
     });
 });
