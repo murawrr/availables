@@ -65,9 +65,13 @@ a { color: inherit; }
 .site-handle:hover,
 .back-link:hover { color: var(--ink); }
 
-.header-center { flex: 0 0 auto; }
+.header-center {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 1rem;
+}
 
-.book-now-btn {
+.header-action {
     background: none;
     border: none;
     padding: 0;
@@ -78,7 +82,7 @@ a { color: inherit; }
     transition: opacity 0.2s ease;
 }
 
-.book-now-btn:hover { opacity: 0.55; }
+.header-action:hover { opacity: 0.55; }
 
 .lang-selector {
     flex: 1;
@@ -488,7 +492,7 @@ body.modal-open { overflow: hidden; }
     }
 
     .lang-selector { gap: 0.6rem; }
-    .book-now-btn { padding: 0.35rem 0.85rem; }
+    .header-center { gap: 0.7rem; }
 
     .marquee-word {
         font-size: 4.5rem;
