@@ -94,7 +94,7 @@ body {
 .menu-bar {
     display: block;
     width: 100%;
-    padding: 2rem;
+    padding: 4rem 2rem;
     text-decoration: none;
     color: var(--black);
     overflow: hidden;
@@ -110,7 +110,7 @@ body {
 .menu-text {
     display: flex;
     align-items: center;
-    height: 4rem;
+    height: 8rem;
     position: relative;
 }
 
@@ -119,23 +119,28 @@ body {
     font-weight: 700;
     letter-spacing: 3px;
     white-space: nowrap;
-    animation: slideText 15s linear infinite;
+    animation: slideText 3.75s linear infinite;
     display: inline-block;
 }
 
-/* Animated looping text - tape effect */
+/* Animated looping text - tape effect (4x faster = 3.75s instead of 15s) */
 @keyframes slideText {
     0% {
         transform: translateX(0);
     }
     100% {
-        transform: translateX(-100%);
+        transform: translateX(-50%);
     }
 }
 
-.menu-text span::after {
-    content: '     ' attr(data-text);
-    margin-left: 2rem;
+/* Create repeating text effect */
+.menu-text span {
+    background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 0,
+        transparent 0
+    );
 }
 
 /* Main Content */
@@ -343,11 +348,11 @@ main {
     }
 
     .menu-bar {
-        padding: 1.5rem;
+        padding: 3rem 1.5rem;
     }
 
     .menu-text {
-        height: 3rem;
+        height: 6rem;
     }
 
     .waitlist-section {
@@ -378,10 +383,10 @@ main {
     }
 
     .menu-bar {
-        padding: 1rem;
+        padding: 2rem 1rem;
     }
 
     .menu-text {
-        height: 2.5rem;
+        height: 4rem;
     }
 }
