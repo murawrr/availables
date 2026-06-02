@@ -13,15 +13,16 @@ Preferred dates:
 const KAKAO_URL = '';
 const INSTAGRAM_URL = 'https://instagram.com/murarctic';
 
-// ===== Language switching =====
+// ===== Language switching (English + Korean) =====
 let currentLanguage = localStorage.getItem('preferredLanguage') || 'ko';
+if (!['en', 'ko'].includes(currentLanguage)) currentLanguage = 'ko';
 
 function applyLanguage(lang) {
     document.querySelectorAll('.lang-btn').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
     });
 
-    document.querySelectorAll('[data-en], [data-ko], [data-jp]').forEach(el => {
+    document.querySelectorAll('[data-en], [data-ko]').forEach(el => {
         // .menu-bar carries labels for the marquee builder; its children are
         // managed by buildMarquees(), so never overwrite its textContent here.
         if (el.classList.contains('menu-bar')) return;
@@ -42,25 +43,18 @@ function renderHeader() {
     const mount = document.getElementById('site-header');
     if (!mount) return;
 
-    const back = mount.getAttribute('data-back');
-    const backHtml = back
-        ? `<a href="${back}" class="back-link" data-en="← Back" data-ko="← 뒤로" data-jp="← 戻る">← Back</a>`
-        : '';
-
     mount.className = 'site-header';
     mount.innerHTML = `
         <div class="header-left">
             <a href="index.html" class="site-name">mura</a>
             <a href="${INSTAGRAM_URL}" target="_blank" rel="noopener" class="site-handle">@murarctic</a>
-            ${backHtml}
         </div>
         <div class="header-center">
-            <button type="button" class="book-now-btn" onclick="openBooking()" data-en="Book Now" data-ko="예약하기" data-jp="予約する">Book Now</button>
+            <button type="button" class="book-now-btn" onclick="openBooking()" data-en="Book Now" data-ko="예약하기">Book Now</button>
         </div>
         <nav class="lang-selector">
             <button class="lang-btn" onclick="setLanguage('en')" data-lang="en">EN</button>
             <button class="lang-btn" onclick="setLanguage('ko')" data-lang="ko">KO</button>
-            <button class="lang-btn" onclick="setLanguage('jp')" data-lang="jp">JP</button>
         </nav>`;
 }
 
@@ -78,11 +72,11 @@ function renderBookingModal() {
     overlay.innerHTML = `
         <div class="modal" role="dialog" aria-modal="true" aria-label="Booking">
             <button class="modal-close" onclick="closeBooking()" aria-label="Close">&times;</button>
-            <h2 class="modal-title" data-en="Book with mura" data-ko="무라와 예약하기" data-jp="muraと予約">Book with mura</h2>
-            <p class="modal-intro" data-en="Copy the template, fill it in, and send it to me on Instagram DM or KakaoTalk." data-ko="아래 양식을 복사해 작성한 뒤 인스타그램 DM 또는 카카오톡으로 보내주세요." data-jp="テンプレートをコピーして記入し、InstagramのDMまたはKakaoTalkで送ってください。">Copy the template, fill it in, and send it to me on Instagram DM or KakaoTalk.</p>
+            <h2 class="modal-title" data-en="Book with mura" data-ko="무라와 예약하기">Book with mura</h2>
+            <p class="modal-intro" data-en="Copy the template, fill it in, and send it to me on Instagram DM or KakaoTalk." data-ko="아래 양식을 복사해 작성한 뒤 인스타그램 DM 또는 카카오톡으로 보내주세요.">Copy the template, fill it in, and send it to me on Instagram DM or KakaoTalk.</p>
             <div class="booking-template-wrap">
                 <textarea id="booking-template" class="booking-template" rows="9" readonly></textarea>
-                <button class="copy-btn" onclick="copyTemplate()" data-en="Copy template" data-ko="양식 복사" data-jp="テンプレートをコピー">Copy template</button>
+                <button class="copy-btn" onclick="copyTemplate()" data-en="Copy template" data-ko="양식 복사">Copy template</button>
             </div>
             <div class="contact-options">
                 <a class="contact-btn ig" href="${INSTAGRAM_URL}" target="_blank" rel="noopener">Instagram DM</a>
@@ -128,9 +122,11 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBooki
 // segments side by side and slide the track by exactly one segment width,
 // so the loop never visibly "refreshes".
 const MARQUEE_SPEED = 120; // px per second
+// Per-bar horizontal start offset (px) so the bars don't all line up.
+const MARQUEE_OFFSETS = [-15, -180, -90, -260];
 
 function buildMarquees() {
-    document.querySelectorAll('.menu-bar').forEach(bar => {
+    document.querySelectorAll('.menu-bar').forEach((bar, index) => {
         const label = bar.getAttribute('data-' + currentLanguage) || bar.getAttribute('data-en') || '';
         const menuText = bar.querySelector('.menu-text');
         if (!menuText) return;
@@ -149,6 +145,8 @@ function buildMarquees() {
 
         const track = document.createElement('div');
         track.className = 'marquee';
+        // Stagger the starting text position (not the animation timing).
+        track.style.marginLeft = (MARQUEE_OFFSETS[index % MARQUEE_OFFSETS.length]) + 'px';
         const seg1 = makeSegment();
         const seg2 = makeSegment();
         seg2.setAttribute('aria-hidden', 'true');

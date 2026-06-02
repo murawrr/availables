@@ -7,29 +7,34 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="site-header" data-back="index.html"></div>
+    <div id="site-header"></div>
 
     <main class="container">
         <section class="project">
             <div class="project-desc">
                 <span class="desc-label">
                     <span class="dot"></span>
-                    <span data-en="Episodes" data-ko="에피소드" data-jp="エピソード">Episodes</span>
+                    <span data-en="Episodes" data-ko="에피소드">Episodes</span>
                 </span>
-                <p data-en="A short introduction to the Episodes series goes here. Replace this text with your own description of the work below."
-                   data-ko="에피소드 시리즈에 대한 짧은 소개를 여기에 작성하세요. 아래 작업에 대한 설명으로 이 텍스트를 교체하세요."
-                   data-jp="エピソードシリーズの短い紹介をここに記載します。下の作品の説明文に置き換えてください。">A short introduction to the Episodes series goes here. Replace this text with your own description of the work below.</p>
+                <p data-en="A short introduction to the Episodes series goes here. Replace this text with your own."
+                   data-ko="에피소드 시리즈에 대한 짧은 소개를 여기에 작성하세요. 자신의 텍스트로 교체하세요.">A short introduction to the Episodes series goes here. Replace this text with your own.</p>
             </div>
 
-            <!-- Add images: drop files into images/episodes/ then replace a tile with:
-                 <figure class="image-tile"><img src="images/episodes/01.jpg" alt="Episode work"></figure> -->
-            <div class="image-grid">
-                <figure class="image-tile is-placeholder"><span class="placeholder-label">Image 01</span></figure>
-                <figure class="image-tile is-placeholder"><span class="placeholder-label">Image 02</span></figure>
-                <figure class="image-tile is-placeholder"><span class="placeholder-label">Image 03</span></figure>
-                <figure class="image-tile is-placeholder"><span class="placeholder-label">Image 04</span></figure>
-                <figure class="image-tile is-placeholder"><span class="placeholder-label">Image 05</span></figure>
-                <figure class="image-tile is-placeholder"><span class="placeholder-label">Image 06</span></figure>
+            <div class="work-grid">
+                <a class="work-card" href="episode-1.html">
+                    <div class="thumb"><span class="placeholder-label">Episode 1</span></div>
+                    <div class="work-meta">
+                        <span class="work-num">01</span>
+                        <span class="work-title" data-en="Hello, world!" data-ko="안녕, 세상!">Hello, world!</span>
+                    </div>
+                </a>
+                <a class="work-card" href="episode-2.html">
+                    <div class="thumb"><span class="placeholder-label">Episode 2</span></div>
+                    <div class="work-meta">
+                        <span class="work-num">02</span>
+                        <span class="work-title" data-en="mini-tattoos" data-ko="미니 타투">mini-tattoos</span>
+                    </div>
+                </a>
             </div>
         </section>
     </main>
