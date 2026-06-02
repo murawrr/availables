@@ -504,8 +504,14 @@ body.modal-open { overflow: hidden; }
 }
 
 @media (max-width: 480px) {
-    .header-left { gap: 0.4rem; }
-    .site-handle { display: none; } /* keep the slim header from overflowing */
+    .site-header {
+        gap: 0.45rem;
+        padding: 0.7rem 0.75rem;
+        font-size: 0.78rem;
+    }
+
+    .header-left { gap: 0.35rem; }
+    .header-left a { white-space: nowrap; } /* keep name + handle on one line */
 
     .marquee-word {
         font-size: 3.4rem;

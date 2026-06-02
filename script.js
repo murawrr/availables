@@ -10,7 +10,7 @@ Preferred dates:
 (Attach reference images in your message)`;
 
 // KakaoTalk open-chat / channel link. Leave empty until provided.
-const KAKAO_URL = '';
+const KAKAO_URL = 'https://open.kakao.com/me/murarctic';
 const INSTAGRAM_URL = 'https://instagram.com/murarctic';
 
 // ===== Language switching (English + Korean) =====
