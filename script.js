@@ -123,7 +123,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBooki
 // so the loop never visibly "refreshes".
 const MARQUEE_SPEED = 120; // px per second
 // Per-bar horizontal start offset (px) so the bars don't all line up.
-const MARQUEE_OFFSETS = [-15, -180, -90, -260];
+const MARQUEE_OFFSETS = [-15, -180, -90, -260, -45, -200, -120, -310];
 
 function buildMarquees() {
     document.querySelectorAll('.menu-bar').forEach((bar, index) => {
