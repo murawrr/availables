@@ -186,6 +186,34 @@ main {
     text-align: center;
 }
 
+/* Form Status Messages */
+.form-status {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.success-message {
+    background-color: #d4edda;
+    border: 2px solid #28a745;
+    color: #155724;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.success-message p {
+    margin: 0;
+}
+
+.error-message {
+    background-color: #f8d7da;
+    border: 2px solid #dc3545;
+    color: #721c24;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
 /* Form Styles */
 .waitlist-form {
     max-width: 700px;
@@ -239,6 +267,12 @@ main {
     box-shadow: 0 0 0 3px rgba(107, 91, 149, 0.1);
 }
 
+.form-group input[aria-invalid="true"],
+.form-group textarea[aria-invalid="true"] {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
 .form-group textarea {
     resize: vertical;
     min-height: 120px;
@@ -254,6 +288,14 @@ main {
     color: #999;
     margin-top: 0.5rem;
     font-style: italic;
+}
+
+[data-fs-error] {
+    font-size: 0.85rem;
+    color: #dc3545;
+    margin-top: 0.5rem;
+    display: block;
+    min-height: 1.2rem;
 }
 
 .submit-btn {
@@ -272,21 +314,18 @@ main {
     box-shadow: 0 4px 12px rgba(107, 91, 149, 0.3);
 }
 
-.submit-btn:hover {
+.submit-btn:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(107, 91, 149, 0.4);
 }
 
-.submit-btn:active {
+.submit-btn:active:not(:disabled) {
     transform: translateY(0);
 }
 
-.form-message {
-    text-align: center;
-    margin-top: 2.5rem;
-    font-size: 1.1rem;
-    color: #666;
-    font-weight: 500;
+.submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 
 /* Footer */
