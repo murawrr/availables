@@ -7,104 +7,43 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Language Toggle -->
-    <div class="lang-selector">
-        <button class="lang-btn active" onclick="setLanguage('en')" data-lang="en">English</button>
-        <button class="lang-btn" onclick="setLanguage('ko')" data-lang="ko">한국어</button>
-        <button class="lang-btn" onclick="setLanguage('jp')" data-lang="jp">日本語</button>
-    </div>
-
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1 id="header-name" data-en="mura" data-ko="무라" data-jp="ムラ">mura</h1>
+            <h1 id="header-name" data-en="'mura" data-ko="무라" data-jp="ムラ">'mura</h1>
+            <div class="lang-selector">
+                <button class="lang-btn active" onclick="setLanguage('en')" data-lang="en">English</button>
+                <button class="lang-btn" onclick="setLanguage('ko')" data-lang="ko">한국어</button>
+                <button class="lang-btn" onclick="setLanguage('jp')" data-lang="jp">日本語</button>
+            </div>
         </header>
 
         <!-- Menu Bars -->
         <nav class="menu-bars">
-            <a href="episodes.html" class="menu-bar" style="background-color: #6B5B95;">
+            <a href="episodes.html" class="menu-bar">
                 <div class="menu-text">
-                    <span data-en="EPISODES  EPISODES  EPISODES  EPISODES" data-ko="에피소드  에피소드  에피소드  에피소드" data-jp="エピソード  エピソード  エピソード  エピソード">EPISODES  EPISODES  EPISODES  EPISODES</span>
+                    <span data-en="EPISODES EPISODES EPISODES EPISODES" data-ko="에피소드 에피소드 에피소드 에피소드" data-jp="エピソード エピソード エピソード エピソード">EPISODES EPISODES EPISODES EPISODES</span>
                 </div>
             </a>
-            
-            <a href="mura-types.html" class="menu-bar" style="background-color: #9B8BA8;">
+
+            <a href="mura-types.html" class="menu-bar">
                 <div class="menu-text">
-                    <span data-en="MURA-TYPES  MURA-TYPES  MURA-TYPES  MURA-TYPES" data-ko="뮤라-타입  뮤라-타입  뮤라-타입  뮤라-타입" data-jp="ムラ-タイプ  ムラ-タイプ  ムラ-タイプ  ムラ-タイプ">MURA-TYPES  MURA-TYPES  MURA-TYPES  MURA-TYPES</span>
+                    <span data-en="MURA-TYPES MURA-TYPES MURA-TYPES MURA-TYPES" data-ko="뮤라-타입 뮤라-타입 뮤라-타입 뮤라-타입" data-jp="ムラ-タイプ ムラ-タイプ ムラ-タイプ ムラ-タイプ">MURA-TYPES MURA-TYPES MURA-TYPES MURA-TYPES</span>
                 </div>
             </a>
-            
-            <a href="contact.html" class="menu-bar" style="background-color: #8B7BA8;">
+
+            <a href="contact.html" class="menu-bar">
                 <div class="menu-text">
-                    <span data-en="CONTACT  CONTACT  CONTACT  CONTACT" data-ko="연락  연락  연락  연락" data-jp="お問い合わせ  お問い合わせ  お問い合わせ  お問い合わせ">CONTACT  CONTACT  CONTACT  CONTACT</span>
+                    <span data-en="CONTACT CONTACT CONTACT CONTACT" data-ko="연락 연락 연락 연락" data-jp="お問い合わせ お問い合わせ お問い合わせ お問い合わせ">CONTACT CONTACT CONTACT CONTACT</span>
                 </div>
             </a>
-            
-            <a href="waitlist.html" class="menu-bar" style="background-color: #A8D5D5;">
+
+            <a href="waitlist.html" class="menu-bar">
                 <div class="menu-text">
-                    <span data-en="WAITLIST  WAITLIST  WAITLIST  WAITLIST" data-ko="대기열  대기열  대기열  대기열" data-jp="ウェイトリスト  ウェイトリスト  ウェイトリスト  ウェイトリスト">WAITLIST  WAITLIST  WAITLIST  WAITLIST</span>
+                    <span data-en="WAITLIST WAITLIST WAITLIST WAITLIST" data-ko="대기열 대기열 대기열 대기열" data-jp="ウェイトリスト ウェイトリスト ウェイトリスト ウェイトリスト">WAITLIST WAITLIST WAITLIST WAITLIST</span>
                 </div>
             </a>
         </nav>
-
-        <!-- Main Content -->
-        <main>
-            <!-- Waitlist Form Section -->
-            <section class="waitlist-section" id="waitlist">
-                <h2 data-en="Join the Waitlist" data-ko="대기열에 참가하세요" data-jp="ウェイトリストに参加">Join the Waitlist</h2>
-                
-                <!-- Success/Error Messages -->
-                <div class="form-status">
-                    <div data-fs-success class="success-message" style="display: none;">
-                        <p data-en="Thank you! I'll get back to you soon!" data-ko="감사합니다! 곧 연락드리겠습니다!" data-jp="ありがとうございました！すぐにお返事します！">Thank you! I'll get back to you soon!</p>
-                    </div>
-                    <div data-fs-error class="error-message" style="display: none;"></div>
-                </div>
-
-                <form id="waitlistForm">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="name" data-en="Name" data-ko="이름" data-jp="名前">Name</label>
-                            <input type="text" id="name" name="name" data-fs-field required>
-                            <span data-fs-error="name"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="instagram" data-en="Instagram @" data-ko="인스타그램 @" data-jp="Instagram @">Instagram @</label>
-                            <input type="text" id="instagram" name="instagram" placeholder="@username" data-fs-field required>
-                            <span data-fs-error="instagram"></span>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="city" data-en="City" data-ko="도시" data-jp="都市">City</label>
-                            <input type="text" id="city" name="city" data-fs-field required>
-                            <span data-fs-error="city"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="country" data-en="Country" data-ko="국가" data-jp="国">Country</label>
-                            <input type="text" id="country" name="country" data-fs-field required>
-                            <span data-fs-error="country"></span>
-                        </div>
-                    </div>
-
-                    <div class="form-group full-width">
-                        <label for="design" data-en="Design You Want & Approx Size" data-ko="원하는 디자인 및 대략적인 크기" data-jp="欲しいデザインと大まかなサイズ">Design You Want & Approx Size</label>
-                        <textarea id="design" name="design" rows="4" placeholder="Describe the design and size..." data-fs-field required></textarea>
-                        <span data-fs-error="design"></span>
-                    </div>
-
-                    <div class="form-group full-width">
-                        <label for="files" data-en="Upload Design Reference or Images" data-ko="디자인 참고 또는 이미지 업로드" data-jp="デザイン参考または画像をアップロード">Upload Design Reference or Images</label>
-                        <input type="file" id="files" name="files" multiple accept="image/*,.pdf,.doc,.docx" data-fs-field>
-                        <p class="file-help" data-en="You can upload multiple images or files (optional)" data-ko="여러 이미지 또는 파일을 업로드할 수 있습니다 (선택사항)" data-jp="複数の画像またはファイルをアップロードできます (オプション)">You can upload multiple images or files (optional)</p>
-                        <span data-fs-error="files"></span>
-                    </div>
-
-                    <button type="submit" class="submit-btn" data-fs-submit-btn data-en="Join Waitlist" data-ko="대기열 참가" data-jp="ウェイトリストに参加">Join Waitlist</button>
-                </form>
-            </section>
-        </main>
 
         <!-- Footer -->
         <footer class="footer">
@@ -112,13 +51,6 @@
         </footer>
     </div>
 
-    <!-- Formspree Library -->
-    <script>
-        window.formspree = window.formspree || function () { (formspree.q = formspree.q || []).push(arguments); };
-        formspree('initForm', { formElement: '#waitlistForm', formId: 'xojbgknk' });
-    </script>
-    <script src="https://unpkg.com/@formspree/ajax@1" defer></script>
-    
     <script src="script.js"></script>
 </body>
 </html>

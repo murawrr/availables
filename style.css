@@ -11,6 +11,7 @@
     --jade-sage: #A8D5D5;
     --jade-muted: #B8D5C8;
     --mint: #CAFCE1;
+    --greyish-azure: #6E8CA0;
     --black: #000000;
     --white: #FFFFFF;
 }
@@ -28,18 +29,10 @@ body {
     padding: 2rem;
 }
 
-/* Language Selector */
+/* Language Selector (in header) */
 .lang-selector {
-    position: fixed;
-    top: 2rem;
-    right: 2rem;
     display: flex;
     gap: 0.75rem;
-    z-index: 1000;
-    background-color: rgba(255, 255, 255, 0.95);
-    padding: 0.75rem;
-    border-radius: 50px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .lang-btn {
@@ -68,15 +61,21 @@ body {
 
 /* Header */
 .header {
-    text-align: center;
-    margin-bottom: 3rem;
-    padding-top: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: calc(100% + 4rem);
+    margin-left: -2rem;
+    margin-right: -2rem;
+    padding: 0.25rem 1rem;
+    margin-bottom: 2rem;
 }
 
 .header h1 {
     font-size: 4rem;
     font-weight: 700;
-    margin-bottom: 0;
+    margin: 0;
+    line-height: 1;
     letter-spacing: 2px;
 }
 
@@ -84,7 +83,8 @@ body {
 .menu-bars {
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: 2pt; /* 2pt white fixed bar between each bar */
+    background-color: var(--white);
     margin-bottom: 4rem;
     width: calc(100% + 4rem);
     margin-left: -2rem;
@@ -96,7 +96,8 @@ body {
     width: 100%;
     padding: 4rem 2rem;
     text-decoration: none;
-    color: var(--black);
+    background-color: var(--greyish-azure);
+    color: var(--mint);
     overflow: hidden;
     cursor: pointer;
     transition: opacity 0.2s ease;
@@ -115,9 +116,12 @@ body {
 }
 
 .menu-text span {
-    font-size: 2.5rem;
+    font-size: 7.5rem;
     font-weight: 700;
     letter-spacing: 3px;
+    word-spacing: 5rem; /* 5x more space between the repeated texts */
+    line-height: 1;
+    color: var(--mint);
     white-space: nowrap;
     animation: slideText 3.75s linear infinite;
     display: inline-block;
@@ -328,10 +332,14 @@ main {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .lang-selector {
-        top: 1rem;
-        right: 1rem;
+    .header {
         flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .lang-selector {
+        gap: 0.5rem;
     }
 
     .header h1 {
@@ -339,7 +347,8 @@ main {
     }
 
     .menu-text span {
-        font-size: 1.8rem;
+        font-size: 5.4rem;
+        word-spacing: 3rem;
     }
 
     .form-row {
@@ -378,8 +387,9 @@ main {
     }
 
     .menu-text span {
-        font-size: 1.4rem;
+        font-size: 4.2rem;
         letter-spacing: 1px;
+        word-spacing: 2rem;
     }
 
     .menu-bar {
@@ -387,6 +397,6 @@ main {
     }
 
     .menu-text {
-        height: 4rem;
+        height: 5rem;
     }
 }
