@@ -29,6 +29,11 @@ function applyLanguage(lang) {
         const val = el.getAttribute('data-' + lang);
         if (val !== null) el.textContent = val;
     });
+
+    // English-only items (e.g. the Waitlist bar) are hidden in other languages.
+    document.querySelectorAll('.en-only').forEach(el => {
+        el.style.display = (lang === 'en') ? '' : 'none';
+    });
 }
 
 function setLanguage(lang) {
@@ -50,7 +55,8 @@ function renderHeader() {
             <a href="${INSTAGRAM_URL}" target="_blank" rel="noopener" class="site-handle">@murarctic</a>
         </div>
         <div class="header-center">
-            <button type="button" class="book-now-btn" onclick="openBooking()" data-en="Book Now" data-ko="예약하기">Book Now</button>
+            <button type="button" class="header-action" onclick="openBooking()" data-en="Book Now" data-ko="예약하기">Book Now</button>
+            <button type="button" class="header-action" onclick="openContact()" data-en="Enquire" data-ko="문의">Enquire</button>
         </div>
         <nav class="lang-selector">
             <button class="lang-btn" onclick="setLanguage('en')" data-lang="en">EN</button>
@@ -98,6 +104,41 @@ function closeBooking() {
     if (m) { m.classList.remove('open'); document.body.classList.remove('modal-open'); }
 }
 
+// ===== Enquire modal (lighter contact: no booking template) =====
+function renderContactModal() {
+    if (document.getElementById('contact-modal')) return;
+
+    const kakaoBtn = KAKAO_URL
+        ? `<a class="contact-btn kakao" href="${KAKAO_URL}" target="_blank" rel="noopener">KakaoTalk</a>`
+        : '';
+
+    const overlay = document.createElement('div');
+    overlay.id = 'contact-modal';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+        <div class="modal" role="dialog" aria-modal="true" aria-label="Enquire">
+            <button class="modal-close" onclick="closeContact()" aria-label="Close">&times;</button>
+            <h2 class="modal-title" data-en="Enquire" data-ko="문의">Enquire</h2>
+            <p class="modal-intro" data-en="Have a question? Send me a message on Instagram or KakaoTalk." data-ko="궁금한 점이 있으신가요? 인스타그램 또는 카카오톡으로 메시지를 보내주세요.">Have a question? Send me a message on Instagram or KakaoTalk.</p>
+            <div class="contact-options">
+                <a class="contact-btn ig" href="${INSTAGRAM_URL}" target="_blank" rel="noopener">Instagram DM</a>
+                ${kakaoBtn}
+            </div>
+        </div>`;
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeContact(); });
+    document.body.appendChild(overlay);
+}
+
+function openContact() {
+    const m = document.getElementById('contact-modal');
+    if (m) { m.classList.add('open'); document.body.classList.add('modal-open'); }
+}
+
+function closeContact() {
+    const m = document.getElementById('contact-modal');
+    if (m) { m.classList.remove('open'); document.body.classList.remove('modal-open'); }
+}
+
 async function copyTemplate() {
     const ta = document.getElementById('booking-template');
     const btn = document.querySelector('.copy-btn');
@@ -115,7 +156,7 @@ async function copyTemplate() {
     }
 }
 
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBooking(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeBooking(); closeContact(); } });
 
 // ===== Seamless looping menu marquee =====
 // Each .menu-bar carries data-en/ko/jp labels. We render two identical
@@ -130,6 +171,9 @@ function buildMarquees() {
         const label = bar.getAttribute('data-' + currentLanguage) || bar.getAttribute('data-en') || '';
         const menuText = bar.querySelector('.menu-text');
         if (!menuText) return;
+
+        // Skip bars hidden for the current language (e.g. Waitlist in Korean).
+        if (bar.offsetParent === null) { menuText.innerHTML = ''; return; }
 
         const makeSegment = () => {
             const seg = document.createElement('span');
@@ -168,6 +212,7 @@ function buildMarquees() {
 function init() {
     renderHeader();
     renderBookingModal();
+    renderContactModal();
     applyLanguage(currentLanguage);
     buildMarquees();
 }
