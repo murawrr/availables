@@ -11,15 +11,11 @@ Placement on body:
 Budget:
 Preferred dates:
 (Attach reference images in your message)`,
-    ko: `이름:
-인스타그램: @
-도시 / 국가:
-디자인 아이디어:
-대략적인 크기 (cm):
-시술 부위:
-예산:
-희망 날짜:
-(메시지에 참고 이미지를 첨부해 주세요)`
+    ko: `이름 및 생년월일:
+원하시는 도안: (메세지에 이미지를 첨부해주세요)
+색상, 크기, 부위:
+(선택) 도안 수정 사항:
+(선택) 주문 제작 아이디어:`
 };
 
 // KakaoTalk open-chat / channel link. Leave empty until provided.
