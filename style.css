@@ -186,6 +186,13 @@ a { color: inherit; }
     display: inline-block;
 }
 
+.work-tag {
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+}
+
 .project-desc p {
     font-size: 1rem;
     line-height: 1.6;
