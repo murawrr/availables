@@ -2,15 +2,13 @@
 // One per language. The Korean text below is a DRAFT — replace with the
 // wording you give me.
 const BOOKING_TEMPLATE = {
-    en: `Name:
-Instagram: @
+    en: `Name & date of birth:
 City / Country:
-Design idea:
-Approx. size (cm):
-Placement on body:
+Desired design: (please attach an image in your message)
+Color, size, placement:
 Budget:
-Preferred dates:
-(Attach reference images in your message)`,
+(Optional) Design edits:
+(Optional) Custom design idea:`,
     ko: `이름 및 생년월일:
 원하시는 도안: (메세지에 이미지를 첨부해주세요)
 색상, 크기, 부위:
@@ -72,8 +70,7 @@ function renderHeader() {
             <a href="${INSTAGRAM_URL}" target="_blank" rel="noopener" class="site-handle">@murarctic</a>
         </div>
         <div class="header-center">
-            <button type="button" class="header-action" onclick="openBooking()" data-en="Book Now" data-ko="예약하기">Book Now</button>
-            <button type="button" class="header-action" onclick="openContact()" data-en="Enquire" data-ko="문의">Enquire</button>
+            <button type="button" class="header-action" onclick="openBooking()" data-en="Book or enquire" data-ko="예약 혹은 문의">Book or enquire</button>
         </div>
         <nav class="lang-selector">
             <button class="lang-btn" onclick="setLanguage('en')" data-lang="en">EN</button>
@@ -95,8 +92,8 @@ function renderBookingModal() {
     overlay.innerHTML = `
         <div class="modal" role="dialog" aria-modal="true" aria-label="Booking">
             <button class="modal-close" onclick="closeBooking()" aria-label="Close">&times;</button>
-            <h2 class="modal-title" data-en="Book with mura" data-ko="무라와 예약하기">Book with mura</h2>
-            <p class="modal-intro" data-en="Copy the template, fill it in, and send it to me on Instagram DM or KakaoTalk." data-ko="아래 양식을 복사해 작성한 뒤 인스타그램 DM 또는 카카오톡으로 보내주세요.">Copy the template, fill it in, and send it to me on Instagram DM or KakaoTalk.</p>
+            <h2 class="modal-title" data-en="Book or enquire" data-ko="예약 혹은 문의">Book or enquire</h2>
+            <p class="modal-intro" data-en="To book, copy and fill in the template below — or feel free to ignore it and just ask me a question. Either way, reach me on Instagram DM or KakaoTalk." data-ko="예약을 원하시면 아래 양식을 복사해 작성해 주세요. 양식은 건너뛰고 편하게 질문만 보내주셔도 괜찮습니다. 인스타그램 DM 또는 카카오톡으로 연락 주세요.">To book, copy and fill in the template below — or feel free to ignore it and just ask me a question. Either way, reach me on Instagram DM or KakaoTalk.</p>
             <div class="booking-template-wrap">
                 <textarea id="booking-template" class="booking-template" rows="9" readonly></textarea>
                 <button class="copy-btn" onclick="copyTemplate()" data-en="Copy template" data-ko="양식 복사">Copy template</button>
@@ -121,41 +118,6 @@ function closeBooking() {
     if (m) { m.classList.remove('open'); document.body.classList.remove('modal-open'); }
 }
 
-// ===== Enquire modal (lighter contact: no booking template) =====
-function renderContactModal() {
-    if (document.getElementById('contact-modal')) return;
-
-    const kakaoBtn = KAKAO_URL
-        ? `<a class="contact-btn kakao" href="${KAKAO_URL}" target="_blank" rel="noopener">KakaoTalk</a>`
-        : '';
-
-    const overlay = document.createElement('div');
-    overlay.id = 'contact-modal';
-    overlay.className = 'modal-overlay';
-    overlay.innerHTML = `
-        <div class="modal" role="dialog" aria-modal="true" aria-label="Enquire">
-            <button class="modal-close" onclick="closeContact()" aria-label="Close">&times;</button>
-            <h2 class="modal-title" data-en="Enquire" data-ko="문의">Enquire</h2>
-            <p class="modal-intro" data-en="Have a question? Send me a message on Instagram or KakaoTalk." data-ko="궁금한 점이 있으신가요? 인스타그램 또는 카카오톡으로 메시지를 보내주세요.">Have a question? Send me a message on Instagram or KakaoTalk.</p>
-            <div class="contact-options">
-                <a class="contact-btn ig" href="${INSTAGRAM_URL}" target="_blank" rel="noopener">Instagram DM</a>
-                ${kakaoBtn}
-            </div>
-        </div>`;
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeContact(); });
-    document.body.appendChild(overlay);
-}
-
-function openContact() {
-    const m = document.getElementById('contact-modal');
-    if (m) { m.classList.add('open'); document.body.classList.add('modal-open'); }
-}
-
-function closeContact() {
-    const m = document.getElementById('contact-modal');
-    if (m) { m.classList.remove('open'); document.body.classList.remove('modal-open'); }
-}
-
 async function copyTemplate() {
     const ta = document.getElementById('booking-template');
     const btn = document.querySelector('.copy-btn');
@@ -173,7 +135,7 @@ async function copyTemplate() {
     }
 }
 
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeBooking(); closeContact(); } });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBooking(); });
 
 // ===== Seamless looping menu marquee =====
 // Each .menu-bar carries data-en/ko/jp labels. We render two identical
@@ -277,7 +239,6 @@ function loadGallery(grid) {
 function init() {
     renderHeader();
     renderBookingModal();
-    renderContactModal();
     applyLanguage(currentLanguage);
     buildMarquees();
     document.querySelectorAll('.image-grid[data-images]').forEach(loadGallery);
