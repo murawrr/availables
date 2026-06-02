@@ -225,6 +225,54 @@ function buildMarquees() {
     });
 }
 
+// ===== Gallery auto-loader =====
+// Each .image-grid[data-images="folder"] loads files named 01, 02, 03 ...
+// trying common extensions, stopping at the first number that has no file.
+function loadGallery(grid) {
+    const folder = grid.getAttribute('data-images');
+    if (!folder) return;
+    const exts = ['jpg', 'jpeg', 'png', 'webp', 'JPG', 'PNG'];
+    const alt = grid.getAttribute('data-alt') || 'mura';
+    let index = 1;
+    let loaded = 0;
+
+    const finish = () => {
+        if (loaded === 0) {
+            const fig = document.createElement('figure');
+            fig.className = 'image-tile is-placeholder';
+            fig.innerHTML = '<span class="placeholder-label">Images coming soon</span>';
+            grid.appendChild(fig);
+        }
+    };
+
+    const next = () => {
+        const pad = String(index).padStart(2, '0');
+        const tryExt = (i) => {
+            if (i >= exts.length) { finish(); return; } // no file for this number -> stop
+            const src = `${folder}/${pad}.${exts[i]}`;
+            const probe = new Image();
+            probe.onload = () => {
+                const fig = document.createElement('figure');
+                fig.className = 'image-tile';
+                const img = document.createElement('img');
+                img.src = src;
+                img.alt = `${alt} ${pad}`;
+                img.loading = 'lazy';
+                fig.appendChild(img);
+                grid.appendChild(fig);
+                loaded++;
+                index++;
+                next();
+            };
+            probe.onerror = () => tryExt(i + 1);
+            probe.src = src;
+        };
+        tryExt(0);
+    };
+
+    next();
+}
+
 // ===== Init =====
 function init() {
     renderHeader();
@@ -232,6 +280,7 @@ function init() {
     renderContactModal();
     applyLanguage(currentLanguage);
     buildMarquees();
+    document.querySelectorAll('.image-grid[data-images]').forEach(loadGallery);
 }
 
 if (document.readyState === 'loading') {
