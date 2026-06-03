@@ -15,9 +15,9 @@
             <div class="project-desc">
                 <span class="desc-label">
                     <span class="dot"></span>
-                    <span data-en="Join the Waitlist" data-ko="대기열에 참가하세요">Join the Waitlist</span>
+                    <span data-en="Waitlist" data-ko="대기열">Waitlist</span>
                 </span>
-                <p data-en="Fill in the form below and I'll get back to you." data-ko="아래 양식을 작성해 주시면 연락드리겠습니다.">Fill in the form below and I'll get back to you.</p>
+                <p data-en="Sign up to get notified when I'm in your area." data-ko="제가 여러분의 지역을 방문할 때 알림을 받아보세요.">Sign up to get notified when I'm in your area.</p>
             </div>
 
             <!-- Success/Error Messages -->
@@ -29,7 +29,7 @@
             </div>
 
             <form id="waitlistForm">
-                <div class="form-row">
+                <div class="form-row form-row--three">
                     <div class="form-group">
                         <label for="name" data-en="Name" data-ko="이름">Name</label>
                         <input type="text" id="name" name="name" data-fs-field required>
@@ -40,35 +40,39 @@
                         <input type="text" id="instagram" name="instagram" placeholder="@username" data-fs-field required>
                         <span data-fs-error="instagram"></span>
                     </div>
+                    <div class="form-group">
+                        <label for="email" data-en="Email" data-ko="이메일">Email</label>
+                        <input type="email" id="email" name="email" placeholder="you@email.com" data-fs-field required>
+                        <span data-fs-error="email"></span>
+                    </div>
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group">
-                        <label for="city" data-en="City" data-ko="도시">City</label>
-                        <input type="text" id="city" name="city" data-fs-field required>
-                        <span data-fs-error="city"></span>
-                    </div>
                     <div class="form-group">
                         <label for="country" data-en="Country" data-ko="국가">Country</label>
                         <input type="text" id="country" name="country" data-fs-field required>
                         <span data-fs-error="country"></span>
                     </div>
+                    <div class="form-group">
+                        <label for="city" data-en="City" data-ko="도시">City</label>
+                        <input type="text" id="city" name="city" data-fs-field required>
+                        <span data-fs-error="city"></span>
+                    </div>
                 </div>
 
                 <div class="form-group full-width">
-                    <label for="design" data-en="Design You Want & Approx Size" data-ko="원하는 디자인 및 대략적인 크기">Design You Want & Approx Size</label>
-                    <textarea id="design" name="design" rows="4" placeholder="Describe the design and size..." data-fs-field required></textarea>
+                    <label for="budget" data-en="Budget" data-ko="예산">Budget</label>
+                    <input type="text" id="budget" name="budget" data-fs-field required>
+                    <span data-fs-error="budget"></span>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="design" data-en="(Optional) Design ideas" data-ko="(선택) 도안 아이디어">(Optional) Design ideas</label>
+                    <textarea id="design" name="design" rows="3" data-fs-field></textarea>
                     <span data-fs-error="design"></span>
                 </div>
 
-                <div class="form-group full-width">
-                    <label for="files" data-en="Upload Design Reference or Images" data-ko="디자인 참고 또는 이미지 업로드">Upload Design Reference or Images</label>
-                    <input type="file" id="files" name="files" multiple accept="image/*,.pdf,.doc,.docx" data-fs-field>
-                    <p class="file-help" data-en="You can upload multiple images or files (optional)" data-ko="여러 이미지 또는 파일을 업로드할 수 있습니다 (선택사항)">You can upload multiple images or files (optional)</p>
-                    <span data-fs-error="files"></span>
-                </div>
-
-                <button type="submit" class="submit-btn" data-fs-submit-btn data-en="Join Waitlist" data-ko="대기열 참가">Join Waitlist</button>
+                <button type="submit" class="submit-btn" data-fs-submit-btn data-en="Sign up" data-ko="신청하기">Sign up</button>
             </form>
         </section>
     </main>
