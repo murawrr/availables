@@ -128,16 +128,21 @@ a { color: inherit; }
 .menu-bar--half .menu-text { height: 4.25rem; }
 .menu-bar--half .marquee-word { font-size: 3.2rem; padding-right: 3rem; }
 
-/* ===== Site watermark (hand-drawn logo stamped over the page) ===== */
+/* ===== Site watermark (hand-drawn logo, between content and footer) ===== */
 .site-watermark {
-    position: fixed;
-    inset: 0;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: min(80vw, 680px) auto;
-    opacity: 0.5;
-    pointer-events: none; /* never blocks clicks */
-    z-index: 50;          /* above content, below header/modals */
+    display: flex;
+    justify-content: center;
+    padding: 2.5rem 1.25rem;
+    opacity: 0.18;
+    pointer-events: none;
+}
+
+.site-watermark img {
+    display: block;
+    width: min(55vw, 300px);
+    height: auto;
+    -webkit-user-drag: none;
+    user-drag: none;
 }
 
 .container,
