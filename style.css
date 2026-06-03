@@ -17,11 +17,9 @@
     --white: #FFFFFF;
 }
 
-/* ===== Typography =====
-   Evangelion-style serif (Times New Roman) for Latin; system Korean gothic
-   faces for Hangul. All pre-installed — no web-font download required. */
+/* ===== Typography (neo-grotesque, Helvetica-based) ===== */
 body {
-    font-family: 'Times New Roman', Times, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 16px;
     line-height: 1.5;
     color: var(--text);
@@ -139,7 +137,7 @@ a { color: inherit; }
     display: flex;
     justify-content: center;
     padding: 2.5rem 1.25rem;
-    opacity: 0.18;
+    opacity: 0.45;
     pointer-events: none;
 }
 
@@ -230,10 +228,13 @@ body.lang-ko .lang-only-en { display: none; }
 .notice { max-width: 720px; }
 
 .notice-heading {
-    font-size: 1.05rem;
+    font-size: 1.5rem;
     font-weight: 700;
-    margin: 1.8rem 0 0.7rem;
+    text-align: center;
+    margin: 4rem 0 1.2rem;
 }
+
+.notice-heading:first-child { margin-top: 0.5rem; }
 
 .notice ul { list-style: none; padding: 0; margin: 0; }
 
@@ -506,10 +507,11 @@ body.modal-open { overflow: hidden; }
 .contact-btn {
     flex: 1;
     text-align: center;
-    padding: 0.7rem 1rem;
+    padding: 0.45rem 1rem;
     border-radius: 0;
     text-decoration: none;
     font-weight: 600;
+    font-size: 1.6rem;
 }
 
 .contact-btn.ig { background: var(--mint); color: #111; order: 1; }
