@@ -146,9 +146,8 @@ a { color: inherit; }
 }
 
 .site-watermark img {
-    width: min(42vw, 380px);
+    width: min(105vw, 950px);
     height: auto;
-    max-height: 96vh;
     display: block;
     -webkit-user-drag: none;
     user-drag: none;
