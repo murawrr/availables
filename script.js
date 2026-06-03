@@ -65,7 +65,7 @@ function applyLanguage(lang) {
 
     // Swap the copyable booking template to the current language.
     const ta = document.getElementById('booking-template');
-    if (ta) ta.value = BOOKING_TEMPLATE[lang] || BOOKING_TEMPLATE.en;
+    if (ta) { ta.value = BOOKING_TEMPLATE[lang] || BOOKING_TEMPLATE.en; autosizeTemplate(); }
 }
 
 function setLanguage(lang) {
@@ -113,9 +113,9 @@ function renderBookingModal() {
             <h2 class="modal-title" data-en="book or enquire" data-ko="예약 혹은 문의">book or enquire</h2>
             <p class="modal-intro" data-en="To book, copy and fill in the template below — or feel free to ignore it and just ask me a question. Either way, reach me by DM." data-ko="예약을 원하시면 아래 양식을 복사해 작성해 주세요. 양식은 건너뛰고 편하게 질문만 보내주셔도 괜찮습니다. DM 또는 카카오톡으로 연락 주세요.">To book, copy and fill in the template below — or feel free to ignore it and just ask me a question. Either way, reach me by DM.</p>
             <div class="booking-template-wrap">
-                <textarea id="booking-template" class="booking-template" rows="9" readonly></textarea>
+                <textarea id="booking-template" class="booking-template" rows="5" readonly></textarea>
                 <div class="copy-row">
-                    <button class="copy-btn" onclick="copyTemplate()" data-en="copy" data-ko="복사">copy</button>
+                    <button class="copy-btn" onclick="copyTemplate()" data-en="copy" data-ko="복사하기">copy</button>
                 </div>
             </div>
             <div class="contact-options">
@@ -130,7 +130,19 @@ function renderBookingModal() {
 
 function openBooking() {
     const m = document.getElementById('booking-modal');
-    if (m) { m.classList.add('open'); document.body.classList.add('modal-open'); }
+    if (m) {
+        m.classList.add('open');
+        document.body.classList.add('modal-open');
+        requestAnimationFrame(autosizeTemplate);
+    }
+}
+
+// Shrink the template box to fit its text (no empty space). Only when visible.
+function autosizeTemplate() {
+    const ta = document.getElementById('booking-template');
+    if (!ta || !ta.offsetParent) return;
+    ta.style.height = 'auto';
+    ta.style.height = ta.scrollHeight + 'px';
 }
 
 function closeBooking() {
@@ -252,7 +264,7 @@ document.addEventListener('copy', (e) => {
 // Each .menu-bar carries data-en/ko/jp labels. We render two identical
 // segments side by side and slide the track by exactly one segment width,
 // so the loop never visibly "refreshes".
-const MARQUEE_SPEED = 120; // px per second
+const MARQUEE_SPEED = 90; // px per second
 // Per-bar horizontal start offset (px) so the bars don't all line up.
 const MARQUEE_OFFSETS = [-15, -180, -90, -260, -45, -200, -120, -310];
 
