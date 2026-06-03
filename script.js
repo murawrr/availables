@@ -21,14 +21,17 @@ const KAKAO_URL = 'https://open.kakao.com/me/murarctic';
 const INSTAGRAM_URL = 'https://instagram.com/murarctic';
 const EMAIL = 'murarctic123@gmail.com';
 
-// Opening announcement (shown once per browser session). Edit freely.
-const ANNOUNCEMENT = {
-    title: { en: 'Now booking', ko: '예약 안내' },
-    body: {
-        en: 'June — Seoul · July — Busan, Jeju, Seoul',
-        ko: '6월 — 서울 · 7월 — 부산, 제주, 서울'
-    }
-};
+// Opening announcement (shown once per browser session). Bilingual in one box.
+const ANNOUNCEMENT_HTML = `
+    <h2 class="modal-title">예약 가능 일정 · available slots</h2>
+    <div class="announce-slots">
+        <p class="slot-month">6월 · june</p>
+        <p>서울 seoul</p>
+        <p class="slot-month">7월 · july</p>
+        <p>부산 busan</p>
+        <p>제주 jeju</p>
+        <p>서울 seoul</p>
+    </div>`;
 
 // Optional site watermark (hand-drawn logo). Upload your PNG to this path;
 // until then nothing shows. Set to '' to disable.
@@ -161,8 +164,7 @@ function renderAnnouncement() {
     overlay.innerHTML = `
         <div class="modal modal--announce" role="dialog" aria-modal="true" aria-label="Announcement">
             <button class="modal-close" onclick="closeAnnounce()" aria-label="Close">&times;</button>
-            <h2 class="modal-title" data-en="${ANNOUNCEMENT.title.en}" data-ko="${ANNOUNCEMENT.title.ko}">${ANNOUNCEMENT.title.en}</h2>
-            <p class="modal-intro" data-en="${ANNOUNCEMENT.body.en}" data-ko="${ANNOUNCEMENT.body.ko}">${ANNOUNCEMENT.body.en}</p>
+            ${ANNOUNCEMENT_HTML}
         </div>`;
     overlay.addEventListener('click', (e) => { if (e.target === overlay) closeAnnounce(); });
     document.body.appendChild(overlay);
