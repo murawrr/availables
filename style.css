@@ -372,6 +372,9 @@ body.lang-ko .lang-only-en { display: none; }
 /* Single design: one full-width image (keeps its natural ratio). */
 .image-grid--single { grid-template-columns: 1fr; }
 
+/* No white card behind the artwork (lets the dark page show through). */
+.image-grid--nobg .image-tile { background: transparent; }
+
 .image-tile {
     margin: 0;
     border-radius: 4px;
