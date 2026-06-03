@@ -136,8 +136,8 @@ a { color: inherit; }
 .site-watermark {
     position: fixed;
     top: 0;
+    bottom: 0;
     right: 0;
-    height: 100vh;
     display: flex;
     align-items: center;
     opacity: 0.8;
@@ -146,8 +146,9 @@ a { color: inherit; }
 }
 
 .site-watermark img {
-    height: 100%;
-    width: auto;
+    width: min(42vw, 380px);
+    height: auto;
+    max-height: 96vh;
     display: block;
     -webkit-user-drag: none;
     user-drag: none;
