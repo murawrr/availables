@@ -205,6 +205,43 @@ function renderWatermark() {
 
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeBooking(); closeAnnounce(); } });
 
+// ===== Light copy / save deterrents (note: screenshots still work) =====
+function showCopyToast() {
+    let t = document.getElementById('copy-toast');
+    if (!t) {
+        t = document.createElement('div');
+        t.id = 'copy-toast';
+        t.className = 'copy-toast';
+        document.body.appendChild(t);
+    }
+    t.textContent = (currentLanguage === 'ko')
+        ? '© mura — 복사 및 저장을 삼가주세요.'
+        : "© mura — please don't copy or save.";
+    t.classList.add('show');
+    clearTimeout(showCopyToast._t);
+    showCopyToast._t = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+function isEditableField(el) {
+    return !!(el && el.closest && el.closest('input, textarea, .booking-template'));
+}
+
+document.addEventListener('contextmenu', (e) => {
+    if (isEditableField(e.target)) return;     // allow right-click in form fields
+    e.preventDefault();
+    showCopyToast();
+});
+
+document.addEventListener('dragstart', (e) => {
+    if (e.target && e.target.tagName === 'IMG') e.preventDefault();
+});
+
+document.addEventListener('copy', (e) => {
+    if (isEditableField(e.target)) return;     // allow copying the booking template
+    e.preventDefault();
+    showCopyToast();
+});
+
 // ===== Seamless looping menu marquee =====
 // Each .menu-bar carries data-en/ko/jp labels. We render two identical
 // segments side by side and slide the track by exactly one segment width,
