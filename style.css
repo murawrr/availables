@@ -17,9 +17,11 @@
     --white: #FFFFFF;
 }
 
-/* ===== Typography (neo-grotesque, Helvetica-based) ===== */
+/* ===== Typography =====
+   Evangelion-style serif (Times New Roman) for Latin; system Korean gothic
+   faces for Hangul. All pre-installed — no web-font download required. */
 body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Times New Roman', Times, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', serif;
     font-size: 16px;
     line-height: 1.5;
     color: var(--text);
