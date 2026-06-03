@@ -109,8 +109,11 @@ a { color: inherit; }
 .menu-bars {
     display: flex;
     flex-direction: column;
+    align-items: stretch;
     gap: 2pt; /* 2pt white fixed bar between each bar */
     background: var(--white);
+    position: relative;
+    z-index: 1;
 }
 
 .menu-bar {
@@ -120,6 +123,68 @@ a { color: inherit; }
     text-decoration: none;
     overflow: hidden;
 }
+
+/* Half-width bar (e.g. notice / 공지사항) */
+.menu-bar--half {
+    width: 50%;
+    align-self: flex-start;
+}
+
+.menu-bar--half .menu-text { height: 4.25rem; }
+.menu-bar--half .marquee-word { font-size: 3.2rem; padding-right: 3rem; }
+
+/* ===== Site watermark (hand-drawn logo behind everything) ===== */
+.site-watermark {
+    position: fixed;
+    inset: 0;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: min(80vw, 680px) auto;
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Keep content above the watermark. */
+.container,
+.footer { position: relative; z-index: 1; }
+
+/* Language-specific content blocks (used on the notice page). */
+.lang-only-ko { display: none; }
+body.lang-ko .lang-only-ko { display: block; }
+body.lang-ko .lang-only-en { display: none; }
+
+/* Opening announcement popup */
+.modal--announce { max-width: 420px; text-align: center; }
+.modal--announce .modal-intro { margin-bottom: 0; }
+
+/* ===== Notice page ===== */
+.notice { max-width: 720px; }
+
+.notice-heading {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 1.8rem 0 0.7rem;
+}
+
+.notice ul { list-style: none; padding: 0; margin: 0; }
+
+.notice li {
+    position: relative;
+    padding-left: 1.1rem;
+    line-height: 1.7;
+    color: #222;
+}
+
+.notice li::before {
+    content: "*";
+    position: absolute;
+    left: 0;
+    color: var(--muted);
+}
+
+.notice p { line-height: 1.6; color: #222; }
+.notice-price { margin-top: 0.7rem; font-weight: 600; }
 
 .menu-text {
     display: flex;
@@ -342,14 +407,19 @@ body.modal-open { overflow: hidden; }
     resize: vertical;
 }
 
-.copy-btn {
+.copy-row {
+    text-align: center;
     margin-top: 0.6rem;
+}
+
+.copy-btn {
     background: var(--ink);
     color: var(--white);
     border: none;
-    border-radius: 50px;
-    padding: 0.55rem 1.2rem;
+    border-radius: 0;
+    padding: 0.4rem 1rem;
     font: inherit;
+    font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s ease;
@@ -367,17 +437,16 @@ body.modal-open { overflow: hidden; }
     flex: 1;
     text-align: center;
     padding: 0.7rem 1rem;
-    border-radius: 50px;
+    border-radius: 0;
     text-decoration: none;
     font-weight: 600;
 }
 
 .contact-btn.ig { background: var(--ink); color: var(--white); order: 1; }
-.contact-btn.kakao { background: #FEE500; color: #191600; order: 2; }
-.contact-btn.kakao.disabled { background: #eee; color: #999; cursor: not-allowed; }
+.contact-btn.kakao { background: #e8dfb7; color: #191600; order: 2; display: none; }
 
-/* Korean site: KakaoTalk first/primary, Instagram second. */
-body.lang-ko .contact-btn.kakao { order: 1; }
+/* Korean site: KakaoTalk shows (hidden in English) and goes first. */
+body.lang-ko .contact-btn.kakao { display: block; order: 1; }
 body.lang-ko .contact-btn.ig { order: 2; }
 
 /* ===== Footer ===== */
@@ -386,6 +455,28 @@ body.lang-ko .contact-btn.ig { order: 2; }
     padding: 3rem 1.25rem;
     color: var(--muted);
     font-size: 0.9rem;
+    position: relative;
+    z-index: 1;
+}
+
+.footer-line {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.footer-line a { color: var(--muted); text-decoration: none; }
+.footer-line a:hover { color: var(--ink); }
+.footer-sep { color: #ccc; }
+
+.footer-rights {
+    margin: 0.7rem auto 0;
+    max-width: 560px;
+    font-size: 0.78rem;
+    color: #aaa;
+    line-height: 1.5;
 }
 
 /* ===== Waitlist form (waitlist.html) ===== */
@@ -482,7 +573,7 @@ body.lang-ko .contact-btn.ig { order: 2; }
     background: var(--ink);
     color: var(--white);
     border: none;
-    border-radius: 50px;
+    border-radius: 0;
     font-weight: 700;
     font-size: 1rem;
     cursor: pointer;

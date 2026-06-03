@@ -19,6 +19,20 @@ Budget:
 // KakaoTalk open-chat / channel link. Leave empty until provided.
 const KAKAO_URL = 'https://open.kakao.com/me/murarctic';
 const INSTAGRAM_URL = 'https://instagram.com/murarctic';
+const EMAIL = 'murarctic123@gmail.com';
+
+// Opening announcement (shown once per browser session). Edit freely.
+const ANNOUNCEMENT = {
+    title: { en: 'Now booking', ko: '예약 안내' },
+    body: {
+        en: 'June — Seoul · July — Busan, Jeju, Seoul',
+        ko: '6월 — 서울 · 7월 — 부산, 제주, 서울'
+    }
+};
+
+// Optional site watermark (hand-drawn logo). Upload your PNG to this path;
+// until then nothing shows. Set to '' to disable.
+const WATERMARK_SRC = 'images/watermark.png';
 
 // ===== Language switching (English + Korean) =====
 let currentLanguage = localStorage.getItem('preferredLanguage') || 'ko';
@@ -70,7 +84,7 @@ function renderHeader() {
             <a href="${INSTAGRAM_URL}" target="_blank" rel="noopener" class="site-handle">@murarctic</a>
         </div>
         <div class="header-center">
-            <button type="button" class="header-action" onclick="openBooking()" data-en="Book or enquire" data-ko="예약 혹은 문의">Book or enquire</button>
+            <button type="button" class="header-action" onclick="openBooking()" data-en="book or enquire" data-ko="예약 혹은 문의">book or enquire</button>
         </div>
         <nav class="lang-selector">
             <button class="lang-btn" onclick="setLanguage('en')" data-lang="en">EN</button>
@@ -82,9 +96,10 @@ function renderHeader() {
 function renderBookingModal() {
     if (document.getElementById('booking-modal')) return;
 
+    // Kakao only shows on the Korean site (CSS hides .contact-btn.kakao in EN).
     const kakaoBtn = KAKAO_URL
-        ? `<a class="contact-btn kakao" href="${KAKAO_URL}" target="_blank" rel="noopener">KakaoTalk</a>`
-        : `<span class="contact-btn kakao disabled" title="Link coming soon">KakaoTalk (soon)</span>`;
+        ? `<a class="contact-btn kakao" href="${KAKAO_URL}" target="_blank" rel="noopener">kakao</a>`
+        : '';
 
     const overlay = document.createElement('div');
     overlay.id = 'booking-modal';
@@ -92,14 +107,16 @@ function renderBookingModal() {
     overlay.innerHTML = `
         <div class="modal" role="dialog" aria-modal="true" aria-label="Booking">
             <button class="modal-close" onclick="closeBooking()" aria-label="Close">&times;</button>
-            <h2 class="modal-title" data-en="Book or enquire" data-ko="예약 혹은 문의">Book or enquire</h2>
-            <p class="modal-intro" data-en="To book, copy and fill in the template below — or feel free to ignore it and just ask me a question. Either way, reach me on Instagram DM or KakaoTalk." data-ko="예약을 원하시면 아래 양식을 복사해 작성해 주세요. 양식은 건너뛰고 편하게 질문만 보내주셔도 괜찮습니다. 인스타그램 DM 또는 카카오톡으로 연락 주세요.">To book, copy and fill in the template below — or feel free to ignore it and just ask me a question. Either way, reach me on Instagram DM or KakaoTalk.</p>
+            <h2 class="modal-title" data-en="book or enquire" data-ko="예약 혹은 문의">book or enquire</h2>
+            <p class="modal-intro" data-en="To book, copy and fill in the template below — or feel free to ignore it and just ask me a question. Either way, reach me by DM." data-ko="예약을 원하시면 아래 양식을 복사해 작성해 주세요. 양식은 건너뛰고 편하게 질문만 보내주셔도 괜찮습니다. DM 또는 카카오톡으로 연락 주세요.">To book, copy and fill in the template below — or feel free to ignore it and just ask me a question. Either way, reach me by DM.</p>
             <div class="booking-template-wrap">
                 <textarea id="booking-template" class="booking-template" rows="9" readonly></textarea>
-                <button class="copy-btn" onclick="copyTemplate()" data-en="Copy template" data-ko="양식 복사">Copy template</button>
+                <div class="copy-row">
+                    <button class="copy-btn" onclick="copyTemplate()" data-en="copy" data-ko="복사">copy</button>
+                </div>
             </div>
             <div class="contact-options">
-                <a class="contact-btn ig" href="${INSTAGRAM_URL}" target="_blank" rel="noopener">Instagram DM</a>
+                <a class="contact-btn ig" href="${INSTAGRAM_URL}" target="_blank" rel="noopener">dm</a>
                 ${kakaoBtn}
             </div>
         </div>`;
@@ -135,7 +152,58 @@ async function copyTemplate() {
     }
 }
 
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBooking(); });
+// ===== Opening announcement =====
+function renderAnnouncement() {
+    if (document.getElementById('announce-modal')) return;
+    const overlay = document.createElement('div');
+    overlay.id = 'announce-modal';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+        <div class="modal modal--announce" role="dialog" aria-modal="true" aria-label="Announcement">
+            <button class="modal-close" onclick="closeAnnounce()" aria-label="Close">&times;</button>
+            <h2 class="modal-title" data-en="${ANNOUNCEMENT.title.en}" data-ko="${ANNOUNCEMENT.title.ko}">${ANNOUNCEMENT.title.en}</h2>
+            <p class="modal-intro" data-en="${ANNOUNCEMENT.body.en}" data-ko="${ANNOUNCEMENT.body.ko}">${ANNOUNCEMENT.body.en}</p>
+        </div>`;
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeAnnounce(); });
+    document.body.appendChild(overlay);
+}
+
+function openAnnounce() {
+    const m = document.getElementById('announce-modal');
+    if (m) { m.classList.add('open'); document.body.classList.add('modal-open'); }
+}
+
+function closeAnnounce() {
+    const m = document.getElementById('announce-modal');
+    if (m) { m.classList.remove('open'); document.body.classList.remove('modal-open'); }
+    sessionStorage.setItem('announceSeen', '1');
+}
+
+// ===== Shared footer (copyright + email + rights) =====
+function renderFooter() {
+    if (document.querySelector('.footer')) return;
+    const footer = document.createElement('footer');
+    footer.className = 'footer';
+    footer.innerHTML = `
+        <p class="footer-line">
+            <span data-en="mura © 2026" data-ko="무라 © 2026">mura © 2026</span>
+            <span class="footer-sep">·</span>
+            <a href="mailto:${EMAIL}">${EMAIL}</a>
+        </p>
+        <p class="footer-rights" data-en="All works © mura. Please do not reproduce, repost, or use for AI / ML training without permission." data-ko="모든 작품의 저작권은 mura에 있습니다. 허가 없이 복제, 재게시, AI 학습에 사용하지 마세요.">All works © mura. Please do not reproduce, repost, or use for AI / ML training without permission.</p>`;
+    document.body.appendChild(footer);
+}
+
+// ===== Site watermark =====
+function renderWatermark() {
+    if (!WATERMARK_SRC || document.querySelector('.site-watermark')) return;
+    const wm = document.createElement('div');
+    wm.className = 'site-watermark';
+    wm.style.backgroundImage = `url("${WATERMARK_SRC}")`;
+    document.body.appendChild(wm);
+}
+
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeBooking(); closeAnnounce(); } });
 
 // ===== Seamless looping menu marquee =====
 // Each .menu-bar carries data-en/ko/jp labels. We render two identical
@@ -237,11 +305,17 @@ function loadGallery(grid) {
 
 // ===== Init =====
 function init() {
+    renderWatermark();
     renderHeader();
     renderBookingModal();
+    renderAnnouncement();
+    renderFooter();
     applyLanguage(currentLanguage);
     buildMarquees();
     document.querySelectorAll('.image-grid[data-images]').forEach(loadGallery);
+
+    // Show the opening announcement once per session.
+    if (!sessionStorage.getItem('announceSeen')) openAnnounce();
 }
 
 if (document.readyState === 'loading') {
