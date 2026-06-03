@@ -23,7 +23,7 @@ const EMAIL = 'murarctic123@gmail.com';
 
 // Opening announcement (shown once per browser session). Bilingual in one box.
 const ANNOUNCEMENT_HTML = `
-    <h2 class="modal-title">예약 가능 일정 · available slots</h2>
+    <h2 class="modal-title announce-title">예약 가능 일정<span class="announce-sub">available slots</span></h2>
     <div class="announce-slots">
         <p class="slot-month">6월 · june</p>
         <p>서울 seoul</p>
