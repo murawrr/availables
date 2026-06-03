@@ -196,13 +196,17 @@ function renderFooter() {
     document.body.appendChild(footer);
 }
 
-// ===== Site watermark =====
+// ===== Site watermark (single faint logo above the footer) =====
 function renderWatermark() {
     if (!WATERMARK_SRC || document.querySelector('.site-watermark')) return;
-    const wm = document.createElement('div');
-    wm.className = 'site-watermark';
-    wm.style.backgroundImage = `url("${WATERMARK_SRC}")`;
-    document.body.appendChild(wm);
+    const wrap = document.createElement('div');
+    wrap.className = 'site-watermark';
+    const img = document.createElement('img');
+    img.src = WATERMARK_SRC;
+    img.alt = '';
+    img.setAttribute('aria-hidden', 'true');
+    wrap.appendChild(img);
+    document.body.appendChild(wrap);
 }
 
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeBooking(); closeAnnounce(); } });
