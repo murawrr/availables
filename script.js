@@ -79,8 +79,10 @@ function setLanguage(lang) {
     buildMarquees(); // labels may have changed length -> rebuild
 }
 
-// Header / announcement language buttons jump to the MAIN page in that language.
+// Header language buttons: clicking the current language stays on the page;
+// clicking the other language jumps to the MAIN page in that language.
 function setLanguageHome(lang) {
+    if (lang === currentLanguage) return;
     localStorage.setItem('preferredLanguage', lang);
     window.location.href = 'index.html';
 }
