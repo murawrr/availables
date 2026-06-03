@@ -124,7 +124,12 @@ a { color: inherit; }
     overflow: hidden;
 }
 
-/* Slim notice bar: full width, half the height of the other bars */
+/* Notice bar: shorter than the others (half the horizontal length) */
+.menu-bar--half {
+    width: 50%;
+    align-self: flex-start;
+}
+
 .menu-bar--half .menu-text { height: 4.25rem; }
 .menu-bar--half .marquee-word { font-size: 3.2rem; padding-right: 3rem; }
 
