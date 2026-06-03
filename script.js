@@ -31,11 +31,15 @@ const ANNOUNCEMENT_HTML = `
         <p>부산 busan</p>
         <p>제주 jeju</p>
         <p>서울 seoul</p>
+    </div>
+    <div class="announce-langs">
+        <button type="button" class="announce-lang" onclick="chooseLanguageHome('en')">English</button>
+        <button type="button" class="announce-lang" onclick="chooseLanguageHome('ko')">한국어</button>
     </div>`;
 
-// Optional site watermark (hand-drawn logo). Upload your PNG to this path;
-// until then nothing shows. Set to '' to disable.
-const WATERMARK_SRC = 'images/watermark.png';
+// Optional site watermark (hand-drawn logo). Set to a path to enable,
+// or '' to disable. Currently disabled.
+const WATERMARK_SRC = '';
 
 // ===== Language switching (English + Korean) =====
 let currentLanguage = localStorage.getItem('preferredLanguage') || 'ko';
@@ -75,6 +79,17 @@ function setLanguage(lang) {
     buildMarquees(); // labels may have changed length -> rebuild
 }
 
+// Header / announcement language buttons jump to the MAIN page in that language.
+function setLanguageHome(lang) {
+    localStorage.setItem('preferredLanguage', lang);
+    window.location.href = 'index.html';
+}
+
+function chooseLanguageHome(lang) {
+    sessionStorage.setItem('announceSeen', '1'); // don't reshow the popup
+    setLanguageHome(lang);
+}
+
 // ===== Shared header (injected into #site-header on every page) =====
 function renderHeader() {
     const mount = document.getElementById('site-header');
@@ -90,8 +105,8 @@ function renderHeader() {
             <button type="button" class="header-action" onclick="openBooking()" data-en="book or enquire" data-ko="예약 혹은 문의">book or enquire</button>
         </div>
         <nav class="lang-selector">
-            <button class="lang-btn" onclick="setLanguage('en')" data-lang="en">EN</button>
-            <button class="lang-btn" onclick="setLanguage('ko')" data-lang="ko">KO</button>
+            <button class="lang-btn" onclick="setLanguageHome('en')" data-lang="en">EN</button>
+            <button class="lang-btn" onclick="setLanguageHome('ko')" data-lang="ko">KO</button>
         </nav>`;
 }
 
