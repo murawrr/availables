@@ -133,7 +133,7 @@ a { color: inherit; }
 .menu-bar--half .menu-text { height: 4.25rem; }
 .menu-bar--half .marquee-word { font-size: 3.2rem; padding-right: 3rem; }
 
-/* ===== Site watermark (hand-drawn logo behind everything) ===== */
+/* ===== Site watermark (hand-drawn logo stamped over the page) ===== */
 .site-watermark {
     position: fixed;
     inset: 0;
@@ -141,13 +141,57 @@ a { color: inherit; }
     background-position: center;
     background-size: min(80vw, 680px) auto;
     opacity: 0.5;
-    pointer-events: none;
-    z-index: 0;
+    pointer-events: none; /* never blocks clicks */
+    z-index: 50;          /* above content, below header/modals */
 }
 
-/* Keep content above the watermark. */
 .container,
-.footer { position: relative; z-index: 1; }
+.footer,
+.menu-bars { position: relative; z-index: 1; }
+
+/* ===== Copy / save deterrents (screenshots still work) ===== */
+body {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+/* …but allow selecting/copying in the booking template & form fields */
+input,
+textarea,
+.booking-template {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+}
+
+/* Stop image drag / long-press-save on gallery + thumbnails */
+.image-tile img,
+.work-card .thumb img {
+    -webkit-user-drag: none;
+    user-drag: none;
+    -webkit-touch-callout: none;
+    pointer-events: none;
+}
+
+.copy-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 2rem;
+    transform: translateX(-50%) translateY(1rem);
+    background: rgba(17, 17, 17, 0.92);
+    color: #fff;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 2000;
+}
+
+.copy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* Language-specific content blocks (used on the notice page). */
 .lang-only-ko { display: none; }
