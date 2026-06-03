@@ -124,12 +124,7 @@ a { color: inherit; }
     overflow: hidden;
 }
 
-/* Half-width bar (e.g. notice / 공지사항) */
-.menu-bar--half {
-    width: 50%;
-    align-self: flex-start;
-}
-
+/* Slim notice bar: full width, half the height of the other bars */
 .menu-bar--half .menu-text { height: 4.25rem; }
 .menu-bar--half .marquee-word { font-size: 3.2rem; padding-right: 3rem; }
 
@@ -201,6 +196,14 @@ body.lang-ko .lang-only-en { display: none; }
 /* Opening announcement popup */
 .modal--announce { max-width: 420px; text-align: center; }
 .modal--announce .modal-intro { margin-bottom: 0; }
+
+.announce-slots { margin-top: 1rem; line-height: 1.7; }
+.announce-slots p { margin: 0; }
+.announce-slots .slot-month {
+    font-weight: 700;
+    margin-top: 1rem;
+}
+.announce-slots .slot-month:first-child { margin-top: 0; }
 
 /* ===== Notice page ===== */
 .notice { max-width: 720px; }
