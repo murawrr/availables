@@ -87,9 +87,11 @@ function setLanguageHome(lang) {
     window.location.href = 'index.html';
 }
 
+// Opening popup: always go to the main page in the chosen language.
 function chooseLanguageHome(lang) {
     sessionStorage.setItem('announceSeen', '1'); // don't reshow the popup
-    setLanguageHome(lang);
+    localStorage.setItem('preferredLanguage', lang);
+    window.location.href = 'index.html';
 }
 
 // ===== Shared header (injected into #site-header on every page) =====
@@ -138,6 +140,7 @@ function renderBookingModal() {
             <div class="contact-options">
                 <a class="contact-btn ig" href="${INSTAGRAM_URL}" target="_blank" rel="noopener">dm</a>
                 ${kakaoBtn}
+                <a class="contact-btn email" href="mailto:${EMAIL}">email</a>
             </div>
         </div>`;
     overlay.addEventListener('click', (e) => { if (e.target === overlay) closeBooking(); });
@@ -375,6 +378,31 @@ function loadGallery(grid) {
     next();
 }
 
+// ===== Listing thumbnails =====
+// Each .work-card[data-thumb="folder"] shows the work's first image (01.*).
+function loadThumb(card) {
+    const folder = card.getAttribute('data-thumb');
+    const thumb = card.querySelector('.thumb');
+    if (!folder || !thumb) return;
+    const exts = ['jpg', 'jpeg', 'png', 'webp', 'JPG', 'PNG'];
+    const tryExt = (i) => {
+        if (i >= exts.length) return; // no image -> keep placeholder
+        const src = `${folder}/01.${exts[i]}`;
+        const probe = new Image();
+        probe.onload = () => {
+            thumb.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = src;
+            img.alt = '';
+            img.loading = 'lazy';
+            thumb.appendChild(img);
+        };
+        probe.onerror = () => tryExt(i + 1);
+        probe.src = src;
+    };
+    tryExt(0);
+}
+
 // ===== Init =====
 function init() {
     renderWatermark();
@@ -385,6 +413,7 @@ function init() {
     applyLanguage(currentLanguage);
     buildMarquees();
     document.querySelectorAll('.image-grid[data-images]').forEach(loadGallery);
+    document.querySelectorAll('.work-card[data-thumb]').forEach(loadThumb);
 
     // Show the opening announcement once per session.
     if (!sessionStorage.getItem('announceSeen')) openAnnounce();
