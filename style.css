@@ -1,4 +1,5 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/variable/pretendardvariable-dynamic-subset.css");
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&display=swap");
 
 * {
     margin: 0;
@@ -262,14 +263,38 @@ body.lang-ko .lang-only-en { display: none; }
 /* ===== Notice page ===== */
 .notice { max-width: 720px; }
 
+/* Collapsible sections */
+.notice-section { border-bottom: 1px solid var(--line); }
+.notice-section:first-child { border-top: 1px solid var(--line); }
+
 .notice-heading {
-    font-size: 1.5rem;
+    font-size: clamp(2.1rem, 9.5vw, 3.75rem); /* ~2.5x larger, scales on mobile */
     font-weight: 700;
-    text-align: center;
-    margin: 4rem 0 1.2rem;
+    line-height: 1.1;
+    margin: 0;
+    padding: 1.1rem 0;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
 }
 
-.notice-heading:first-child { margin-top: 0.5rem; }
+.notice-heading::-webkit-details-marker { display: none; }
+
+.notice-heading::after {
+    content: "+";
+    font-size: 0.45em;
+    font-weight: 300;
+    color: var(--muted);
+    flex: none;
+}
+
+.notice-section[open] > .notice-heading::after { content: "\2013"; } /* – */
+
+.notice-section ul,
+.notice-section > p { margin-bottom: 1.5rem; }
 
 .notice ul { list-style: none; padding: 0; margin: 0; }
 
@@ -315,7 +340,7 @@ body.lang-ko .lang-only-en { display: none; }
     display: inline-block;
     white-space: nowrap;
     font-size: 7rem;
-    font-weight: 700;
+    font-weight: 300; /* thinner menu text */
     letter-spacing: 1px;
     line-height: 1;
     padding-right: 15rem; /* gap between repeated words (uniform = seamless seam) */
@@ -450,7 +475,13 @@ body.lang-ko .lang-only-en { display: none; }
 }
 
 .work-num { color: var(--muted); }
-.work-title { color: var(--text); }
+.work-title {
+    color: var(--text);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.7rem;
+    font-weight: 500;
+    line-height: 1.1;
+}
 .work-card:hover .work-title { opacity: 0.55; }
 
 /* ===== Modals ===== */
@@ -558,6 +589,7 @@ body.modal-open { overflow: hidden; }
 .contact-btn.ig { background: var(--mint); color: #111; order: 1; }
 .contact-btn.kakao { background: #e8dfb7; color: #191600; order: 2; display: none; }
 .contact-btn.email { background: #d7d7d7; color: #111; order: 3; }
+body.lang-ko .contact-btn.email { display: none; } /* email only on the English popup */
 
 /* Korean site: KakaoTalk shows (hidden in English) and goes first. */
 body.lang-ko .contact-btn.kakao { display: block; order: 1; }
