@@ -1,3 +1,5 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/variable/pretendardvariable-dynamic-subset.css");
+
 * {
     margin: 0;
     padding: 0;
@@ -17,10 +19,13 @@
     --white: #FFFFFF;
 }
 
-/* ===== Typography (neo-grotesque, Helvetica-based) ===== */
+/* ===== Typography =====
+   Pretendard (free, loaded above) for KR + Latin, Light weight. The paid
+   fonts are listed first so they render on machines that have them installed. */
 body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Söhne', 'ABC Diatype', 'GT Sectra', 'Tiempos', 'Pretendard Variable', Pretendard, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 16px;
+    font-weight: 300;
     line-height: 1.5;
     color: var(--text);
     background-color: var(--bg);
@@ -552,6 +557,7 @@ body.modal-open { overflow: hidden; }
 
 .contact-btn.ig { background: var(--mint); color: #111; order: 1; }
 .contact-btn.kakao { background: #e8dfb7; color: #191600; order: 2; display: none; }
+.contact-btn.email { background: #d7d7d7; color: #111; order: 3; }
 
 /* Korean site: KakaoTalk shows (hidden in English) and goes first. */
 body.lang-ko .contact-btn.kakao { display: block; order: 1; }
