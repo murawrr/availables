@@ -17,7 +17,7 @@
     --line: #d3d6db;          /* borders / separators */
     --ink: #575b64;
     --white: #FFFFFF;
-    /* strip accent palette, top -> bottom of the vase (green -> blue -> purple) */
+    /* strip accent palette, top -> bottom (green -> blue -> purple) */
     --c1: #a7c2b4;
     --c2: #33c6a1;
     --c3: #4ab7ca;
@@ -130,18 +130,15 @@ a { color: inherit; }
     flex-direction: column;
     align-items: stretch;
     margin-top: 1.75rem;
-    gap: 0; /* bars are contiguous windows onto the one shared image */
+    gap: 2px; /* thin separation between the colour strips */
     background: var(--bg);
     position: relative;
     z-index: 1;
-    isolation: isolate; /* keep the shared background behind the bars */
 }
 
 .menu-bar {
     display: block;
-    position: relative;
-    z-index: 1;            /* sits above the shared .menu-bg */
-    background: transparent; /* transparent window onto the shared image */
+    background-color: var(--greyish-azure);
     color: var(--text);
     text-decoration: none;
     overflow: hidden;
@@ -154,12 +151,12 @@ a { color: inherit; }
 /* Notice bar */
 .menu-bar--notice { color: var(--text); }
 
-/* Each bar's accent tints the shared image (via the .menu-text::after scrim). */
-.menu-bars .menu-bar:nth-of-type(1) { --accent: var(--c1); }
-.menu-bars .menu-bar:nth-of-type(2) { --accent: var(--c2); }
-.menu-bars .menu-bar:nth-of-type(3) { --accent: var(--c3); }
-.menu-bars .menu-bar:nth-of-type(4) { --accent: var(--c4); }
-.menu-bars .menu-bar:nth-of-type(5) { --accent: var(--c5); }
+/* Each strip is a solid accent colour. */
+.menu-bars .menu-bar:nth-of-type(1) { background-color: var(--c1); }
+.menu-bars .menu-bar:nth-of-type(2) { background-color: var(--c2); }
+.menu-bars .menu-bar:nth-of-type(3) { background-color: var(--c3); }
+.menu-bars .menu-bar:nth-of-type(4) { background-color: var(--c4); }
+.menu-bars .menu-bar:nth-of-type(5) { background-color: var(--c5); }
 
 /* ===== Site watermark (hand-drawn logo, pinned to the right edge, over content) ===== */
 .site-watermark {
@@ -338,19 +335,6 @@ body.lang-ko .lang-only-en { display: none; }
     overflow: hidden;
 }
 
-/* Reversed overlay: the maebyeong appears as inverted negative space. The same
-   marquee runs underneath; inside this clipped layer the colours flip. */
-.vase-layer {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    background: var(--text);
-    color: #e9efea;
-    pointer-events: none;
-}
-
 .marquee {
     position: relative;
     z-index: 2;
@@ -375,50 +359,13 @@ body.lang-ko .lang-only-en { display: none; }
     text-transform: uppercase;
     letter-spacing: 2px;
     line-height: 1;
-    color: #ffffff;
+    color: #2e3037; /* dark text reads on the pastel accent strips */
     padding-right: 15rem; /* gap between repeated words (uniform = seamless seam) */
-}
-
-/* ===== One shared auto-sliding image behind ALL bars ===== */
-.menu-bg {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    overflow: hidden;
-}
-.menu-bg-track {
-    display: flex;
-    height: 100%;
-    /* width set in JS (slides × menu width) */
-}
-.menu-bg-slide {
-    flex: 0 0 auto;
-    height: 100%;
-    background-size: cover;
-    background-position: center;
-}
-/* Light per-bar accent tint so the shared image reads through each bar. */
-.menu-text::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    background: color-mix(in srgb, var(--accent, #575b64) 26%, transparent);
 }
 
 @keyframes slideText {
     from { transform: translateX(0); }
     to   { transform: translateX(-50%); }
-}
-
-/* Curved SVG bars (static label following each band's arc). */
-.bar-svg { display: block; width: 100%; height: 100%; overflow: visible; }
-.bar-svg text {
-    fill: currentColor;
-    font-family: inherit;
-    font-weight: 700;
-    letter-spacing: 1px;
 }
 
 /* ===== Subpage project layout ===== */
@@ -488,12 +435,6 @@ body.lang-ko .lang-only-en { display: none; }
     display: block;
     width: 100%;
     height: auto;
-}
-
-/* ===== Vase mouth / base caps ===== */
-.vase-cap {
-    width: 100%;
-    background: #c4d3cb; /* lighter than the menu (decorative, not clickable) */
 }
 
 /* ===== Lightbox (tap a design to zoom) ===== */
