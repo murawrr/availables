@@ -376,65 +376,61 @@ function probeSlideFolder(folder, cb) {
     tryNum();
 }
 
-function buildBarSlideshow(menuText, barIndex, W, folder) {
+// ONE shared slideshow behind the whole menu. The bars are transparent windows
+// onto it (each tinted with its accent), so every bar shares the same image and
+// only a single set of photos is ever loaded.
+function buildMenuBackground() {
+    const nav = document.querySelector('.menu-bars');
+    if (!nav) return;
+    const old = nav.querySelector('.menu-bg');
+    if (old) old.remove();
+
+    const W = Math.round(nav.clientWidth);
     if (!W) return;
     const gen = buildGen;
 
     const render = (srcs) => {
-        if (gen !== buildGen) return;            // a newer rebuild superseded us
-        // Fall back to the shared pool when a bar has no folder images yet.
-        if (!srcs || !srcs.length) {
-            const pool = SLIDESHOW_IMAGES;
-            if (!pool.length) return;
-            const start = (barIndex * 7) % pool.length;
-            srcs = [];
-            for (let i = 0; i < Math.min(SLIDE_COUNT, pool.length); i++) srcs.push(pool[(start + i) % pool.length]);
-        }
-        buildSlideshowDom(menuText, barIndex, W, srcs);
+        if (gen !== buildGen) return; // a newer rebuild superseded us
+        if (!srcs || !srcs.length) srcs = SLIDESHOW_IMAGES.slice(0, SLIDE_COUNT);
+        if (!srcs.length) return;
+
+        const bg = document.createElement('div');
+        bg.className = 'menu-bg';
+        const track = document.createElement('div');
+        track.className = 'menu-bg-track';
+        bg.appendChild(track);
+
+        const n = srcs.length;
+        const makeSlide = (src) => {
+            const s = document.createElement('div');
+            s.className = 'menu-bg-slide';
+            s.style.width = W + 'px';
+            s.style.backgroundImage = `url("${src}")`;
+            return s;
+        };
+        srcs.forEach(src => track.appendChild(makeSlide(src)));
+        track.appendChild(makeSlide(srcs[0])); // clone for a seamless wrap
+        track.style.width = ((n + 1) * W) + 'px';
+        nav.insertBefore(bg, nav.firstChild);
+
+        if (n < 2) return; // nothing to animate
+        let idx = 0;
+        const advance = () => {
+            idx++;
+            track.style.transition = 'transform 1s ease';
+            track.style.transform = `translateX(${-idx * W}px)`;
+            if (idx === n) {
+                setTimeout(() => {
+                    track.style.transition = 'none';
+                    idx = 0;
+                    track.style.transform = 'translateX(0)';
+                }, 1020);
+            }
+        };
+        slideTimers.push(setInterval(advance, SLIDE_PERIOD));
     };
 
-    if (folder) probeSlideFolder(folder, render);
-    else render(null);
-}
-
-function buildSlideshowDom(menuText, barIndex, W, imgs) {
-    const bg = document.createElement('div');
-    bg.className = 'bar-bg';
-    const track = document.createElement('div');
-    track.className = 'bar-bg-track';
-    bg.appendChild(track);
-
-    const n = imgs.length;
-
-    const makeSlide = (src) => {
-        const s = document.createElement('div');
-        s.className = 'bar-slide';
-        s.style.width = W + 'px';
-        s.style.backgroundImage = `url("${src}")`;
-        return s;
-    };
-    imgs.forEach(src => track.appendChild(makeSlide(src)));
-    track.appendChild(makeSlide(imgs[0])); // clone for a seamless wrap
-    track.style.width = ((n + 1) * W) + 'px';
-
-    menuText.insertBefore(bg, menuText.firstChild);
-
-    let idx = 0;
-    const advance = () => {
-        idx++;
-        track.style.transition = 'transform 0.9s ease';
-        track.style.transform = `translateX(${-idx * W}px)`;
-        if (idx === n) {
-            setTimeout(() => {
-                track.style.transition = 'none';
-                idx = 0;
-                track.style.transform = 'translateX(0)';
-            }, 920);
-        }
-    };
-    // Stagger each bar so they don't all flip at the same moment.
-    const t = setInterval(advance, SLIDE_PERIOD + barIndex * 350);
-    slideTimers.push(t);
+    probeSlideFolder('images/home', render);
 }
 
 // ===== Looping menu marquee (text over the slideshow) =====
@@ -442,6 +438,9 @@ function buildMarquees() {
     slideTimers.forEach(clearInterval);
     slideTimers = [];
     buildGen++;
+
+    // One shared image slideshow behind every bar.
+    buildMenuBackground();
 
     let index = -1;
     document.querySelectorAll('.menu-bar').forEach(bar => {
@@ -457,10 +456,7 @@ function buildMarquees() {
 
         menuText.innerHTML = '';
 
-        // Auto-sliding artwork behind the text (bar's own folder, else pool).
-        buildBarSlideshow(menuText, index, W, bar.getAttribute('data-slides'));
-
-        // Seamless two-segment marquee on top.
+        // Seamless two-segment marquee on top of the shared background.
         const track = document.createElement('div');
         track.className = 'marquee';
         track.style.marginLeft = offset + 'px';

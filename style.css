@@ -130,15 +130,18 @@ a { color: inherit; }
     flex-direction: column;
     align-items: stretch;
     margin-top: 1.75rem;
-    gap: 3px; /* thin incised band line between each slice of the vase */
+    gap: 0; /* bars are contiguous windows onto the one shared image */
     background: var(--bg);
     position: relative;
     z-index: 1;
+    isolation: isolate; /* keep the shared background behind the bars */
 }
 
 .menu-bar {
     display: block;
-    background-color: var(--greyish-azure);
+    position: relative;
+    z-index: 1;            /* sits above the shared .menu-bg */
+    background: transparent; /* transparent window onto the shared image */
     color: var(--text);
     text-decoration: none;
     overflow: hidden;
@@ -151,13 +154,12 @@ a { color: inherit; }
 /* Notice bar */
 .menu-bar--notice { color: var(--text); }
 
-/* Each strip carries its own accent; the slideshow scrim tints to it. */
-.menu-bar--invert { background-color: var(--c2); }
-.menu-bars .menu-bar:nth-of-type(1) { --accent: var(--c1); background-color: var(--c1); }
-.menu-bars .menu-bar:nth-of-type(2) { --accent: var(--c2); background-color: var(--c2); }
-.menu-bars .menu-bar:nth-of-type(3) { --accent: var(--c3); background-color: var(--c3); }
-.menu-bars .menu-bar:nth-of-type(4) { --accent: var(--c4); background-color: var(--c4); }
-.menu-bars .menu-bar:nth-of-type(5) { --accent: var(--c5); background-color: var(--c5); }
+/* Each bar's accent tints the shared image (via the .menu-text::after scrim). */
+.menu-bars .menu-bar:nth-of-type(1) { --accent: var(--c1); }
+.menu-bars .menu-bar:nth-of-type(2) { --accent: var(--c2); }
+.menu-bars .menu-bar:nth-of-type(3) { --accent: var(--c3); }
+.menu-bars .menu-bar:nth-of-type(4) { --accent: var(--c4); }
+.menu-bars .menu-bar:nth-of-type(5) { --accent: var(--c5); }
 
 /* ===== Site watermark (hand-drawn logo, pinned to the right edge, over content) ===== */
 .site-watermark {
@@ -374,38 +376,35 @@ body.lang-ko .lang-only-en { display: none; }
     letter-spacing: 2px;
     line-height: 1;
     color: #ffffff;
-    text-shadow: 0 2px 10px rgba(20, 22, 28, 0.5);
     padding-right: 15rem; /* gap between repeated words (uniform = seamless seam) */
 }
 
-/* ===== Auto-sliding artwork behind each bar ===== */
-.bar-bg {
+/* ===== One shared auto-sliding image behind ALL bars ===== */
+.menu-bg {
     position: absolute;
     inset: 0;
     z-index: 0;
     overflow: hidden;
 }
-.bar-bg-track {
+.menu-bg-track {
     display: flex;
     height: 100%;
-    /* width set in JS (slides × bar width) */
+    /* width set in JS (slides × menu width) */
 }
-.bar-slide {
+.menu-bg-slide {
     flex: 0 0 auto;
     height: 100%;
     background-size: cover;
     background-position: center;
 }
-/* tint + darken so the heavy white text stays legible, keeping the accent */
+/* Light per-bar accent tint so the shared image reads through each bar. */
 .menu-text::after {
     content: "";
     position: absolute;
     inset: 0;
     z-index: 1;
     pointer-events: none;
-    background:
-        linear-gradient(rgba(28, 30, 36, 0.30), rgba(28, 30, 36, 0.30)),
-        color-mix(in srgb, var(--accent, #575b64) 40%, transparent);
+    background: color-mix(in srgb, var(--accent, #575b64) 26%, transparent);
 }
 
 @keyframes slideText {
