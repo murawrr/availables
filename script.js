@@ -141,6 +141,7 @@ function renderBookingModal() {
                 ${kakaoBtn}
                 <a class="contact-btn email" href="mailto:${EMAIL}">email</a>
             </div>
+            <p class="modal-foot"><a href="waitlist.html" data-en="Not in your area yet? Join the waitlist →" data-ko="아직 근처에 안 계신가요? 대기열에 등록하기 →">Not in your area yet? Join the waitlist →</a></p>
         </div>`;
     overlay.addEventListener('click', (e) => { if (e.target === overlay) closeBooking(); });
     document.body.appendChild(overlay);
@@ -341,20 +342,26 @@ function buildMarquees() {
         const segWidth = seg1.getBoundingClientRect().width;
         if (segWidth > 0) track.style.animationDuration = (segWidth / MARQUEE_SPEED) + 's';
 
-        // Vase: centred block whose width follows the maebyeong profile, with
-        // rounded (convex) left/right ends and an upward bow for flow.
-        const p = (index + 0.5) / N;
-        const Wbar = Math.max(150, Math.round(vaseProfile(p) * W));
-        const left = Math.round((W - Wbar) / 2), right = W - left;
-        const yT = Math.round(H * 0.14), yB = H - yT;
-        const midX = W / 2, midY = (yT + yB) / 2;
-        const bow = Math.round(H * 0.13);                          // upward arc
-        const side = Math.min(Math.round((yB - yT) * 0.7), left);  // how far the ends bulge out
-        const d = `path('M ${left} ${yT} `
-            + `Q ${midX} ${yT - bow} ${right} ${yT} `        // top edge bows up
-            + `Q ${right + side} ${midY} ${right} ${yB} `    // right end bulges out
-            + `Q ${midX} ${yB - bow} ${left} ${yB} `         // bottom edge bows up (arc)
-            + `Q ${left - side} ${midY} ${left} ${yT} Z')`;  // left end bulges out
+        // Vase silhouette: each bar is a frustum slice whose left/right edges
+        // follow the maebyeong profile at the top, middle and bottom of the bar,
+        // so the stacked bars trace one continuous vase outline.
+        const pT = index / N, pM = (index + 0.5) / N, pB = (index + 1) / N;
+        const wT = Math.max(120, vaseProfile(pT) * W);
+        const wM = Math.max(120, vaseProfile(pM) * W);
+        const wB = Math.max(120, vaseProfile(pB) * W);
+        const tlx = (W - wT) / 2, trx = W - tlx;
+        const mlx = (W - wM) / 2, mrx = W - mlx;
+        const blx = (W - wB) / 2, brx = W - blx;
+        const yT = Math.round(H * 0.08), yB = H - yT, midY = (yT + yB) / 2;
+        const bow = Math.round(H * 0.12);
+        const crx = (2 * mrx - (trx + brx) / 2).toFixed(1); // right-side control (through mid)
+        const clx = (2 * mlx - (tlx + blx) / 2).toFixed(1); // left-side control
+        const f = (n) => n.toFixed(1);
+        const d = `path('M ${f(tlx)} ${yT} `
+            + `Q ${W / 2} ${yT - bow} ${f(trx)} ${yT} `   // top edge (gentle upward bow)
+            + `Q ${crx} ${midY} ${f(brx)} ${yB} `         // right edge follows the vase
+            + `Q ${W / 2} ${yB - bow} ${f(blx)} ${yB} `   // bottom edge
+            + `Q ${clx} ${midY} ${f(tlx)} ${yT} Z')`;     // left edge follows the vase
         bar.style.clipPath = d;
         bar.style.webkitClipPath = d;
     });
