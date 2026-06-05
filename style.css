@@ -320,12 +320,14 @@ body.lang-ko .lang-only-en { display: none; }
     align-items: center;
     height: 8.5rem;
     overflow: hidden;
+    perspective: 700px; /* depth for the cylinder curve */
 }
 
 .marquee {
     display: flex;
     flex: none;
     will-change: transform;
+    transform-style: preserve-3d;
     animation: slideText 20s linear infinite;
 }
 
@@ -334,6 +336,7 @@ body.lang-ko .lang-only-en { display: none; }
 .marquee-seg {
     display: flex;
     flex: none;
+    transform-style: preserve-3d;
 }
 
 .marquee-word {
@@ -344,6 +347,8 @@ body.lang-ko .lang-only-en { display: none; }
     letter-spacing: 1px;
     line-height: 1;
     padding-right: 15rem; /* gap between repeated words (uniform = seamless seam) */
+    will-change: transform, opacity;
+    backface-visibility: hidden;
 }
 
 @keyframes slideText {
