@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap");
 
 * {
     margin: 0;
@@ -7,21 +7,27 @@
 }
 
 :root {
-    --greyish-azure: #9bb1a5; /* key colour (bars / accent) */
-    --mint: #9bb1a5;          /* accent (same key colour) */
+    --greyish-azure: #9bb1a5; /* legacy key colour */
+    --mint: #9bb1a5;          /* button accent */
     --bg: #edf2ee;            /* page background */
     --surface: #ffffff;       /* cards / modals */
     --field: #ffffff;         /* inputs / textarea */
-    --text: #2d362f;          /* primary text (dark) */
-    --muted: #6f7b74;         /* secondary text */
-    --line: #cdd6d0;          /* borders / separators */
-    --ink: #2d362f;
+    --text: #575b64;          /* primary text / dark (replaces the khaki) */
+    --muted: #8b8f99;         /* secondary text */
+    --line: #d3d6db;          /* borders / separators */
+    --ink: #575b64;
     --white: #FFFFFF;
+    /* strip accent palette, top -> bottom of the vase (green -> blue -> purple) */
+    --c1: #a7c2b4;
+    --c2: #33c6a1;
+    --c3: #4ab7ca;
+    --c4: #a49bac;
+    --c5: #827c9e;
 }
 
-/* ===== Typography (serif, Noto Serif KR covers Latin + Korean) ===== */
+/* ===== Typography (sans-serif, Noto Sans KR covers Latin + Korean) ===== */
 body {
-    font-family: 'Noto Serif KR', Georgia, 'Times New Roman', serif;
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     font-size: 16px;
     font-weight: 600;
     line-height: 1.5;
@@ -143,9 +149,13 @@ a { color: inherit; }
 /* Notice bar */
 .menu-bar--notice { color: var(--text); }
 
-/* All strips share the key colour now — the vase comes from the reversed
-   overlay, not from a single inverted bar. */
-.menu-bar--invert { background-color: var(--greyish-azure); color: var(--text); }
+/* Each strip gets its own accent (the reversed vase overlay inverts to dark). */
+.menu-bar--invert { background-color: var(--c2); color: var(--text); }
+.menu-bars .menu-bar:nth-of-type(1) { background-color: var(--c1); }
+.menu-bars .menu-bar:nth-of-type(2) { background-color: var(--c2); }
+.menu-bars .menu-bar:nth-of-type(3) { background-color: var(--c3); }
+.menu-bars .menu-bar:nth-of-type(4) { background-color: var(--c4); }
+.menu-bars .menu-bar:nth-of-type(5) { background-color: var(--c5); }
 
 /* ===== Site watermark (hand-drawn logo, pinned to the right edge, over content) ===== */
 .site-watermark {
@@ -370,7 +380,7 @@ body.lang-ko .lang-only-en { display: none; }
 .bar-svg { display: block; width: 100%; height: 100%; overflow: visible; }
 .bar-svg text {
     fill: currentColor;
-    font-family: 'Noto Serif KR', Georgia, 'Times New Roman', serif;
+    font-family: inherit;
     font-weight: 700;
     letter-spacing: 1px;
 }
