@@ -337,21 +337,21 @@ function buildMarquees() {
     document.querySelectorAll('.menu-bar').forEach(bar => {
         const mt = bar.querySelector('.menu-text');
         if (!mt) return;
-        if (bar.offsetParent === null) { mt.innerHTML = ''; bar.style.clipPath = ''; bar.style.webkitClipPath = ''; return; }
+        bar.style.clipPath = ''; bar.style.webkitClipPath = ''; // strips are full-width
+        if (bar.offsetParent === null) { mt.innerHTML = ''; return; }
         visible.push(bar);
     });
-    if (!visible.length) { renderVaseCaps(); return; }
+    // No decorative caps in this layout — the vase is the inverted negative space.
+    document.querySelectorAll('.menu-bars .vase-cap').forEach(c => c.remove());
+    if (!visible.length) return;
 
-    // Sample the silhouette by REAL pixel position so the half-height bars
-    // (notice / archives) get the correct width slice -> smooth outline.
+    // Sample the silhouette by REAL pixel height so each strip gets the right slice.
     const heights = visible.map(b => (b.querySelector('.menu-text').clientHeight || 1));
     const total = heights.reduce((a, b) => a + b, 0) || 1;
     const bounds = [];
     let acc = 0;
     visible.forEach((b, i) => { const t = acc / total; acc += heights[i]; bounds.push([t, acc / total]); });
 
-    const NS = 'http://www.w3.org/2000/svg';
-    const XLINK = 'http://www.w3.org/1999/xlink';
     const r = (n) => Math.round(n);
 
     visible.forEach((bar, index) => {
@@ -360,14 +360,54 @@ function buildMarquees() {
         const W = Math.round(menuText.clientWidth);
         const H = Math.round(menuText.clientHeight);
         if (!W || !H) return;
-        bar.style.backgroundColor = ''; // use the CSS bar colour
+        bar.style.backgroundColor = '';
+        const offset = (MARQUEE_OFFSETS[index % MARQUEE_OFFSETS.length] || 0);
 
+        // Two-segment sliding marquee for a seamless loop. Built twice (base +
+        // reversed overlay) with identical settings so the text stays in sync.
+        const makeTrack = () => {
+            const track = document.createElement('div');
+            track.className = 'marquee';
+            track.style.marginLeft = offset + 'px';
+            for (let s = 0; s < 2; s++) {
+                const seg = document.createElement('span');
+                seg.className = 'marquee-seg';
+                if (s === 1) seg.setAttribute('aria-hidden', 'true');
+                for (let i = 0; i < 8; i++) {
+                    const w = document.createElement('span');
+                    w.className = 'marquee-word';
+                    w.textContent = label;
+                    seg.appendChild(w);
+                }
+                track.appendChild(seg);
+            }
+            return track;
+        };
+
+        menuText.innerHTML = '';
+
+        // Base layer: full-width strip, normal colours.
+        const base = makeTrack();
+        menuText.appendChild(base);
+
+        // Reversed layer: identical marquee, inverted colours, clipped to the
+        // vase-silhouette slice for this strip -> the maebyeong appears in negative.
+        const layer = document.createElement('div');
+        layer.className = 'vase-layer';
+        const over = makeTrack();
+        layer.appendChild(over);
+        menuText.appendChild(layer);
+
+        // Sync the two tracks: identical duration so words line up across the edge.
+        const segWidth = base.firstChild.getBoundingClientRect().width;
+        if (segWidth > 0) {
+            const dur = (segWidth / MARQUEE_SPEED) + 's';
+            base.style.animationDuration = dur;
+            over.style.animationDuration = dur;
+        }
+
+        // Vase slice: flat top/bottom, smooth sampled sides shared between strips.
         const pT = bounds[index][0], pB = bounds[index][1];
-
-        // Clip the band by SAMPLING the smooth profile down each side. Top and
-        // bottom edges are flat; sides are a fine polyline of the silhouette, so
-        // adjacent bands share edge points and the whole stack reads as ONE
-        // continuous round-shouldered vase (no straight-line tent / zig-zag).
         const xL = (p) => (W - vaseProfile(p) * W) / 2;
         const SEG = 14;
         const parts = [`M ${r(xL(pT))} 0`, `L ${r(W - xL(pT))} 0`];
@@ -376,61 +416,9 @@ function buildMarquees() {
         for (let s = SEG - 1; s >= 1; s--) { const pp = pT + (pB - pT) * s / SEG; parts.push(`L ${r(xL(pp))} ${r(H * s / SEG)}`); }
         parts.push('Z');
         const d = `path('${parts.join(' ')}')`;
-        bar.style.clipPath = d;
-        bar.style.webkitClipPath = d;
-
-        // ----- Static label following a gentle arc across the band -----
-        const pMid = (pT + pB) / 2;
-        const wM = Math.max(60, vaseProfile(pMid) * W);
-        const mlx = r((W - wM) / 2), mrx = W - mlx;
-        const cx = r(W / 2);
-        const bow = Math.max(4, Math.round(Math.min(wM * 0.05, H * 0.4)));
-        const pid = 'barpath-' + index;
-
-        const svg = document.createElementNS(NS, 'svg');
-        svg.setAttribute('class', 'bar-svg');
-        svg.setAttribute('width', W);
-        svg.setAttribute('height', H);
-        svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-        svg.setAttribute('preserveAspectRatio', 'none');
-
-        const defs = document.createElementNS(NS, 'defs');
-        const path = document.createElementNS(NS, 'path');
-        path.setAttribute('id', pid);
-        path.setAttribute('fill', 'none');
-        let baseY = r(H / 2);
-        path.setAttribute('d', `M ${mlx} ${baseY} Q ${cx} ${baseY + bow} ${mrx} ${baseY}`);
-        defs.appendChild(path);
-        svg.appendChild(defs);
-
-        const text = document.createElementNS(NS, 'text');
-        text.setAttribute('text-anchor', 'middle');
-        const tp = document.createElementNS(NS, 'textPath');
-        tp.setAttributeNS(XLINK, 'xlink:href', '#' + pid);
-        tp.setAttribute('href', '#' + pid);
-        tp.setAttribute('startOffset', '50%');
-        tp.textContent = label;
-        text.appendChild(tp);
-        svg.appendChild(text);
-
-        menuText.innerHTML = '';
-        menuText.appendChild(svg);
-
-        // Fit the label to the band width: measure at a base size, then scale.
-        const baseFs = 100;
-        text.style.fontSize = baseFs + 'px';
-        let textLen = 0;
-        try { textLen = text.getComputedTextLength(); } catch (e) { textLen = 0; }
-        const pathLen = (path.getTotalLength && path.getTotalLength()) || wM;
-        let fs = textLen > 0 ? baseFs * (pathLen * 0.8) / textLen : Math.round(H * 0.4);
-        fs = Math.max(13, Math.min(fs, Math.round(H * 0.52)));
-        text.style.fontSize = fs + 'px';
-
-        baseY = r(H / 2 + fs * 0.34);
-        path.setAttribute('d', `M ${mlx} ${baseY} Q ${cx} ${baseY + bow} ${mrx} ${baseY}`);
+        layer.style.clipPath = d;
+        layer.style.webkitClipPath = d;
     });
-
-    renderVaseCaps();
 }
 
 // Decorative mouth (top) and base (bottom) caps for the vase (not clickable).
