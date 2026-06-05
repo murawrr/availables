@@ -141,7 +141,7 @@ function renderBookingModal() {
                 ${kakaoBtn}
                 <a class="contact-btn email" href="mailto:${EMAIL}">email</a>
             </div>
-            <p class="modal-foot"><a href="waitlist.html" data-en="Not in your area yet? Join the waitlist →" data-ko="아직 근처에 안 계신가요? 대기열에 등록하기 →">Not in your area yet? Join the waitlist →</a></p>
+            <p class="modal-foot en-only"><a href="waitlist.html" data-en="Not in your area yet? Join the waitlist →">Not in your area yet? Join the waitlist →</a></p>
         </div>`;
     overlay.addEventListener('click', (e) => { if (e.target === overlay) closeBooking(); });
     document.body.appendChild(overlay);
@@ -181,7 +181,7 @@ async function copyTemplate() {
     }
     if (btn) {
         const prev = btn.textContent;
-        btn.textContent = 'Copied!';
+        btn.textContent = (currentLanguage === 'ko') ? '복사됨!' : 'Copied!';
         btn.classList.add('copied');
         setTimeout(() => { btn.textContent = prev; btn.classList.remove('copied'); }, 1500);
     }
