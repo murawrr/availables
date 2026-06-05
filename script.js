@@ -102,11 +102,10 @@ function renderHeader() {
     mount.className = 'site-header';
     mount.innerHTML = `
         <div class="header-left">
-            <a href="index.html" class="site-name">mura</a>
-            <a href="${INSTAGRAM_URL}" target="_blank" rel="noopener" class="site-handle">@murarctic</a>
+            <button type="button" class="header-action" onclick="openBooking()" data-en="book or enquire" data-ko="예약 혹은 문의">book or enquire</button>
         </div>
         <div class="header-center">
-            <button type="button" class="header-action" onclick="openBooking()" data-en="book or enquire" data-ko="예약 혹은 문의">book or enquire</button>
+            <a href="index.html" class="site-name">mura</a>
         </div>
         <nav class="lang-selector">
             <button class="lang-btn" onclick="setLanguageHome('en')" data-lang="en">EN</button>
@@ -342,14 +341,20 @@ function buildMarquees() {
         const segWidth = seg1.getBoundingClientRect().width;
         if (segWidth > 0) track.style.animationDuration = (segWidth / MARQUEE_SPEED) + 's';
 
-        // Vase silhouette: a centred block whose WIDTH follows the maebyeong
-        // profile, with gently curved top & bottom edges (subtle 3D).
+        // Vase: centred block whose width follows the maebyeong profile, with
+        // rounded (convex) left/right ends and an upward bow for flow.
         const p = (index + 0.5) / N;
-        const Wbar = Math.max(140, Math.round(vaseProfile(p) * W));
+        const Wbar = Math.max(150, Math.round(vaseProfile(p) * W));
         const left = Math.round((W - Wbar) / 2), right = W - left;
-        const yT = Math.round(H * 0.12), yB = H - yT;
-        const bow = Math.round(Math.min(H * 0.12, 16));
-        const d = `path('M ${left} ${yT} Q ${W / 2} ${yT - bow} ${right} ${yT} L ${right} ${yB} Q ${W / 2} ${yB + bow} ${left} ${yB} Z')`;
+        const yT = Math.round(H * 0.14), yB = H - yT;
+        const midX = W / 2, midY = (yT + yB) / 2;
+        const bow = Math.round(H * 0.13);                          // upward arc
+        const side = Math.min(Math.round((yB - yT) * 0.7), left);  // how far the ends bulge out
+        const d = `path('M ${left} ${yT} `
+            + `Q ${midX} ${yT - bow} ${right} ${yT} `        // top edge bows up
+            + `Q ${right + side} ${midY} ${right} ${yB} `    // right end bulges out
+            + `Q ${midX} ${yB - bow} ${left} ${yB} `         // bottom edge bows up (arc)
+            + `Q ${left - side} ${midY} ${left} ${yT} Z')`;  // left end bulges out
         bar.style.clipPath = d;
         bar.style.webkitClipPath = d;
     });
