@@ -328,57 +328,6 @@ function buildMarquees() {
             track.style.animationDuration = (segWidth / MARQUEE_SPEED) + 's';
         }
     });
-    collectCylinder();
-}
-
-// ===== Cylinder curve =====
-// Wrap each bar's scrolling text around a vertical cylinder: words rotate away
-// and recede toward the left/right edges, flat & facing front at the centre.
-const CYL_MAX_ANGLE = 72; // degrees at the edges
-const CYL_DEPTH = 70;     // px the edges recede
-let cylinderBars = [];
-let cylinderRunning = false;
-
-function collectCylinder() {
-    cylinderBars = [];
-    document.querySelectorAll('.menu-bar').forEach(bar => {
-        if (bar.offsetParent === null) return;
-        const track = bar.querySelector('.marquee');
-        if (!track) return;
-        const words = Array.from(track.querySelectorAll('.marquee-word'))
-            .map(el => ({ el, base: el.offsetLeft + el.offsetWidth / 2 }));
-        if (!words.length) return;
-        const center = bar.offsetLeft + bar.offsetWidth / 2;
-        cylinderBars.push({ track, words, center, half: (bar.offsetWidth / 2) || 1 });
-    });
-    if (cylinderBars.length && !cylinderRunning) {
-        cylinderRunning = true;
-        requestAnimationFrame(cylinderFrame);
-    }
-}
-
-function trackTranslateX(el) {
-    const t = getComputedStyle(el).transform;
-    if (!t || t === 'none') return 0;
-    const nums = t.slice(t.indexOf('(') + 1, t.indexOf(')')).split(',').map(parseFloat);
-    return nums.length === 16 ? nums[12] : nums[4]; // matrix3d vs matrix
-}
-
-function cylinderFrame() {
-    for (const b of cylinderBars) {
-        const tx = trackTranslateX(b.track);
-        for (const w of b.words) {
-            let n = (w.base + tx - b.center) / b.half;
-            if (n < -1.5) n = -1.5; else if (n > 1.5) n = 1.5;
-            const angle = n * CYL_MAX_ANGLE;
-            const rad = angle * Math.PI / 180;
-            const cos = Math.cos(rad);
-            const z = (cos - 1) * CYL_DEPTH;
-            w.el.style.transform = `translateZ(${z.toFixed(1)}px) rotateY(${angle.toFixed(1)}deg)`;
-            w.el.style.opacity = (0.12 + 0.88 * Math.max(0, cos)).toFixed(2);
-        }
-    }
-    requestAnimationFrame(cylinderFrame);
 }
 
 // ===== Gallery auto-loader =====
