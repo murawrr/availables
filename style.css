@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;700;900&display=swap");
 
 * {
     margin: 0;
@@ -17,17 +17,12 @@
     --line: #d3d6db;          /* borders / separators */
     --ink: #575b64;
     --white: #FFFFFF;
-    /* strip accent palette, top -> bottom (green -> blue -> purple) */
-    --c1: #a7c2b4;
-    --c2: #33c6a1;
-    --c3: #4ab7ca;
-    --c4: #a49bac;
-    --c5: #827c9e;
+    --header: #4a4f59;        /* dark header bar */
 }
 
-/* ===== Typography (sans-serif, Noto Sans KR covers Latin + Korean) ===== */
+/* ===== Typography (serif, Noto Serif KR covers Latin + Korean) ===== */
 body {
-    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'Noto Serif KR', Georgia, 'Times New Roman', serif;
     font-size: 16px;
     font-weight: 600;
     line-height: 1.5;
@@ -47,11 +42,11 @@ a { color: inherit; }
     align-items: center;
     gap: 1rem;
     padding: 0.85rem 1.25rem;
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid #3c404a;
     font-size: 0.95rem;
     position: sticky;
     top: 0;
-    background: var(--bg);
+    background: var(--header);
     z-index: 100;
 }
 
@@ -67,7 +62,7 @@ a { color: inherit; }
     font-weight: 900;
     text-transform: uppercase;
     text-decoration: none;
-    color: var(--text);
+    color: #f1f3f5;
     letter-spacing: 0.5px;
     font-size: 2.6rem;
     line-height: 1;
@@ -93,7 +88,7 @@ a { color: inherit; }
     border: none;
     padding: 0;
     font: inherit;
-    color: var(--mint);
+    color: #d8dce2;
     font-weight: 700;
     text-transform: uppercase;
     cursor: pointer;
@@ -151,12 +146,6 @@ a { color: inherit; }
 /* Notice bar */
 .menu-bar--notice { color: var(--text); }
 
-/* Each strip is a solid accent colour. */
-.menu-bars .menu-bar:nth-of-type(1) { background-color: var(--c1); }
-.menu-bars .menu-bar:nth-of-type(2) { background-color: var(--c2); }
-.menu-bars .menu-bar:nth-of-type(3) { background-color: var(--c3); }
-.menu-bars .menu-bar:nth-of-type(4) { background-color: var(--c4); }
-.menu-bars .menu-bar:nth-of-type(5) { background-color: var(--c5); }
 
 /* ===== Site watermark (hand-drawn logo, pinned to the right edge, over content) ===== */
 .site-watermark {
