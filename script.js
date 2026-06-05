@@ -2,13 +2,13 @@
 // One per language. The Korean text below is a DRAFT — replace with the
 // wording you give me.
 const BOOKING_TEMPLATE = {
-    en: `Name & date of birth:
-City / Country:
-Desired design: (please attach an image in your message)
-Color, size, placement:
-Budget:
-(Optional) Design edits:
-(Optional) Custom design idea:`,
+    en: `name:
+city / country
+design: (preferrably a screenshot)
+colour:
+size:
+placement:
+ideas for customising the design or creating a custom design:`,
     ko: `이름 및 생년월일:
 원하시는 도안: (메세지에 이미지를 첨부해주세요)
 색상, 크기, 부위:
@@ -241,7 +241,7 @@ function renderWatermark() {
     document.body.appendChild(wrap);
 }
 
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeBooking(); closeAnnounce(); } });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeBooking(); closeAnnounce(); closeLightbox(); } });
 
 // ===== Light copy / save deterrents (note: screenshots still work) =====
 function showCopyToast() {
@@ -288,9 +288,10 @@ const MARQUEE_SPEED = 90; // px per second
 // Per-bar horizontal start offset (px) so the bars don't all line up.
 const MARQUEE_OFFSETS = [-15, -180, -90, -260, -45, -200, -120, -310];
 
-// Celadon maebyeong silhouette: width fraction (0..1) from top (0) to base (1).
+// Vase silhouette: SYMMETRIC about the middle line — narrow at top & base,
+// widest in the centre. Width fraction (0..1) from top (0) to base (1).
 function vaseProfile(p) {
-    const pts = [[0, 0.16], [0.10, 0.58], [0.22, 1.0], [0.40, 0.86], [0.60, 0.64], [0.80, 0.50], [1, 0.46]];
+    const pts = [[0, 0.30], [0.25, 0.74], [0.5, 1.0], [0.75, 0.74], [1, 0.30]];
     for (let k = 0; k < pts.length - 1; k++) {
         const a = pts[k], b = pts[k + 1];
         if (p <= b[0]) { const f = (p - a[0]) / (b[0] - a[0]); return a[1] + (b[1] - a[1]) * f; }
@@ -342,29 +343,52 @@ function buildMarquees() {
         const segWidth = seg1.getBoundingClientRect().width;
         if (segWidth > 0) track.style.animationDuration = (segWidth / MARQUEE_SPEED) + 's';
 
-        // Vase silhouette: each bar is a frustum slice whose left/right edges
-        // follow the maebyeong profile at the top, middle and bottom of the bar,
-        // so the stacked bars trace one continuous vase outline.
-        const pT = index / N, pM = (index + 0.5) / N, pB = (index + 1) / N;
+        // Frustum slice: straight sides follow the profile (top width -> bottom
+        // width) so the stack traces one continuous vase outline; top & bottom
+        // edges arc DOWNWARD (dramatic) for flow.
+        const pT = index / N, pB = (index + 1) / N;
         const wT = Math.max(120, vaseProfile(pT) * W);
-        const wM = Math.max(120, vaseProfile(pM) * W);
         const wB = Math.max(120, vaseProfile(pB) * W);
-        const tlx = (W - wT) / 2, trx = W - tlx;
-        const mlx = (W - wM) / 2, mrx = W - mlx;
-        const blx = (W - wB) / 2, brx = W - blx;
-        const yT = Math.round(H * 0.08), yB = H - yT, midY = (yT + yB) / 2;
-        const bow = Math.round(H * 0.12);
-        const crx = (2 * mrx - (trx + brx) / 2).toFixed(1); // right-side control (through mid)
-        const clx = (2 * mlx - (tlx + blx) / 2).toFixed(1); // left-side control
-        const f = (n) => n.toFixed(1);
-        const d = `path('M ${f(tlx)} ${yT} `
-            + `Q ${W / 2} ${yT - bow} ${f(trx)} ${yT} `   // top edge (gentle upward bow)
-            + `Q ${crx} ${midY} ${f(brx)} ${yB} `         // right edge follows the vase
-            + `Q ${W / 2} ${yB - bow} ${f(blx)} ${yB} `   // bottom edge
-            + `Q ${clx} ${midY} ${f(tlx)} ${yT} Z')`;     // left edge follows the vase
+        const tlx = Math.round((W - wT) / 2), trx = W - tlx;
+        const blx = Math.round((W - wB) / 2), brx = W - blx;
+        const bow = Math.round(H * 0.24);
+        const yT = Math.round(H * 0.05), yB = H - bow - Math.round(H * 0.05);
+        const d = `path('M ${tlx} ${yT} `
+            + `Q ${Math.round(W / 2)} ${yT + bow} ${trx} ${yT} `   // top edge arcs down
+            + `L ${brx} ${yB} `                                     // right side (straight)
+            + `Q ${Math.round(W / 2)} ${yB + bow} ${blx} ${yB} `   // bottom edge arcs down
+            + `Z')`;                                                // left side (straight)
         bar.style.clipPath = d;
         bar.style.webkitClipPath = d;
     });
+
+    renderVaseCaps();
+}
+
+// Decorative mouth (top) and base (bottom) caps for the vase.
+function renderVaseCaps() {
+    const nav = document.querySelector('.menu-bars');
+    if (!nav) return;
+    nav.querySelectorAll('.vase-cap').forEach(c => c.remove());
+    const W = nav.clientWidth;
+    if (!W) return;
+    const make = (cls, wf, h) => {
+        const el = document.createElement('div');
+        el.className = 'vase-cap ' + cls;
+        el.style.height = h + 'px';
+        const Wc = Math.round(wf * W);
+        const left = Math.round((W - Wc) / 2), right = W - left;
+        const r = Math.min(Math.round(h * 0.5), 22);
+        const d = `path('M ${left + r} 0 L ${right - r} 0 Q ${right} 0 ${right} ${r} `
+            + `L ${right} ${h - r} Q ${right} ${h} ${right - r} ${h} `
+            + `L ${left + r} ${h} Q ${left} ${h} ${left} ${h - r} `
+            + `L ${left} ${r} Q ${left} 0 ${left + r} 0 Z')`;
+        el.style.clipPath = d;
+        el.style.webkitClipPath = d;
+        return el;
+    };
+    nav.insertBefore(make('vase-cap--mouth', 0.16, 30), nav.firstChild);
+    nav.appendChild(make('vase-cap--base', 0.22, 38));
 }
 
 // ===== Gallery auto-loader =====
@@ -402,6 +426,7 @@ function loadGallery(grid) {
                 img.loading = 'lazy';
                 fig.appendChild(img);
                 grid.appendChild(fig);
+                fig.addEventListener('click', () => openLightbox(src));
                 loaded++;
                 index++;
                 next();
@@ -438,6 +463,27 @@ function loadThumb(card) {
         probe.src = src;
     };
     tryExt(0);
+}
+
+// ===== Lightbox =====
+function openLightbox(src) {
+    let lb = document.getElementById('lightbox');
+    if (!lb) {
+        lb = document.createElement('div');
+        lb.id = 'lightbox';
+        lb.className = 'lightbox';
+        lb.innerHTML = '<img alt="">';
+        lb.addEventListener('click', closeLightbox);
+        document.body.appendChild(lb);
+    }
+    lb.querySelector('img').src = src;
+    lb.classList.add('open');
+    document.body.classList.add('modal-open');
+}
+
+function closeLightbox() {
+    const lb = document.getElementById('lightbox');
+    if (lb) { lb.classList.remove('open'); document.body.classList.remove('modal-open'); }
 }
 
 // ===== Init =====
