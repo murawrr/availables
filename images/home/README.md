@@ -1,16 +1,19 @@
-# Home bar slideshows
+# Home menu background slideshow
 
-Each home-page bar plays an automatic slideshow from its own folder here.
-Drop images in named **01, 02, 03 …** (zero-padded), e.g.:
+One shared image slides behind ALL the menu bars (each bar is a transparent,
+tinted window onto the same image). Drop images here named **01, 02, 03 …**
+(zero-padded):
 
-    images/home/episodes/01.png
-    images/home/episodes/02.jpg
+    images/home/01.jpg
+    images/home/02.jpg
+    images/home/03.jpg
 
 Rules:
 - Numbering must be consecutive starting at 01 (the loader stops at the first
   missing number).
 - Accepted extensions: png, jpg, jpeg, webp.
-- Landscape / wide crops look best (they fill a full-width bar).
-- A bar with no images here automatically falls back to the shared artwork pool.
-
-Folders: notice, mini-tattoos, episodes, mura-types, archives
+- Tall / portrait crops work well here since the image spans the full height of
+  the whole menu (all bars stacked).
+- Keep files small for fast loading — JPG or WebP around 200–400 KB each is
+  plenty. (Large multi-MB PNGs are what make the page slow.)
+- With no images here, the menu falls back to a few pieces from the gallery.
