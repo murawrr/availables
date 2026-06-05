@@ -300,26 +300,38 @@ const MARQUEE_SPEED = 90; // px per second
 // Per-bar horizontal start offset (px) so the bars don't all line up.
 const MARQUEE_OFFSETS = [-15, -180, -90, -260, -45, -200, -120, -310];
 
-// Maebyeong silhouette: width fraction (0..1 of the menu width) sampled from
-// the top of the bar stack (p=0) down to the bottom (p=1). Narrow neck ->
-// full rounded shoulder (widest, near the top) -> concave taper -> narrow
-// waist just above the flared foot. The mouth/foot caps continue the curve.
+// Maebyeong silhouette as a SMOOTH curve. vaseProfile(p) returns the width
+// fraction (0..1 of the menu width) at vertical position p (0 = top of the
+// bar stack, 1 = bottom). A Catmull-Rom spline through these control points
+// gives a narrow neck -> round full shoulder (widest near the top) -> concave
+// body -> narrow waist. The mouth/foot caps continue the curve top & bottom.
+const VASE_PTS = [
+    [0.00, 0.18],  // neck base (under the lip)
+    [0.10, 0.62],
+    [0.20, 0.92],
+    [0.27, 0.985], // shoulder — widest, rounded
+    [0.40, 0.93],
+    [0.55, 0.78],
+    [0.70, 0.60],
+    [0.84, 0.49],
+    [0.95, 0.45],
+    [1.00, 0.45]   // waist, just above the flared foot
+];
 function vaseProfile(p) {
-    const pts = [
-        [0.00, 0.16],  // neck base (just under the lip)
-        [0.11, 0.96],  // shoulder — widest (top of the dark mini-tattoos band)
-        [0.37, 0.84],
-        [0.63, 0.63],
-        [0.89, 0.47],
-        [1.00, 0.44]   // waist, just above the foot
-    ];
-    for (let k = 0; k < pts.length - 1; k++) {
-        const a = pts[k], b = pts[k + 1];
-        if (p <= b[0]) { const f = (p - a[0]) / (b[0] - a[0]); return a[1] + (b[1] - a[1]) * f; }
-    }
-    return pts[pts.length - 1][1];
+    const P = VASE_PTS;
+    if (p <= P[0][0]) return P[0][1];
+    if (p >= P[P.length - 1][0]) return P[P.length - 1][1];
+    let i = 0;
+    while (i < P.length - 1 && p > P[i + 1][0]) i++;
+    const p0 = P[Math.max(0, i - 1)], p1 = P[i], p2 = P[i + 1], p3 = P[Math.min(P.length - 1, i + 2)];
+    const t = (p - p1[0]) / (p2[0] - p1[0]);
+    const t2 = t * t, t3 = t2 * t;
+    const y = 0.5 * ((2 * p1[1])
+        + (-p0[1] + p2[1]) * t
+        + (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2
+        + (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3);
+    return Math.max(0.06, Math.min(0.99, y));
 }
-
 function buildMarquees() {
     const visible = [];
     document.querySelectorAll('.menu-bar').forEach(bar => {
@@ -350,39 +362,29 @@ function buildMarquees() {
         if (!W || !H) return;
         bar.style.backgroundColor = ''; // use the CSS bar colour
 
-        // Vase-profile widths at this band's top / bottom edges (centred).
         const pT = bounds[index][0], pB = bounds[index][1];
-        const wT = Math.max(60, vaseProfile(pT) * W);
-        const wB = Math.max(60, vaseProfile(pB) * W);
-        const tlx = r((W - wT) / 2), trx = W - tlx;
-        const blx = r((W - wB) / 2), brx = W - blx;
-        const cx = r(W / 2), cr = 8;
 
-        // Gentle, width-proportional bow (wide bands curve a touch more than
-        // narrow ones). Widths are shared at boundaries, so bands nest cleanly.
-        const bowAt = (w) => Math.max(5, Math.round(w * 0.022));
-        const bowT = bowAt(wT), bowB = bowAt(wB);
-        const yT = cr;
-        const yB = H - bowB;
-
-        const Lr = Math.hypot(brx - trx, yB - yT) || 1, rux = (brx - trx) / Lr, ruy = (yB - yT) / Lr;
-        const Ll = Math.hypot(blx - tlx, yB - yT) || 1, llx = (blx - tlx) / Ll, lly = (yB - yT) / Ll;
-        const d = `path('M ${r(tlx + cr)} ${yT} `
-            + `Q ${cx} ${yT + bowT} ${r(trx - cr)} ${yT} `              // top edge (gentle arc)
-            + `Q ${trx} ${yT} ${r(trx + cr * rux)} ${r(yT + cr * ruy)} ` // round TR
-            + `L ${r(brx - cr * rux)} ${r(yB - cr * ruy)} `             // right side
-            + `Q ${brx} ${yB} ${r(brx - cr)} ${yB} `                   // round BR
-            + `Q ${cx} ${yB + bowB} ${r(blx + cr)} ${yB} `             // bottom edge (gentle arc)
-            + `Q ${blx} ${yB} ${r(blx - cr * llx)} ${r(yB - cr * lly)} ` // round BL
-            + `L ${r(tlx + cr * llx)} ${r(yT + cr * lly)} `             // left side
-            + `Q ${tlx} ${yT} ${r(tlx + cr)} ${yT} Z')`;              // round TL
+        // Clip the band by SAMPLING the smooth profile down each side. Top and
+        // bottom edges are flat; sides are a fine polyline of the silhouette, so
+        // adjacent bands share edge points and the whole stack reads as ONE
+        // continuous round-shouldered vase (no straight-line tent / zig-zag).
+        const xL = (p) => (W - vaseProfile(p) * W) / 2;
+        const SEG = 14;
+        const parts = [`M ${r(xL(pT))} 0`, `L ${r(W - xL(pT))} 0`];
+        for (let s = 1; s <= SEG; s++) { const pp = pT + (pB - pT) * s / SEG; parts.push(`L ${r(W - xL(pp))} ${r(H * s / SEG)}`); }
+        parts.push(`L ${r(xL(pB))} ${H}`);
+        for (let s = SEG - 1; s >= 1; s--) { const pp = pT + (pB - pT) * s / SEG; parts.push(`L ${r(xL(pp))} ${r(H * s / SEG)}`); }
+        parts.push('Z');
+        const d = `path('${parts.join(' ')}')`;
         bar.style.clipPath = d;
         bar.style.webkitClipPath = d;
 
-        // ----- Static label that FOLLOWS the band arc (no animation) -----
-        const wMid = (wT + wB) / 2;
-        const mlx = r((W - wMid) / 2), mrx = W - mlx;
-        const bowMid = Math.round((bowT + bowB) / 2);
+        // ----- Static label following a gentle arc across the band -----
+        const pMid = (pT + pB) / 2;
+        const wM = Math.max(60, vaseProfile(pMid) * W);
+        const mlx = r((W - wM) / 2), mrx = W - mlx;
+        const cx = r(W / 2);
+        const bow = Math.max(4, Math.round(Math.min(wM * 0.05, H * 0.4)));
         const pid = 'barpath-' + index;
 
         const svg = document.createElementNS(NS, 'svg');
@@ -396,8 +398,8 @@ function buildMarquees() {
         const path = document.createElementNS(NS, 'path');
         path.setAttribute('id', pid);
         path.setAttribute('fill', 'none');
-        let baseY = r((yT + yB) / 2);
-        path.setAttribute('d', `M ${mlx} ${baseY} Q ${cx} ${baseY + bowMid} ${mrx} ${baseY}`);
+        let baseY = r(H / 2);
+        path.setAttribute('d', `M ${mlx} ${baseY} Q ${cx} ${baseY + bow} ${mrx} ${baseY}`);
         defs.appendChild(path);
         svg.appendChild(defs);
 
@@ -415,18 +417,17 @@ function buildMarquees() {
         menuText.appendChild(svg);
 
         // Fit the label to the band width: measure at a base size, then scale.
-        const base = 100;
-        text.style.fontSize = base + 'px';
+        const baseFs = 100;
+        text.style.fontSize = baseFs + 'px';
         let textLen = 0;
         try { textLen = text.getComputedTextLength(); } catch (e) { textLen = 0; }
-        const pathLen = (path.getTotalLength && path.getTotalLength()) || wMid;
-        let fs = textLen > 0 ? base * (pathLen * 0.82) / textLen : Math.round(H * 0.4);
-        fs = Math.max(13, Math.min(fs, Math.round(H * 0.5)));
+        const pathLen = (path.getTotalLength && path.getTotalLength()) || wM;
+        let fs = textLen > 0 ? baseFs * (pathLen * 0.8) / textLen : Math.round(H * 0.4);
+        fs = Math.max(13, Math.min(fs, Math.round(H * 0.52)));
         text.style.fontSize = fs + 'px';
 
-        // Re-centre the baseline now the glyph height is known.
-        baseY = r((yT + yB) / 2 + fs * 0.34);
-        path.setAttribute('d', `M ${mlx} ${baseY} Q ${cx} ${baseY + bowMid} ${mrx} ${baseY}`);
+        baseY = r(H / 2 + fs * 0.34);
+        path.setAttribute('d', `M ${mlx} ${baseY} Q ${cx} ${baseY + bow} ${mrx} ${baseY}`);
     });
 
     renderVaseCaps();
@@ -454,8 +455,8 @@ function renderVaseCaps() {
         el.style.clipPath = d; el.style.webkitClipPath = d;
         return el;
     };
-    nav.insertBefore(cap('vase-cap--mouth', 0.22, 0.15, 40), nav.firstChild); // lip + narrow neck
-    nav.appendChild(cap('vase-cap--base', 0.40, 0.62, 66));                   // flared lotus foot
+    nav.insertBefore(cap('vase-cap--mouth', 0.21, 0.17, 32), nav.firstChild); // small lip on the neck
+    nav.appendChild(cap('vase-cap--base', 0.42, 0.60, 60));                   // flared lotus foot
 }
 
 // ===== Gallery auto-loader =====
