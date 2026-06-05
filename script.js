@@ -288,8 +288,8 @@ const MARQUEE_SPEED = 90; // px per second
 // Per-bar horizontal start offset (px) so the bars don't all line up.
 const MARQUEE_OFFSETS = [-15, -180, -90, -260, -45, -200, -120, -310];
 
-const CURVE_AMP = 0.34;   // max curve as a fraction of bar height (at the shoulder)
-const CURVE_MIN = 0.05;   // min curve (mouth / base)
+const CURVE_AMP = 0.30;   // max curve as a fraction of bar height (at the shoulder)
+const CURVE_MIN = 0.08;   // min curve (mouth / base)
 
 let curveBars = [];   // { textPath, unit, phase, speed }
 let curveRAF = false;
@@ -339,12 +339,15 @@ function buildMarquees() {
         bar.style.backgroundColor = 'transparent'; // the SVG band is the bar now
 
         // Curve amount echoes the vase: bulge most at the shoulder, flat at mouth/base.
+        // The visible window [0..W] is one clean arc (rises A at the centre); the
+        // path then trails off-screen on both sides so the text can scroll in/out.
         const p = (index + 0.5) / N;
-        const amp = H * Math.max(CURVE_MIN, CURVE_AMP * vaseProfile(p));
+        const A = H * Math.max(CURVE_MIN, CURVE_AMP * vaseProfile(p));
         const baseY = H / 2;
-        const ext = W;
-        const d = `M ${-ext} ${baseY} Q ${W / 2} ${baseY - amp * 2} ${W + ext} ${baseY}`;
-        const thick = Math.max(10, H - amp * 2 - 6);
+        const ext = Math.round(W * 0.5);
+        const yTail = (baseY + ext * (4 * A) / W).toFixed(1); // tails continue the arc's slope
+        const d = `M ${-ext} ${yTail} L 0 ${baseY} Q ${W / 2} ${(baseY - 2 * A).toFixed(1)} ${W} ${baseY} L ${W + ext} ${yTail}`;
+        const thick = Math.max(10, H - 2 * A - 6);
         const fontSize = Math.round(thick * 0.8);
 
         const gap = '     ';
