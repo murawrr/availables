@@ -300,151 +300,140 @@ const MARQUEE_SPEED = 90; // px per second
 // Per-bar horizontal start offset (px) so the bars don't all line up.
 const MARQUEE_OFFSETS = [-15, -180, -90, -260, -45, -200, -120, -310];
 
-// Maebyeong silhouette as a SMOOTH curve. vaseProfile(p) returns the width
-// fraction (0..1 of the menu width) at vertical position p (0 = top of the
-// bar stack, 1 = bottom). A Catmull-Rom spline through these control points
-// gives a narrow neck -> round full shoulder (widest near the top) -> concave
-// body -> narrow waist. The mouth/foot caps continue the curve top & bottom.
-const VASE_PTS = [
-    [0.00, 0.18],  // neck base (under the lip)
-    [0.10, 0.62],
-    [0.20, 0.92],
-    [0.27, 0.985], // shoulder — widest, rounded
-    [0.40, 0.93],
-    [0.55, 0.78],
-    [0.70, 0.60],
-    [0.84, 0.49],
-    [0.95, 0.45],
-    [1.00, 0.45]   // waist, just above the flared foot
+// ===== Background image slideshow (auto-sliding behind each bar) =====
+// Shared pool of artwork; each bar slides through its own slice of it.
+const SLIDESHOW_IMAGES = [
+    'images/archives/01.png',
+    'images/episodes/episode-1/01.png',
+    'images/episodes/episode-1/02.png',
+    'images/episodes/episode-1/03.png',
+    'images/episodes/episode-1/04.png',
+    'images/episodes/episode-1/05.png',
+    'images/episodes/episode-1/06.png',
+    'images/episodes/episode-2/01.png',
+    'images/episodes/episode-2/02.png',
+    'images/episodes/episode-2/03.png',
+    'images/episodes/episode-2/04.png',
+    'images/episodes/episode-2/05.png',
+    'images/episodes/episode-2/06.png',
+    'images/episodes/episode-2/07.png',
+    'images/episodes/episode-2/08.png',
+    'images/episodes/episode-2/09.png',
+    'images/episodes/episode-2/10.png',
+    'images/episodes/episode-2/11.png',
+    'images/episodes/episode-2/12.png',
+    'images/episodes/episode-2/13.png',
+    'images/episodes/episode-2/14.png',
+    'images/episodes/episode-2/15.png',
+    'images/episodes/episode-2/16.png',
+    'images/mura-types/mura-type-01/01.png',
+    'images/mura-types/mura-type-01/02.png',
+    'images/mura-types/mura-type-01/03.png',
+    'images/mura-types/mura-type-01/04.png',
+    'images/mura-types/mura-type-01/05.png',
+    'images/mura-types/mura-type-01/06.png',
+    'images/mura-types/mura-type-01/07.png',
+    'images/mura-types/mura-type-01/08.png',
+    'images/mura-types/mura-type-01/09.png',
+    'images/mura-types/mura-type-02/01.png',
+    'images/mura-types/mura-type-03/01.png',
+    'images/mura-types/mura-type-04/01.png',
+    'images/mura-types/mura-type-04/02.png',
+    'images/mura-types/mura-type-04/03.png'
 ];
-function vaseProfile(p) {
-    const P = VASE_PTS;
-    if (p <= P[0][0]) return P[0][1];
-    if (p >= P[P.length - 1][0]) return P[P.length - 1][1];
-    let i = 0;
-    while (i < P.length - 1 && p > P[i + 1][0]) i++;
-    const p0 = P[Math.max(0, i - 1)], p1 = P[i], p2 = P[i + 1], p3 = P[Math.min(P.length - 1, i + 2)];
-    const t = (p - p1[0]) / (p2[0] - p1[0]);
-    const t2 = t * t, t3 = t2 * t;
-    const y = 0.5 * ((2 * p1[1])
-        + (-p0[1] + p2[1]) * t
-        + (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2
-        + (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3);
-    return Math.max(0.06, Math.min(0.99, y));
+
+const SLIDE_PERIOD = 4200; // ms each image is shown
+const SLIDE_COUNT = 6;     // images per bar
+
+// Keep timers so a rebuild (resize / language switch) doesn't stack them up.
+let slideTimers = [];
+
+function buildBarSlideshow(menuText, barIndex, W) {
+    const pool = SLIDESHOW_IMAGES;
+    if (!pool.length || !W) return;
+    const bg = document.createElement('div');
+    bg.className = 'bar-bg';
+    const track = document.createElement('div');
+    track.className = 'bar-bg-track';
+    bg.appendChild(track);
+
+    const n = Math.min(SLIDE_COUNT, pool.length);
+    const startAt = (barIndex * 7) % pool.length;
+    const imgs = [];
+    for (let i = 0; i < n; i++) imgs.push(pool[(startAt + i) % pool.length]);
+
+    const makeSlide = (src) => {
+        const s = document.createElement('div');
+        s.className = 'bar-slide';
+        s.style.backgroundImage = `url("${src}")`;
+        return s;
+    };
+    imgs.forEach(src => track.appendChild(makeSlide(src)));
+    track.appendChild(makeSlide(imgs[0])); // clone for a seamless wrap
+
+    menuText.insertBefore(bg, menuText.firstChild);
+
+    let idx = 0;
+    const advance = () => {
+        idx++;
+        track.style.transition = 'transform 0.9s ease';
+        track.style.transform = `translateX(${-idx * W}px)`;
+        if (idx === n) {
+            setTimeout(() => {
+                track.style.transition = 'none';
+                idx = 0;
+                track.style.transform = 'translateX(0)';
+            }, 920);
+        }
+    };
+    // Stagger each bar so they don't all flip at the same moment.
+    const t = setInterval(advance, SLIDE_PERIOD + barIndex * 350);
+    slideTimers.push(t);
 }
+
+// ===== Looping menu marquee (text over the slideshow) =====
 function buildMarquees() {
-    const visible = [];
+    slideTimers.forEach(clearInterval);
+    slideTimers = [];
+
+    let index = -1;
     document.querySelectorAll('.menu-bar').forEach(bar => {
-        const mt = bar.querySelector('.menu-text');
-        if (!mt) return;
-        bar.style.clipPath = ''; bar.style.webkitClipPath = ''; // strips are full-width
-        if (bar.offsetParent === null) { mt.innerHTML = ''; return; }
-        visible.push(bar);
-    });
-    // No decorative caps in this layout — the vase is the inverted negative space.
-    document.querySelectorAll('.menu-bars .vase-cap').forEach(c => c.remove());
-    if (!visible.length) return;
-
-    // Sample the silhouette by REAL pixel height so each strip gets the right slice.
-    const heights = visible.map(b => (b.querySelector('.menu-text').clientHeight || 1));
-    const total = heights.reduce((a, b) => a + b, 0) || 1;
-    const bounds = [];
-    let acc = 0;
-    visible.forEach((b, i) => { const t = acc / total; acc += heights[i]; bounds.push([t, acc / total]); });
-
-    const r = (n) => Math.round(n);
-
-    visible.forEach((bar, index) => {
-        const label = bar.getAttribute('data-' + currentLanguage) || bar.getAttribute('data-en') || '';
         const menuText = bar.querySelector('.menu-text');
-        const W = Math.round(menuText.clientWidth);
-        const H = Math.round(menuText.clientHeight);
-        if (!W || !H) return;
-        bar.style.backgroundColor = '';
-        const offset = (MARQUEE_OFFSETS[index % MARQUEE_OFFSETS.length] || 0);
+        if (!menuText) return;
+        if (bar.offsetParent === null) { menuText.innerHTML = ''; return; }
+        index++;
 
-        // Two-segment sliding marquee for a seamless loop. Built twice (base +
-        // reversed overlay) with identical settings so the text stays in sync.
-        const makeTrack = () => {
-            const track = document.createElement('div');
-            track.className = 'marquee';
-            track.style.marginLeft = offset + 'px';
-            for (let s = 0; s < 2; s++) {
-                const seg = document.createElement('span');
-                seg.className = 'marquee-seg';
-                if (s === 1) seg.setAttribute('aria-hidden', 'true');
-                for (let i = 0; i < 8; i++) {
-                    const w = document.createElement('span');
-                    w.className = 'marquee-word';
-                    w.textContent = label;
-                    seg.appendChild(w);
-                }
-                track.appendChild(seg);
-            }
-            return track;
-        };
+        const label = bar.getAttribute('data-' + currentLanguage) || bar.getAttribute('data-en') || '';
+        const W = Math.round(menuText.clientWidth);
+        if (!W) return;
+        const offset = (MARQUEE_OFFSETS[index % MARQUEE_OFFSETS.length] || 0);
 
         menuText.innerHTML = '';
 
-        // Base layer: full-width strip, normal colours.
-        const base = makeTrack();
-        menuText.appendChild(base);
+        // Auto-sliding artwork behind the text.
+        buildBarSlideshow(menuText, index, W);
 
-        // Reversed layer: identical marquee, inverted colours, clipped to the
-        // vase-silhouette slice for this strip -> the maebyeong appears in negative.
-        const layer = document.createElement('div');
-        layer.className = 'vase-layer';
-        const over = makeTrack();
-        layer.appendChild(over);
-        menuText.appendChild(layer);
-
-        // Sync the two tracks: identical duration so words line up across the edge.
-        const segWidth = base.firstChild.getBoundingClientRect().width;
-        if (segWidth > 0) {
-            const dur = (segWidth / MARQUEE_SPEED) + 's';
-            base.style.animationDuration = dur;
-            over.style.animationDuration = dur;
+        // Seamless two-segment marquee on top.
+        const track = document.createElement('div');
+        track.className = 'marquee';
+        track.style.marginLeft = offset + 'px';
+        for (let s = 0; s < 2; s++) {
+            const seg = document.createElement('span');
+            seg.className = 'marquee-seg';
+            if (s === 1) seg.setAttribute('aria-hidden', 'true');
+            for (let i = 0; i < 8; i++) {
+                const w = document.createElement('span');
+                w.className = 'marquee-word';
+                w.textContent = label;
+                seg.appendChild(w);
+            }
+            track.appendChild(seg);
         }
+        menuText.appendChild(track);
 
-        // Vase slice: flat top/bottom, smooth sampled sides shared between strips.
-        const pT = bounds[index][0], pB = bounds[index][1];
-        const xL = (p) => (W - vaseProfile(p) * W) / 2;
-        const SEG = 14;
-        const parts = [`M ${r(xL(pT))} 0`, `L ${r(W - xL(pT))} 0`];
-        for (let s = 1; s <= SEG; s++) { const pp = pT + (pB - pT) * s / SEG; parts.push(`L ${r(W - xL(pp))} ${r(H * s / SEG)}`); }
-        parts.push(`L ${r(xL(pB))} ${H}`);
-        for (let s = SEG - 1; s >= 1; s--) { const pp = pT + (pB - pT) * s / SEG; parts.push(`L ${r(xL(pp))} ${r(H * s / SEG)}`); }
-        parts.push('Z');
-        const d = `path('${parts.join(' ')}')`;
-        layer.style.clipPath = d;
-        layer.style.webkitClipPath = d;
+        const segWidth = track.firstChild.getBoundingClientRect().width;
+        if (segWidth > 0) track.style.animationDuration = (segWidth / MARQUEE_SPEED) + 's';
     });
-}
-
-// Decorative mouth (top) and base (bottom) caps for the vase (not clickable).
-function renderVaseCaps() {
-    const nav = document.querySelector('.menu-bars');
-    if (!nav) return;
-    nav.querySelectorAll('.vase-cap').forEach(c => c.remove());
-    const W = nav.clientWidth;
-    if (!W) return;
-    const cap = (cls, topWf, botWf, h) => {
-        const el = document.createElement('div');
-        el.className = 'vase-cap ' + cls;
-        el.style.height = h + 'px';
-        const wt = Math.round(topWf * W), wb = Math.round(botWf * W);
-        const tl = Math.round((W - wt) / 2), tr = W - tl;
-        const bl = Math.round((W - wb) / 2), br = W - bl;
-        const r = 10;
-        const d = `path('M ${tl + r} 0 L ${tr - r} 0 Q ${tr} 0 ${tr} ${r} `
-            + `L ${br} ${h - r} Q ${br} ${h} ${br - r} ${h} `
-            + `L ${bl + r} ${h} Q ${bl} ${h} ${bl} ${h - r} `
-            + `L ${tl} ${r} Q ${tl} 0 ${tl + r} 0 Z')`;
-        el.style.clipPath = d; el.style.webkitClipPath = d;
-        return el;
-    };
-    nav.insertBefore(cap('vase-cap--mouth', 0.21, 0.17, 32), nav.firstChild); // small lip on the neck
-    nav.appendChild(cap('vase-cap--base', 0.42, 0.60, 60));                   // flared lotus foot
 }
 
 // ===== Gallery auto-loader =====

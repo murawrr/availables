@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap");
 
 * {
     margin: 0;
@@ -64,10 +64,11 @@ a { color: inherit; }
 }
 
 .site-name {
-    font-weight: 700;
+    font-weight: 900;
+    text-transform: uppercase;
     text-decoration: none;
     color: var(--text);
-    letter-spacing: 0.2px;
+    letter-spacing: 0.5px;
     font-size: 2.6rem;
     line-height: 1;
 }
@@ -93,9 +94,10 @@ a { color: inherit; }
     padding: 0;
     font: inherit;
     color: var(--mint);
-    font-weight: 600;
+    font-weight: 700;
+    text-transform: uppercase;
     cursor: pointer;
-    letter-spacing: 0.2px;
+    letter-spacing: 0.6px;
     transition: opacity 0.2s ease;
 }
 
@@ -149,13 +151,13 @@ a { color: inherit; }
 /* Notice bar */
 .menu-bar--notice { color: var(--text); }
 
-/* Each strip gets its own accent (the reversed vase overlay inverts to dark). */
-.menu-bar--invert { background-color: var(--c2); color: var(--text); }
-.menu-bars .menu-bar:nth-of-type(1) { background-color: var(--c1); }
-.menu-bars .menu-bar:nth-of-type(2) { background-color: var(--c2); }
-.menu-bars .menu-bar:nth-of-type(3) { background-color: var(--c3); }
-.menu-bars .menu-bar:nth-of-type(4) { background-color: var(--c4); }
-.menu-bars .menu-bar:nth-of-type(5) { background-color: var(--c5); }
+/* Each strip carries its own accent; the slideshow scrim tints to it. */
+.menu-bar--invert { background-color: var(--c2); }
+.menu-bars .menu-bar:nth-of-type(1) { --accent: var(--c1); background-color: var(--c1); }
+.menu-bars .menu-bar:nth-of-type(2) { --accent: var(--c2); background-color: var(--c2); }
+.menu-bars .menu-bar:nth-of-type(3) { --accent: var(--c3); background-color: var(--c3); }
+.menu-bars .menu-bar:nth-of-type(4) { --accent: var(--c4); background-color: var(--c4); }
+.menu-bars .menu-bar:nth-of-type(5) { --accent: var(--c5); background-color: var(--c5); }
 
 /* ===== Site watermark (hand-drawn logo, pinned to the right edge, over content) ===== */
 .site-watermark {
@@ -348,6 +350,8 @@ body.lang-ko .lang-only-en { display: none; }
 }
 
 .marquee {
+    position: relative;
+    z-index: 2;
     display: flex;
     flex: none;
     will-change: transform;
@@ -364,11 +368,45 @@ body.lang-ko .lang-only-en { display: none; }
 .marquee-word {
     display: inline-block;
     white-space: nowrap;
-    font-size: 4.2rem;
-    font-weight: 600; /* thicker menu text */
-    letter-spacing: 1px;
+    font-size: 4.6rem;
+    font-weight: 900; /* heavy menu text */
+    text-transform: uppercase;
+    letter-spacing: 2px;
     line-height: 1;
+    color: #ffffff;
+    text-shadow: 0 2px 10px rgba(20, 22, 28, 0.5);
     padding-right: 15rem; /* gap between repeated words (uniform = seamless seam) */
+}
+
+/* ===== Auto-sliding artwork behind each bar ===== */
+.bar-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+}
+.bar-bg-track {
+    display: flex;
+    height: 100%;
+    width: max-content;
+}
+.bar-slide {
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+}
+/* tint + darken so the heavy white text stays legible, keeping the accent */
+.menu-text::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+        linear-gradient(rgba(28, 30, 36, 0.42), rgba(28, 30, 36, 0.42)),
+        color-mix(in srgb, var(--accent, #575b64) 55%, transparent);
 }
 
 @keyframes slideText {
@@ -691,6 +729,8 @@ body.announce-open .footer { display: none; }
     align-items: center;
     gap: 0.5rem;
     flex-wrap: wrap;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .footer-line a { color: var(--text); text-decoration: none; }
