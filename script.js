@@ -23,18 +23,31 @@ const EMAIL = 'murarctic123@gmail.com';
 
 // Opening announcement (shown once per browser session). Bilingual in one box.
 const ANNOUNCEMENT_HTML = `
-    <h2 class="modal-title announce-title">예약 가능 일정<span class="announce-sub">available slots</span></h2>
-    <div class="announce-slots">
-        <p class="slot-month">6월 · june</p>
-        <p>서울 seoul</p>
-        <p class="slot-month">7월 · july</p>
-        <p>부산 busan</p>
-        <p>제주 jeju</p>
-        <p>서울 seoul</p>
-    </div>
-    <div class="announce-langs">
-        <button type="button" class="announce-lang" onclick="chooseLanguageHome('en')">English</button>
-        <button type="button" class="announce-lang" onclick="chooseLanguageHome('ko')">한국어</button>
+    <div class="announce-cols">
+        <div class="announce-col">
+            <h3 class="announce-h">available schedule</h3>
+            <div class="announce-slots">
+                <p class="slot-month">june</p>
+                <p>Seoul</p>
+                <p class="slot-month">july</p>
+                <p>Busan</p>
+                <p>Jeju</p>
+                <p>Seoul</p>
+            </div>
+            <button type="button" class="announce-lang" onclick="chooseLanguageHome('en')">go to page</button>
+        </div>
+        <div class="announce-col">
+            <h3 class="announce-h">예약 가능 일정</h3>
+            <div class="announce-slots">
+                <p class="slot-month">6월</p>
+                <p>서울</p>
+                <p class="slot-month">7월</p>
+                <p>부산</p>
+                <p>제주</p>
+                <p>서울</p>
+            </div>
+            <button type="button" class="announce-lang" onclick="chooseLanguageHome('ko')">페이지 가기</button>
+        </div>
     </div>`;
 
 // Optional site watermark (hand-drawn logo). Set to a path to enable,
@@ -213,6 +226,8 @@ function closeAnnounce() {
 // ===== Shared footer (copyright + email + rights) =====
 function renderFooter() {
     if (document.querySelector('.footer')) return;
+    const other = currentLanguage === 'ko' ? 'en' : 'ko';
+    const switchLabel = currentLanguage === 'ko' ? 'switch to English' : 'switch to 한국어';
     const footer = document.createElement('footer');
     footer.className = 'footer';
     footer.innerHTML = `
@@ -221,8 +236,7 @@ function renderFooter() {
             <span class="footer-sep">·</span>
             <a href="mailto:${EMAIL}">${EMAIL}</a>
             <span class="footer-sep">·</span>
-            <button class="lang-btn" onclick="setLanguageHome('en')" data-lang="en">EN</button>
-            <button class="lang-btn" onclick="setLanguageHome('ko')" data-lang="ko">KO</button>
+            <button class="lang-switch" onclick="setLanguageHome('${other}')">${switchLabel}</button>
         </p>
         <p class="footer-rights" data-en="All works © mura. Please do not reproduce, repost, or use for AI / ML training without permission." data-ko="모든 작품의 저작권은 mura에 있습니다. 허가 없이 복제, 재게시, AI 학습에 사용하지 마세요.">All works © mura. Please do not reproduce, repost, or use for AI / ML training without permission.</p>`;
     document.body.appendChild(footer);
@@ -291,7 +305,7 @@ const MARQUEE_OFFSETS = [-15, -180, -90, -260, -45, -200, -120, -310];
 // Vase silhouette: SYMMETRIC about the middle line — narrow at top & base,
 // widest in the centre. Width fraction (0..1) from top (0) to base (1).
 function vaseProfile(p) {
-    const pts = [[0, 0.45], [0.25, 0.80], [0.5, 1.0], [0.75, 0.80], [1, 0.45]];
+    const pts = [[0, 1.0], [0.28, 0.97], [0.5, 0.78], [0.72, 0.56], [1, 0.44]];
     for (let k = 0; k < pts.length - 1; k++) {
         const a = pts[k], b = pts[k + 1];
         if (p <= b[0]) { const f = (p - a[0]) / (b[0] - a[0]); return a[1] + (b[1] - a[1]) * f; }
@@ -350,7 +364,7 @@ function buildMarquees() {
         const wB = Math.max(120, vaseProfile(pB) * W);
         const tlx = Math.round((W - wT) / 2), trx = W - tlx;
         const blx = Math.round((W - wB) / 2), brx = W - blx;
-        const bow = Math.round(H * 0.15);
+        const bow = Math.round(H * 0.24);
         const yT = Math.round(H * 0.10), yB = H - bow - Math.round(H * 0.06);
         const cx = Math.round(W / 2), cr = 18;
         const Lr = Math.hypot(brx - trx, yB - yT) || 1, ux = (brx - trx) / Lr, uy = (yB - yT) / Lr;
@@ -379,35 +393,23 @@ function renderVaseCaps() {
     nav.querySelectorAll('.vase-cap').forEach(c => c.remove());
     const W = nav.clientWidth;
     if (!W) return;
-    const block = (cls, wf, h) => {
+    const cap = (cls, topWf, botWf, h) => {
         const el = document.createElement('div');
         el.className = 'vase-cap ' + cls;
         el.style.height = h + 'px';
-        const Wc = Math.round(wf * W);
-        const left = Math.round((W - Wc) / 2), right = W - left;
-        const r = 8;
-        const d = `path('M ${left + r} 0 L ${right - r} 0 Q ${right} 0 ${right} ${r} `
-            + `L ${right} ${h - r} Q ${right} ${h} ${right - r} ${h} `
-            + `L ${left + r} ${h} Q ${left} ${h} ${left} ${h - r} `
-            + `L ${left} ${r} Q ${left} 0 ${left + r} 0 Z')`;
+        const wt = Math.round(topWf * W), wb = Math.round(botWf * W);
+        const tl = Math.round((W - wt) / 2), tr = W - tl;
+        const bl = Math.round((W - wb) / 2), br = W - bl;
+        const r = 10;
+        const d = `path('M ${tl + r} 0 L ${tr - r} 0 Q ${tr} 0 ${tr} ${r} `
+            + `L ${br} ${h - r} Q ${br} ${h} ${br - r} ${h} `
+            + `L ${bl + r} ${h} Q ${bl} ${h} ${bl} ${h - r} `
+            + `L ${tl} ${r} Q ${tl} 0 ${tl + r} 0 Z')`;
         el.style.clipPath = d; el.style.webkitClipPath = d;
         return el;
     };
-    const foot = (cls, wf, h) => {
-        const el = document.createElement('div');
-        el.className = 'vase-cap ' + cls;
-        el.style.height = h + 'px';
-        const Wc = Math.round(wf * W);
-        const left = Math.round((W - Wc) / 2), right = W - left;
-        const r = 8, sy = Math.round(h * 0.5);
-        const d = `path('M ${left + r} 0 L ${right - r} 0 Q ${right} 0 ${right} ${r} `
-            + `L ${right} ${sy} Q ${Math.round(W / 2)} ${h} ${left} ${sy} `
-            + `L ${left} ${r} Q ${left} 0 ${left + r} 0 Z')`;
-        el.style.clipPath = d; el.style.webkitClipPath = d;
-        return el;
-    };
-    nav.insertBefore(block('vase-cap--mouth', 0.13, 26), nav.firstChild);
-    nav.appendChild(foot('vase-cap--base', 0.24, 36));
+    nav.insertBefore(cap('vase-cap--mouth', 0.22, 0.14, 30), nav.firstChild); // flared lip
+    nav.appendChild(cap('vase-cap--base', 0.14, 0.26, 34));                   // flared foot
 }
 
 // ===== Gallery auto-loader =====
