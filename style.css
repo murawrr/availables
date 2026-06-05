@@ -587,20 +587,20 @@ body.modal-open { overflow: hidden; }
 }
 
 .copy-btn {
-    background: var(--text);
-    color: var(--bg);
-    border: none;
+    background: #ffffff;
+    color: var(--text);
+    border: 1px solid var(--muted);
     border-radius: 0;
     padding: 0.4rem 1rem;
     font: inherit;
     font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
-    transition: opacity 0.2s ease;
+    transition: border-color 0.2s ease, color 0.2s ease;
 }
 
-.copy-btn:hover { opacity: 0.85; }
-.copy-btn.copied { background: #2e7d32; color: #fff; }
+.copy-btn:hover { border-color: var(--text); }
+.copy-btn.copied { border-color: var(--greyish-azure); color: var(--greyish-azure); }
 
 .contact-options {
     display: flex;
