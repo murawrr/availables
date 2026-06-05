@@ -107,10 +107,7 @@ function renderHeader() {
         <div class="header-center">
             <a href="index.html" class="site-name">mura</a>
         </div>
-        <nav class="lang-selector">
-            <button class="lang-btn" onclick="setLanguageHome('en')" data-lang="en">EN</button>
-            <button class="lang-btn" onclick="setLanguageHome('ko')" data-lang="ko">KO</button>
-        </nav>`;
+        <div class="header-right"></div>`;
 }
 
 // ===== Booking modal =====
@@ -223,6 +220,9 @@ function renderFooter() {
             <span data-en="mura © 2026" data-ko="무라 © 2026">mura © 2026</span>
             <span class="footer-sep">·</span>
             <a href="mailto:${EMAIL}">${EMAIL}</a>
+            <span class="footer-sep">·</span>
+            <button class="lang-btn" onclick="setLanguageHome('en')" data-lang="en">EN</button>
+            <button class="lang-btn" onclick="setLanguageHome('ko')" data-lang="ko">KO</button>
         </p>
         <p class="footer-rights" data-en="All works © mura. Please do not reproduce, repost, or use for AI / ML training without permission." data-ko="모든 작품의 저작권은 mura에 있습니다. 허가 없이 복제, 재게시, AI 학습에 사용하지 마세요.">All works © mura. Please do not reproduce, repost, or use for AI / ML training without permission.</p>`;
     document.body.appendChild(footer);
@@ -291,7 +291,7 @@ const MARQUEE_OFFSETS = [-15, -180, -90, -260, -45, -200, -120, -310];
 // Vase silhouette: SYMMETRIC about the middle line — narrow at top & base,
 // widest in the centre. Width fraction (0..1) from top (0) to base (1).
 function vaseProfile(p) {
-    const pts = [[0, 0.30], [0.25, 0.74], [0.5, 1.0], [0.75, 0.74], [1, 0.30]];
+    const pts = [[0, 0.45], [0.25, 0.80], [0.5, 1.0], [0.75, 0.80], [1, 0.45]];
     for (let k = 0; k < pts.length - 1; k++) {
         const a = pts[k], b = pts[k + 1];
         if (p <= b[0]) { const f = (p - a[0]) / (b[0] - a[0]); return a[1] + (b[1] - a[1]) * f; }
@@ -343,21 +343,28 @@ function buildMarquees() {
         const segWidth = seg1.getBoundingClientRect().width;
         if (segWidth > 0) track.style.animationDuration = (segWidth / MARQUEE_SPEED) + 's';
 
-        // Frustum slice: straight sides follow the profile (top width -> bottom
-        // width) so the stack traces one continuous vase outline; top & bottom
-        // edges arc DOWNWARD (dramatic) for flow.
+        // Frustum slice: rounded corners (no sharp points) + arced top/bottom;
+        // straight sides follow the vase profile -> smooth continuous silhouette.
         const pT = index / N, pB = (index + 1) / N;
         const wT = Math.max(120, vaseProfile(pT) * W);
         const wB = Math.max(120, vaseProfile(pB) * W);
         const tlx = Math.round((W - wT) / 2), trx = W - tlx;
         const blx = Math.round((W - wB) / 2), brx = W - blx;
-        const bow = Math.round(H * 0.09);          // gentle arc (was a heavy sag)
-        const yT = Math.round(H * 0.16), yB = H - Math.round(H * 0.10);
-        const d = `path('M ${tlx} ${yT} `
-            + `Q ${Math.round(W / 2)} ${yT + bow} ${trx} ${yT} `   // top edge arcs down
-            + `L ${brx} ${yB} `                                     // right side (straight)
-            + `Q ${Math.round(W / 2)} ${yB + bow} ${blx} ${yB} `   // bottom edge arcs down
-            + `Z')`;                                                // left side (straight)
+        const bow = Math.round(H * 0.15);
+        const yT = Math.round(H * 0.10), yB = H - bow - Math.round(H * 0.06);
+        const cx = Math.round(W / 2), cr = 18;
+        const Lr = Math.hypot(brx - trx, yB - yT) || 1, ux = (brx - trx) / Lr, uy = (yB - yT) / Lr;
+        const Ll = Math.hypot(blx - tlx, yB - yT) || 1, lx = (blx - tlx) / Ll, ly = (yB - yT) / Ll;
+        const r = (n) => Math.round(n);
+        const d = `path('M ${r(tlx + cr)} ${yT} `
+            + `Q ${cx} ${yT + bow} ${r(trx - cr)} ${yT} `              // top edge (arc)
+            + `Q ${trx} ${yT} ${r(trx + cr * ux)} ${r(yT + cr * uy)} ` // round TR
+            + `L ${r(brx - cr * ux)} ${r(yB - cr * uy)} `              // right side
+            + `Q ${brx} ${yB} ${r(brx - cr)} ${yB} `                   // round BR
+            + `Q ${cx} ${yB + bow} ${r(blx + cr)} ${yB} `             // bottom edge (arc)
+            + `Q ${blx} ${yB} ${r(blx - cr * lx)} ${r(yB - cr * ly)} ` // round BL
+            + `L ${r(tlx + cr * lx)} ${r(yT + cr * ly)} `              // left side
+            + `Q ${tlx} ${yT} ${r(tlx + cr)} ${yT} Z')`;              // round TL
         bar.style.clipPath = d;
         bar.style.webkitClipPath = d;
     });
@@ -365,30 +372,42 @@ function buildMarquees() {
     renderVaseCaps();
 }
 
-// Decorative mouth (top) and base (bottom) caps for the vase.
+// Decorative mouth (top) and base (bottom) caps for the vase (not clickable).
 function renderVaseCaps() {
     const nav = document.querySelector('.menu-bars');
     if (!nav) return;
     nav.querySelectorAll('.vase-cap').forEach(c => c.remove());
     const W = nav.clientWidth;
     if (!W) return;
-    const make = (cls, wf, h) => {
+    const block = (cls, wf, h) => {
         const el = document.createElement('div');
         el.className = 'vase-cap ' + cls;
         el.style.height = h + 'px';
         const Wc = Math.round(wf * W);
         const left = Math.round((W - Wc) / 2), right = W - left;
-        const r = Math.min(Math.round(h * 0.5), 22);
+        const r = 8;
         const d = `path('M ${left + r} 0 L ${right - r} 0 Q ${right} 0 ${right} ${r} `
             + `L ${right} ${h - r} Q ${right} ${h} ${right - r} ${h} `
             + `L ${left + r} ${h} Q ${left} ${h} ${left} ${h - r} `
             + `L ${left} ${r} Q ${left} 0 ${left + r} 0 Z')`;
-        el.style.clipPath = d;
-        el.style.webkitClipPath = d;
+        el.style.clipPath = d; el.style.webkitClipPath = d;
         return el;
     };
-    nav.insertBefore(make('vase-cap--mouth', 0.16, 30), nav.firstChild);
-    nav.appendChild(make('vase-cap--base', 0.22, 38));
+    const foot = (cls, wf, h) => {
+        const el = document.createElement('div');
+        el.className = 'vase-cap ' + cls;
+        el.style.height = h + 'px';
+        const Wc = Math.round(wf * W);
+        const left = Math.round((W - Wc) / 2), right = W - left;
+        const r = 8, sy = Math.round(h * 0.5);
+        const d = `path('M ${left + r} 0 L ${right - r} 0 Q ${right} 0 ${right} ${r} `
+            + `L ${right} ${sy} Q ${Math.round(W / 2)} ${h} ${left} ${sy} `
+            + `L ${left} ${r} Q ${left} 0 ${left + r} 0 Z')`;
+        el.style.clipPath = d; el.style.webkitClipPath = d;
+        return el;
+    };
+    nav.insertBefore(block('vase-cap--mouth', 0.13, 26), nav.firstChild);
+    nav.appendChild(foot('vase-cap--base', 0.24, 36));
 }
 
 // ===== Gallery auto-loader =====
@@ -486,6 +505,22 @@ function closeLightbox() {
     if (lb) { lb.classList.remove('open'); document.body.classList.remove('modal-open'); }
 }
 
+// ===== Back-to-top button =====
+function renderBackToTop() {
+    if (document.getElementById('to-top')) return;
+    const btn = document.createElement('button');
+    btn.id = 'to-top';
+    btn.className = 'to-top';
+    btn.type = 'button';
+    btn.setAttribute('aria-label', 'Back to top');
+    btn.textContent = '↑';
+    btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    document.body.appendChild(btn);
+    const onScroll = () => btn.classList.toggle('show', window.scrollY > 400);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+}
+
 // ===== Init =====
 function init() {
     renderWatermark();
@@ -493,6 +528,7 @@ function init() {
     renderBookingModal();
     renderAnnouncement();
     renderFooter();
+    renderBackToTop();
     applyLanguage(currentLanguage);
     buildMarquees();
     document.querySelectorAll('.image-grid[data-images]').forEach(loadGallery);
