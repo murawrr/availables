@@ -351,8 +351,8 @@ function buildMarquees() {
         const wB = Math.max(120, vaseProfile(pB) * W);
         const tlx = Math.round((W - wT) / 2), trx = W - tlx;
         const blx = Math.round((W - wB) / 2), brx = W - blx;
-        const bow = Math.round(H * 0.24);
-        const yT = Math.round(H * 0.05), yB = H - bow - Math.round(H * 0.05);
+        const bow = Math.round(H * 0.09);          // gentle arc (was a heavy sag)
+        const yT = Math.round(H * 0.16), yB = H - Math.round(H * 0.10);
         const d = `path('M ${tlx} ${yT} `
             + `Q ${Math.round(W / 2)} ${yT + bow} ${trx} ${yT} `   // top edge arcs down
             + `L ${brx} ${yB} `                                     // right side (straight)

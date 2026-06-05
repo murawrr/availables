@@ -424,7 +424,7 @@ body.lang-ko .lang-only-en { display: none; }
 /* ===== Vase mouth / base caps ===== */
 .vase-cap {
     width: 100%;
-    background: var(--text);
+    background: var(--greyish-azure); /* same as the vase body */
 }
 
 /* ===== Lightbox (tap a design to zoom) ===== */
