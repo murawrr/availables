@@ -388,11 +388,10 @@ body.lang-ko .lang-only-en { display: none; }
 .bar-bg-track {
     display: flex;
     height: 100%;
-    width: max-content;
+    /* width set in JS (slides × bar width) */
 }
 .bar-slide {
-    flex: 0 0 100%;
-    width: 100%;
+    flex: 0 0 auto;
     height: 100%;
     background-size: cover;
     background-position: center;
@@ -405,8 +404,8 @@ body.lang-ko .lang-only-en { display: none; }
     z-index: 1;
     pointer-events: none;
     background:
-        linear-gradient(rgba(28, 30, 36, 0.42), rgba(28, 30, 36, 0.42)),
-        color-mix(in srgb, var(--accent, #575b64) 55%, transparent);
+        linear-gradient(rgba(28, 30, 36, 0.30), rgba(28, 30, 36, 0.30)),
+        color-mix(in srgb, var(--accent, #575b64) 40%, transparent);
 }
 
 @keyframes slideText {
