@@ -347,20 +347,64 @@ const SLIDE_COUNT = 6;     // images per bar
 
 // Keep timers so a rebuild (resize / language switch) doesn't stack them up.
 let slideTimers = [];
+// Bumped on every rebuild so stale async folder probes don't add slideshows.
+let buildGen = 0;
+// folder -> array of found image srcs (avoids re-probing on resize).
+const slideCache = {};
 
-function buildBarSlideshow(menuText, barIndex, W) {
-    const pool = SLIDESHOW_IMAGES;
-    if (!pool.length || !W) return;
+// Probe a bar's own folder for 01.png, 02.png ... (common extensions),
+// stopping at the first number with no file. Calls cb with the list (possibly
+// empty). Results are cached.
+function probeSlideFolder(folder, cb) {
+    if (slideCache[folder]) { cb(slideCache[folder]); return; }
+    const exts = ['png', 'jpg', 'jpeg', 'webp', 'PNG', 'JPG'];
+    const found = [];
+    let i = 1;
+    const tryNum = () => {
+        const pad = String(i).padStart(2, '0');
+        let e = 0;
+        const tryExt = () => {
+            if (e >= exts.length) { slideCache[folder] = found; cb(found); return; }
+            const src = `${folder}/${pad}.${exts[e]}`;
+            const img = new Image();
+            img.onload = () => { found.push(src); i++; tryNum(); };
+            img.onerror = () => { e++; tryExt(); };
+            img.src = src;
+        };
+        tryExt();
+    };
+    tryNum();
+}
+
+function buildBarSlideshow(menuText, barIndex, W, folder) {
+    if (!W) return;
+    const gen = buildGen;
+
+    const render = (srcs) => {
+        if (gen !== buildGen) return;            // a newer rebuild superseded us
+        // Fall back to the shared pool when a bar has no folder images yet.
+        if (!srcs || !srcs.length) {
+            const pool = SLIDESHOW_IMAGES;
+            if (!pool.length) return;
+            const start = (barIndex * 7) % pool.length;
+            srcs = [];
+            for (let i = 0; i < Math.min(SLIDE_COUNT, pool.length); i++) srcs.push(pool[(start + i) % pool.length]);
+        }
+        buildSlideshowDom(menuText, barIndex, W, srcs);
+    };
+
+    if (folder) probeSlideFolder(folder, render);
+    else render(null);
+}
+
+function buildSlideshowDom(menuText, barIndex, W, imgs) {
     const bg = document.createElement('div');
     bg.className = 'bar-bg';
     const track = document.createElement('div');
     track.className = 'bar-bg-track';
     bg.appendChild(track);
 
-    const n = Math.min(SLIDE_COUNT, pool.length);
-    const startAt = (barIndex * 7) % pool.length;
-    const imgs = [];
-    for (let i = 0; i < n; i++) imgs.push(pool[(startAt + i) % pool.length]);
+    const n = imgs.length;
 
     const makeSlide = (src) => {
         const s = document.createElement('div');
@@ -397,6 +441,7 @@ function buildBarSlideshow(menuText, barIndex, W) {
 function buildMarquees() {
     slideTimers.forEach(clearInterval);
     slideTimers = [];
+    buildGen++;
 
     let index = -1;
     document.querySelectorAll('.menu-bar').forEach(bar => {
@@ -412,8 +457,8 @@ function buildMarquees() {
 
         menuText.innerHTML = '';
 
-        // Auto-sliding artwork behind the text.
-        buildBarSlideshow(menuText, index, W);
+        // Auto-sliding artwork behind the text (bar's own folder, else pool).
+        buildBarSlideshow(menuText, index, W, bar.getAttribute('data-slides'));
 
         // Seamless two-segment marquee on top.
         const track = document.createElement('div');
