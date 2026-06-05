@@ -1,5 +1,4 @@
-@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/variable/pretendardvariable-dynamic-subset.css");
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600;700&display=swap");
 
 * {
     margin: 0;
@@ -8,25 +7,23 @@
 }
 
 :root {
-    --greyish-azure: #edf2ee;
-    --mint: #9bb1a5;
-    --bg: #edf2ee;        /* site background (dark grey) */
-    --surface: #2e2e31;   /* cards / modals */
-    --field: #1c1c1e;     /* inputs / textarea */
-    --text: #ededed;      /* primary text (light) */
-    --muted: #9a9aa0;     /* secondary text */
-    --line: #edf2ee;      /* borders / separators */
-    --ink: #111111;
+    --greyish-azure: #9bb1a5; /* key colour (bars / accent) */
+    --mint: #9bb1a5;          /* accent (same key colour) */
+    --bg: #edf2ee;            /* page background */
+    --surface: #ffffff;       /* cards / modals */
+    --field: #ffffff;         /* inputs / textarea */
+    --text: #2d362f;          /* primary text (dark) */
+    --muted: #6f7b74;         /* secondary text */
+    --line: #cdd6d0;          /* borders / separators */
+    --ink: #2d362f;
     --white: #FFFFFF;
 }
 
-/* ===== Typography =====
-   Pretendard (free, loaded above) for KR + Latin, Light weight. The paid
-   fonts are listed first so they render on machines that have them installed. */
+/* ===== Typography (serif, Noto Serif KR covers Latin + Korean) ===== */
 body {
-    font-family: 'Söhne', 'ABC Diatype', 'GT Sectra', 'Tiempos', 'Pretendard Variable', Pretendard, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Noto Serif KR', Georgia, 'Times New Roman', serif;
     font-size: 16px;
-    font-weight: 300;
+    font-weight: 600;
     line-height: 1.5;
     color: var(--text);
     background-color: var(--bg);
@@ -130,7 +127,7 @@ a { color: inherit; }
 .menu-bar {
     display: block;
     background-color: var(--greyish-azure);
-    color: var(--mint);
+    color: var(--text);
     text-decoration: none;
     overflow: hidden;
 }
@@ -139,11 +136,11 @@ a { color: inherit; }
 .menu-bar--half .menu-text { height: 4rem; }
 .menu-bar--half .marquee-word { font-size: 2.6rem; padding-right: 9rem; }
 
-/* Notice bar: white text */
-.menu-bar--notice { color: #fff; }
+/* Notice bar */
+.menu-bar--notice { color: var(--text); }
 
-/* mini-tattoos: reversed colours (mint bar, azure text) */
-.menu-bar--invert { background-color: var(--mint); color: var(--greyish-azure); }
+/* mini-tattoos: reversed (dark bar, key-colour text) */
+.menu-bar--invert { background-color: var(--text); color: var(--mint); }
 
 /* ===== Site watermark (hand-drawn logo, pinned to the right edge, over content) ===== */
 .site-watermark {
@@ -340,7 +337,7 @@ body.lang-ko .lang-only-en { display: none; }
     display: inline-block;
     white-space: nowrap;
     font-size: 7rem;
-    font-weight: 300; /* thinner menu text */
+    font-weight: 600; /* thicker menu text */
     letter-spacing: 1px;
     line-height: 1;
     padding-right: 15rem; /* gap between repeated words (uniform = seamless seam) */
@@ -481,10 +478,10 @@ body.lang-ko .lang-only-en { display: none; }
 .work-num { color: var(--muted); }
 .work-title {
     color: var(--text);
-    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-family: inherit;
     font-size: 1.7rem;
-    font-weight: 500;
-    line-height: 1.1;
+    font-weight: 600;
+    line-height: 1.2;
 }
 .work-card:hover .work-title { opacity: 0.55; }
 
@@ -641,9 +638,9 @@ body.lang-ko .contact-btn.ig { order: 2; }
 }
 
 .success-message {
-    background-color: #1e3a26;
+    background-color: #dcefe2;
     border: 1px solid #2e7d32;
-    color: #c7f0d0;
+    color: #1e5631;
     padding: 1rem 1.5rem;
     font-weight: 600;
 }
@@ -651,9 +648,9 @@ body.lang-ko .contact-btn.ig { order: 2; }
 .success-message p { margin: 0; }
 
 .error-message {
-    background-color: #3a1f23;
+    background-color: #f7dada;
     border: 1px solid #dc3545;
-    color: #f3c0c5;
+    color: #8a1f28;
     padding: 1rem 1.5rem;
     font-weight: 600;
 }
@@ -714,7 +711,7 @@ body.lang-ko .contact-btn.ig { order: 2; }
 
 [data-fs-error] {
     font-size: 0.85rem;
-    color: #f3818c;
+    color: #c0392b;
     margin-top: 0.5rem;
     display: block;
     min-height: 1.2rem;

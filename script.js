@@ -307,6 +307,7 @@ function buildMarquees() {
         if (bar.offsetParent === null) { mt.innerHTML = ''; bar.style.clipPath = ''; bar.style.webkitClipPath = ''; return; }
         visible.push(bar);
     });
+    const N = visible.length || 1;
 
     visible.forEach((bar, index) => {
         const label = bar.getAttribute('data-' + currentLanguage) || bar.getAttribute('data-en') || '';
@@ -341,9 +342,14 @@ function buildMarquees() {
         const segWidth = seg1.getBoundingClientRect().width;
         if (segWidth > 0) track.style.animationDuration = (segWidth / MARQUEE_SPEED) + 's';
 
-        // Curve the bar into a barrel (convex top & bottom); the text is clipped to it.
-        const s = Math.min(Math.round(H * 0.22), 24);
-        const d = `path('M 0 ${s} Q ${W / 2} 0 ${W} ${s} L ${W} ${H - s} Q ${W / 2} ${H} 0 ${H - s} Z')`;
+        // Vase silhouette: a centred block whose WIDTH follows the maebyeong
+        // profile, with gently curved top & bottom edges (subtle 3D).
+        const p = (index + 0.5) / N;
+        const Wbar = Math.max(140, Math.round(vaseProfile(p) * W));
+        const left = Math.round((W - Wbar) / 2), right = W - left;
+        const yT = Math.round(H * 0.12), yB = H - yT;
+        const bow = Math.round(Math.min(H * 0.12, 16));
+        const d = `path('M ${left} ${yT} Q ${W / 2} ${yT - bow} ${right} ${yT} L ${right} ${yB} Q ${W / 2} ${yB + bow} ${left} ${yB} Z')`;
         bar.style.clipPath = d;
         bar.style.webkitClipPath = d;
     });
