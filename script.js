@@ -115,12 +115,11 @@ function renderHeader() {
     mount.className = 'site-header';
     mount.innerHTML = `
         <div class="header-left">
-            <button type="button" class="header-action" onclick="openBooking()" data-en="book or enquire" data-ko="예약 혹은 문의">book or enquire</button>
-        </div>
-        <div class="header-center">
             <a href="index.html" class="site-name">mura</a>
         </div>
-        <div class="header-right"></div>`;
+        <div class="header-right">
+            <button type="button" class="header-action" onclick="openBooking()" data-en="book or enquire" data-ko="예약 혹은 문의">book or enquire</button>
+        </div>`;
 }
 
 // ===== Booking modal =====
@@ -214,12 +213,13 @@ function renderAnnouncement() {
 
 function openAnnounce() {
     const m = document.getElementById('announce-modal');
-    if (m) { m.classList.add('open'); document.body.classList.add('modal-open'); }
+    if (m) { m.classList.add('open'); document.body.classList.add('modal-open'); document.body.classList.add('announce-open'); }
 }
 
 function closeAnnounce() {
     const m = document.getElementById('announce-modal');
     if (m) { m.classList.remove('open'); document.body.classList.remove('modal-open'); }
+    document.body.classList.remove('announce-open');
     sessionStorage.setItem('announceSeen', '1');
 }
 
@@ -233,9 +233,7 @@ function renderFooter() {
     footer.innerHTML = `
         <p class="footer-line">
             <span data-en="mura © 2026" data-ko="무라 © 2026">mura © 2026</span>
-            <span class="footer-sep">·</span>
             <a href="mailto:${EMAIL}">${EMAIL}</a>
-            <span class="footer-sep">·</span>
             <button class="lang-switch" onclick="setLanguageHome('${other}')">${switchLabel}</button>
         </p>
         <p class="footer-rights" data-en="All works © mura. Please do not reproduce, repost, or use for AI / ML training without permission." data-ko="모든 작품의 저작권은 mura에 있습니다. 허가 없이 복제, 재게시, AI 학습에 사용하지 마세요.">All works © mura. Please do not reproduce, repost, or use for AI / ML training without permission.</p>`;
@@ -305,7 +303,7 @@ const MARQUEE_OFFSETS = [-15, -180, -90, -260, -45, -200, -120, -310];
 // Vase silhouette: SYMMETRIC about the middle line — narrow at top & base,
 // widest in the centre. Width fraction (0..1) from top (0) to base (1).
 function vaseProfile(p) {
-    const pts = [[0, 1.0], [0.28, 0.97], [0.5, 0.78], [0.72, 0.56], [1, 0.44]];
+    const pts = [[0, 1.0], [0.40, 0.95], [0.60, 0.58], [0.80, 0.49], [1, 0.45]];
     for (let k = 0; k < pts.length - 1; k++) {
         const a = pts[k], b = pts[k + 1];
         if (p <= b[0]) { const f = (p - a[0]) / (b[0] - a[0]); return a[1] + (b[1] - a[1]) * f; }
@@ -364,9 +362,9 @@ function buildMarquees() {
         const wB = Math.max(120, vaseProfile(pB) * W);
         const tlx = Math.round((W - wT) / 2), trx = W - tlx;
         const blx = Math.round((W - wB) / 2), brx = W - blx;
-        const bow = Math.round(H * 0.24);
-        const yT = Math.round(H * 0.10), yB = H - bow - Math.round(H * 0.06);
-        const cx = Math.round(W / 2), cr = 18;
+        const bow = Math.round(H * 0.44);
+        const yT = Math.round(H * 0.04), yB = H - bow - Math.round(H * 0.04);
+        const cx = Math.round(W / 2), cr = 8;
         const Lr = Math.hypot(brx - trx, yB - yT) || 1, ux = (brx - trx) / Lr, uy = (yB - yT) / Lr;
         const Ll = Math.hypot(blx - tlx, yB - yT) || 1, lx = (blx - tlx) / Ll, ly = (yB - yT) / Ll;
         const r = (n) => Math.round(n);
@@ -409,7 +407,7 @@ function renderVaseCaps() {
         return el;
     };
     nav.insertBefore(cap('vase-cap--mouth', 0.22, 0.14, 30), nav.firstChild); // flared lip
-    nav.appendChild(cap('vase-cap--base', 0.14, 0.26, 34));                   // flared foot
+    nav.appendChild(cap('vase-cap--base', 0.14, 0.26, 54));                   // flared foot
 }
 
 // ===== Gallery auto-loader =====
