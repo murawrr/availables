@@ -143,8 +143,9 @@ a { color: inherit; }
 /* Notice bar */
 .menu-bar--notice { color: var(--text); }
 
-/* mini-tattoos: reversed (dark bar, key-colour text) */
-.menu-bar--invert { background-color: var(--text); color: var(--mint); }
+/* All strips share the key colour now — the vase comes from the reversed
+   overlay, not from a single inverted bar. */
+.menu-bar--invert { background-color: var(--greyish-azure); color: var(--text); }
 
 /* ===== Site watermark (hand-drawn logo, pinned to the right edge, over content) ===== */
 .site-watermark {
@@ -316,10 +317,24 @@ body.lang-ko .lang-only-en { display: none; }
 .notice-price { margin-top: 0.7rem; font-weight: 600; }
 
 .menu-text {
+    position: relative;
     display: flex;
     align-items: center;
     height: 13rem;
     overflow: hidden;
+}
+
+/* Reversed overlay: the maebyeong appears as inverted negative space. The same
+   marquee runs underneath; inside this clipped layer the colours flip. */
+.vase-layer {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background: var(--text);
+    color: #e9efea;
+    pointer-events: none;
 }
 
 .marquee {
@@ -329,8 +344,7 @@ body.lang-ko .lang-only-en { display: none; }
     animation: slideText 20s linear infinite;
 }
 
-.menu-bar { transition: opacity 0.2s ease; }
-.menu-bar:hover .bar-svg { opacity: 0.55; }
+.menu-bar:hover .marquee { animation-play-state: paused; }
 
 .marquee-seg {
     display: flex;
