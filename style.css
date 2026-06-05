@@ -351,6 +351,10 @@ body.lang-ko .lang-only-en { display: none; }
     to   { transform: translateX(-50%); }
 }
 
+/* Curved SVG bars (rendered by buildMarquees) */
+.bar-svg { display: block; }
+.bar-svg text { font-family: inherit; letter-spacing: 1px; }
+
 /* ===== Subpage project layout ===== */
 .container {
     max-width: 1100px;

@@ -288,46 +288,109 @@ const MARQUEE_SPEED = 90; // px per second
 // Per-bar horizontal start offset (px) so the bars don't all line up.
 const MARQUEE_OFFSETS = [-15, -180, -90, -260, -45, -200, -120, -310];
 
+const CURVE_AMP = 0.34;   // max curve as a fraction of bar height (at the shoulder)
+const CURVE_MIN = 0.05;   // min curve (mouth / base)
+
+let curveBars = [];   // { textPath, unit, phase, speed }
+let curveRAF = false;
+let curveLast = 0;
+
+function escapeXml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// Celadon maebyeong silhouette: width fraction (0..1) from top (0) to base (1).
+function vaseProfile(p) {
+    const pts = [[0, 0.16], [0.10, 0.58], [0.22, 1.0], [0.40, 0.86], [0.60, 0.64], [0.80, 0.50], [1, 0.46]];
+    for (let k = 0; k < pts.length - 1; k++) {
+        const a = pts[k], b = pts[k + 1];
+        if (p <= b[0]) { const f = (p - a[0]) / (b[0] - a[0]); return a[1] + (b[1] - a[1]) * f; }
+    }
+    return pts[pts.length - 1][1];
+}
+
 function buildMarquees() {
-    document.querySelectorAll('.menu-bar').forEach((bar, index) => {
+    curveBars = [];
+    const root = getComputedStyle(document.documentElement);
+    const AZURE = (root.getPropertyValue('--greyish-azure').trim()) || '#575b64';
+    const MINT = (root.getPropertyValue('--mint').trim()) || '#CAFCE1';
+
+    // Only the bars currently shown (Waitlist is hidden in Korean).
+    const visible = [];
+    document.querySelectorAll('.menu-bar').forEach(bar => {
+        const mt = bar.querySelector('.menu-text');
+        if (!mt) return;
+        if (bar.offsetParent === null) { mt.innerHTML = ''; return; }
+        visible.push(bar);
+    });
+    const N = visible.length || 1;
+
+    visible.forEach((bar, index) => {
         const label = bar.getAttribute('data-' + currentLanguage) || bar.getAttribute('data-en') || '';
         const menuText = bar.querySelector('.menu-text');
-        if (!menuText) return;
+        const W = Math.round(menuText.clientWidth);
+        const H = Math.round(menuText.clientHeight);
+        if (!W || !H) return;
 
-        // Skip bars hidden for the current language (e.g. Waitlist in Korean).
-        if (bar.offsetParent === null) { menuText.innerHTML = ''; return; }
+        // Colours per bar variant (read from classes so it survives re-builds).
+        let band = AZURE, txt = MINT;
+        if (bar.classList.contains('menu-bar--invert')) { band = MINT; txt = AZURE; }
+        if (bar.classList.contains('menu-bar--notice')) { txt = '#ffffff'; }
+        bar.style.backgroundColor = 'transparent'; // the SVG band is the bar now
 
-        const makeSegment = () => {
-            const seg = document.createElement('span');
-            seg.className = 'marquee-seg';
-            for (let i = 0; i < 8; i++) {
-                const word = document.createElement('span');
-                word.className = 'marquee-word';
-                word.textContent = label;
-                seg.appendChild(word);
-            }
-            return seg;
-        };
+        // Curve amount echoes the vase: bulge most at the shoulder, flat at mouth/base.
+        const p = (index + 0.5) / N;
+        const amp = H * Math.max(CURVE_MIN, CURVE_AMP * vaseProfile(p));
+        const baseY = H / 2;
+        const ext = W;
+        const d = `M ${-ext} ${baseY} Q ${W / 2} ${baseY - amp * 2} ${W + ext} ${baseY}`;
+        const thick = Math.max(10, H - amp * 2 - 6);
+        const fontSize = Math.round(thick * 0.8);
 
-        const track = document.createElement('div');
-        track.className = 'marquee';
-        // Stagger the starting text position (not the animation timing).
-        track.style.marginLeft = (MARQUEE_OFFSETS[index % MARQUEE_OFFSETS.length]) + 'px';
-        const seg1 = makeSegment();
-        const seg2 = makeSegment();
-        seg2.setAttribute('aria-hidden', 'true');
-        track.appendChild(seg1);
-        track.appendChild(seg2);
+        const gap = '     ';
+        const unitText = label + gap;
+        const approxUnit = Math.max(1, fontSize * 0.62 * unitText.length);
+        const repeats = Math.max(4, Math.ceil((W + 2 * ext) * 1.2 / approxUnit) + 2);
+        const fullText = escapeXml(unitText.repeat(repeats));
 
-        menuText.innerHTML = '';
-        menuText.appendChild(track);
+        const pid = 'curve-' + index + '-' + Math.random().toString(36).slice(2, 7);
+        menuText.innerHTML =
+            `<svg class="bar-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">` +
+                `<path id="${pid}" d="${d}" fill="none" stroke="${band}" stroke-width="${thick}" stroke-linecap="round"/>` +
+                `<text fill="${txt}" font-size="${fontSize}" font-weight="300" letter-spacing="1">` +
+                    `<textPath href="#${pid}" xlink:href="#${pid}" startOffset="0">${fullText}</textPath>` +
+                `</text>` +
+            `</svg>`;
 
-        // Constant speed regardless of word length: duration scales with width.
-        const segWidth = seg1.getBoundingClientRect().width;
-        if (segWidth > 0) {
-            track.style.animationDuration = (segWidth / MARQUEE_SPEED) + 's';
-        }
+        const textPath = menuText.querySelector('textPath');
+        const textEl = menuText.querySelector('text');
+        let unit = approxUnit;
+        try { const t = textEl.getComputedTextLength(); if (t > 0) unit = t / repeats; } catch (e) {}
+
+        curveBars.push({
+            textPath,
+            unit,
+            phase: MARQUEE_OFFSETS[index % MARQUEE_OFFSETS.length] || 0,
+            speed: MARQUEE_SPEED
+        });
     });
+
+    if (curveBars.length && !curveRAF) {
+        curveRAF = true;
+        curveLast = performance.now();
+        requestAnimationFrame(curveFrame);
+    }
+}
+
+function curveFrame(ts) {
+    const dt = Math.min(0.05, (ts - curveLast) / 1000) || 0;
+    curveLast = ts;
+    for (const b of curveBars) {
+        b.phase += b.speed * dt;
+        let off = b.unit > 0 ? ((b.phase % b.unit) + b.unit) % b.unit : 0;
+        b.textPath.setAttribute('startOffset', off.toFixed(1));
+    }
+    requestAnimationFrame(curveFrame);
 }
 
 // ===== Gallery auto-loader =====
