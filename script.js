@@ -300,148 +300,8 @@ const MARQUEE_SPEED = 90; // px per second
 // Per-bar horizontal start offset (px) so the bars don't all line up.
 const MARQUEE_OFFSETS = [-15, -180, -90, -260, -45, -200, -120, -310];
 
-// ===== Background image slideshow (auto-sliding behind each bar) =====
-// Shared pool of artwork; each bar slides through its own slice of it.
-const SLIDESHOW_IMAGES = [
-    'images/archives/01.png',
-    'images/episodes/episode-1/01.png',
-    'images/episodes/episode-1/02.png',
-    'images/episodes/episode-1/03.png',
-    'images/episodes/episode-1/04.png',
-    'images/episodes/episode-1/05.png',
-    'images/episodes/episode-1/06.png',
-    'images/episodes/episode-2/01.png',
-    'images/episodes/episode-2/02.png',
-    'images/episodes/episode-2/03.png',
-    'images/episodes/episode-2/04.png',
-    'images/episodes/episode-2/05.png',
-    'images/episodes/episode-2/06.png',
-    'images/episodes/episode-2/07.png',
-    'images/episodes/episode-2/08.png',
-    'images/episodes/episode-2/09.png',
-    'images/episodes/episode-2/10.png',
-    'images/episodes/episode-2/11.png',
-    'images/episodes/episode-2/12.png',
-    'images/episodes/episode-2/13.png',
-    'images/episodes/episode-2/14.png',
-    'images/episodes/episode-2/15.png',
-    'images/episodes/episode-2/16.png',
-    'images/mura-types/mura-type-01/01.png',
-    'images/mura-types/mura-type-01/02.png',
-    'images/mura-types/mura-type-01/03.png',
-    'images/mura-types/mura-type-01/04.png',
-    'images/mura-types/mura-type-01/05.png',
-    'images/mura-types/mura-type-01/06.png',
-    'images/mura-types/mura-type-01/07.png',
-    'images/mura-types/mura-type-01/08.png',
-    'images/mura-types/mura-type-01/09.png',
-    'images/mura-types/mura-type-02/01.png',
-    'images/mura-types/mura-type-03/01.png',
-    'images/mura-types/mura-type-04/01.png',
-    'images/mura-types/mura-type-04/02.png',
-    'images/mura-types/mura-type-04/03.png'
-];
-
-const SLIDE_PERIOD = 4200; // ms each image is shown
-const SLIDE_COUNT = 6;     // images per bar
-
-// Keep timers so a rebuild (resize / language switch) doesn't stack them up.
-let slideTimers = [];
-// Bumped on every rebuild so stale async folder probes don't add slideshows.
-let buildGen = 0;
-// folder -> array of found image srcs (avoids re-probing on resize).
-const slideCache = {};
-
-// Probe a bar's own folder for 01.png, 02.png ... (common extensions),
-// stopping at the first number with no file. Calls cb with the list (possibly
-// empty). Results are cached.
-function probeSlideFolder(folder, cb) {
-    if (slideCache[folder]) { cb(slideCache[folder]); return; }
-    const exts = ['png', 'jpg', 'jpeg', 'webp', 'PNG', 'JPG'];
-    const found = [];
-    let i = 1;
-    const tryNum = () => {
-        const pad = String(i).padStart(2, '0');
-        let e = 0;
-        const tryExt = () => {
-            if (e >= exts.length) { slideCache[folder] = found; cb(found); return; }
-            const src = `${folder}/${pad}.${exts[e]}`;
-            const img = new Image();
-            img.onload = () => { found.push(src); i++; tryNum(); };
-            img.onerror = () => { e++; tryExt(); };
-            img.src = src;
-        };
-        tryExt();
-    };
-    tryNum();
-}
-
-// ONE shared slideshow behind the whole menu. The bars are transparent windows
-// onto it (each tinted with its accent), so every bar shares the same image and
-// only a single set of photos is ever loaded.
-function buildMenuBackground() {
-    const nav = document.querySelector('.menu-bars');
-    if (!nav) return;
-    const old = nav.querySelector('.menu-bg');
-    if (old) old.remove();
-
-    const W = Math.round(nav.clientWidth);
-    if (!W) return;
-    const gen = buildGen;
-
-    const render = (srcs) => {
-        if (gen !== buildGen) return; // a newer rebuild superseded us
-        if (!srcs || !srcs.length) srcs = SLIDESHOW_IMAGES.slice(0, SLIDE_COUNT);
-        if (!srcs.length) return;
-
-        const bg = document.createElement('div');
-        bg.className = 'menu-bg';
-        const track = document.createElement('div');
-        track.className = 'menu-bg-track';
-        bg.appendChild(track);
-
-        const n = srcs.length;
-        const makeSlide = (src) => {
-            const s = document.createElement('div');
-            s.className = 'menu-bg-slide';
-            s.style.width = W + 'px';
-            s.style.backgroundImage = `url("${src}")`;
-            return s;
-        };
-        srcs.forEach(src => track.appendChild(makeSlide(src)));
-        track.appendChild(makeSlide(srcs[0])); // clone for a seamless wrap
-        track.style.width = ((n + 1) * W) + 'px';
-        nav.insertBefore(bg, nav.firstChild);
-
-        if (n < 2) return; // nothing to animate
-        let idx = 0;
-        const advance = () => {
-            idx++;
-            track.style.transition = 'transform 1s ease';
-            track.style.transform = `translateX(${-idx * W}px)`;
-            if (idx === n) {
-                setTimeout(() => {
-                    track.style.transition = 'none';
-                    idx = 0;
-                    track.style.transform = 'translateX(0)';
-                }, 1020);
-            }
-        };
-        slideTimers.push(setInterval(advance, SLIDE_PERIOD));
-    };
-
-    probeSlideFolder('images/home', render);
-}
-
-// ===== Looping menu marquee (text over the slideshow) =====
+// ===== Looping menu marquee =====
 function buildMarquees() {
-    slideTimers.forEach(clearInterval);
-    slideTimers = [];
-    buildGen++;
-
-    // One shared image slideshow behind every bar.
-    buildMenuBackground();
-
     let index = -1;
     document.querySelectorAll('.menu-bar').forEach(bar => {
         const menuText = bar.querySelector('.menu-text');
@@ -456,7 +316,7 @@ function buildMarquees() {
 
         menuText.innerHTML = '';
 
-        // Seamless two-segment marquee on top of the shared background.
+        // Seamless two-segment marquee.
         const track = document.createElement('div');
         track.className = 'marquee';
         track.style.marginLeft = offset + 'px';
