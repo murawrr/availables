@@ -365,11 +365,13 @@ function buildBarSlideshow(menuText, barIndex, W) {
     const makeSlide = (src) => {
         const s = document.createElement('div');
         s.className = 'bar-slide';
+        s.style.width = W + 'px';
         s.style.backgroundImage = `url("${src}")`;
         return s;
     };
     imgs.forEach(src => track.appendChild(makeSlide(src)));
     track.appendChild(makeSlide(imgs[0])); // clone for a seamless wrap
+    track.style.width = ((n + 1) * W) + 'px';
 
     menuText.insertBefore(bg, menuText.firstChild);
 
