@@ -9,8 +9,8 @@
 
 :root {
     --greyish-azure: #575b64;
-    --mint: #CAFCE1;
-    --bg: #242426;        /* site background (dark grey) */
+    --mint: #9bb1a5;
+    --bg: #edf2ee;        /* site background (dark grey) */
     --surface: #2e2e31;   /* cards / modals */
     --field: #1c1c1e;     /* inputs / textarea */
     --text: #ededed;      /* primary text (light) */
