@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;700;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap");
 
 * {
     margin: 0;
@@ -20,9 +20,10 @@
     --header: #4a4f59;        /* dark header bar */
 }
 
-/* ===== Typography (serif, Noto Serif KR covers Latin + Korean) ===== */
+/* ===== Typography (heavy neo-grotesque; Helvetica where present, Inter as the
+   consistent web fallback, Noto Sans KR for Korean) ===== */
 body {
-    font-family: 'Noto Serif KR', Georgia, 'Times New Roman', serif;
+    font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, 'Noto Sans KR', sans-serif;
     font-size: 16px;
     font-weight: 600;
     line-height: 1.5;
@@ -222,7 +223,7 @@ body.lang-ko .lang-only-ko { display: block; }
 body.lang-ko .lang-only-en { display: none; }
 
 /* Opening announcement popup */
-.modal--announce { max-width: 560px; text-align: center; }
+.modal--announce { max-width: 560px; text-align: center; font-size: 0.92rem; }
 
 .announce-title { line-height: 1.25; }
 .announce-sub {
@@ -250,12 +251,13 @@ body.lang-ko .lang-only-en { display: none; }
 
 .announce-lang {
     flex: 1;
-    padding: 0.6rem 1rem;
+    padding: 0.55rem 0.7rem;
     background: var(--mint);
     color: #111;
     border: none;
     font: inherit;
     font-weight: 600;
+    white-space: nowrap; /* never wrap the button label onto a second line */
     cursor: pointer;
 }
 
@@ -818,6 +820,11 @@ body.announce-open .footer { display: none; }
     .header-left { gap: 0.35rem; }
     .header-left a { white-space: nowrap; } /* keep name + handle on one line */
 
+    /* Opening popup: smaller text + tighter padding so the buttons fit one line */
+    .modal--announce { font-size: 0.85rem; padding: 1.6rem 1.1rem; }
+    .announce-col { padding: 0 0.55rem; }
+    .announce-lang { padding: 0.5rem 0.4rem; }
+
     .marquee-word {
         font-size: 2.2rem;
         padding-right: 6rem;
@@ -871,7 +878,7 @@ body.announce-open .footer { display: none; }
 .announce-cols { display: flex; text-align: center; }
 .announce-col { flex: 1; padding: 0 1.1rem; }
 .announce-col:first-child { border-right: 1px solid var(--line); }
-.announce-h { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.4rem; }
+.announce-h { font-size: 1.05em; font-weight: 700; margin-bottom: 0.4rem; }
 .announce-col .announce-lang { width: 100%; margin-top: 1.25rem; }
 
 /* Footer language switch link */
