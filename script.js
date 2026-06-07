@@ -227,7 +227,7 @@ function closeAnnounce() {
 function renderFooter() {
     if (document.querySelector('.footer')) return;
     const other = currentLanguage === 'ko' ? 'en' : 'ko';
-    const switchLabel = currentLanguage === 'ko' ? 'switch to English' : 'switch to 한국어';
+    const switchLabel = currentLanguage === 'ko' ? 'switch to 🇬🇧' : 'switch to 🇰🇷';
     const footer = document.createElement('footer');
     footer.className = 'footer';
     footer.innerHTML = `
