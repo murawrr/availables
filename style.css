@@ -59,6 +59,20 @@ a { color: inherit; }
     min-width: 0;
 }
 
+.header-back {
+    color: #d8dce2;
+    text-decoration: none;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+.header-back:hover { opacity: 0.7; }
+
+/* Unbold all text in the header and footer */
+.site-header, .site-header *,
+.footer, .footer * { font-weight: 400; }
+
 .site-name {
     font-weight: 900;
     text-transform: uppercase;
@@ -141,8 +155,8 @@ a { color: inherit; }
 }
 
 /* Notice bar: full width, half the height of the other bars */
-.menu-bar--half .menu-text { height: 5.5rem; }
-.menu-bar--half .marquee-word { font-size: 1.7rem; padding-right: 9rem; }
+.menu-bar--half .menu-text { height: 3rem; }
+.menu-bar--half .marquee-word { font-size: 2.1rem; padding-right: 9rem; }
 
 /* Notice bar */
 .menu-bar--notice { color: var(--text); }
@@ -322,7 +336,7 @@ body.lang-ko .lang-only-en { display: none; }
     position: relative;
     display: flex;
     align-items: center;
-    height: 13rem;
+    height: 6rem;
     overflow: hidden;
 }
 
@@ -345,7 +359,7 @@ body.lang-ko .lang-only-en { display: none; }
 .marquee-word {
     display: inline-block;
     white-space: nowrap;
-    font-size: 4.6rem;
+    font-size: 5rem;
     font-weight: 900; /* heavy menu text */
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -795,13 +809,13 @@ body.announce-open .footer { display: none; }
     .header-center { gap: 0.7rem; }
 
     .marquee-word {
-        font-size: 2.8rem;
+        font-size: 3.4rem;
         padding-right: 9rem;
     }
 
-    .menu-text { height: 9.5rem; }
-    .menu-bar--half .menu-text { height: 4.2rem; }
-    .menu-bar--half .marquee-word { font-size: 1.5rem; }
+    .menu-text { height: 4.6rem; }
+    .menu-bar--half .menu-text { height: 2.6rem; }
+    .menu-bar--half .marquee-word { font-size: 1.8rem; }
 
     .image-grid { column-count: 2; }
     .image-grid--single { column-count: 1; }
@@ -826,13 +840,13 @@ body.announce-open .footer { display: none; }
     .announce-lang { padding: 0.5rem 0.4rem; }
 
     .marquee-word {
-        font-size: 2.2rem;
+        font-size: 2.6rem;
         padding-right: 6rem;
     }
 
-    .menu-text { height: 6.5rem; }
-    .menu-bar--half .menu-text { height: 3.4rem; }
-    .menu-bar--half .marquee-word { font-size: 1.3rem; }
+    .menu-text { height: 3.6rem; }
+    .menu-bar--half .menu-text { height: 2.2rem; }
+    .menu-bar--half .marquee-word { font-size: 1.5rem; }
 }
 
 /* Header right: pin 'book or enquire' to the far-right corner. */
