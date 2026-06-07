@@ -113,9 +113,14 @@ function renderHeader() {
     if (!mount) return;
 
     mount.className = 'site-header';
+    const back = mount.dataset.back;
+    const backLink = back
+        ? `<a href="${back}" class="header-back" data-en="← home" data-ko="← 홈">← home</a>`
+        : '';
     mount.innerHTML = `
         <div class="header-left">
             <a href="index.html" class="site-name">mura</a>
+            ${backLink}
         </div>
         <div class="header-right">
             <button type="button" class="header-action" onclick="openBooking()" data-en="book or enquire" data-ko="예약 혹은 문의">book or enquire</button>
