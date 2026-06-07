@@ -877,7 +877,8 @@ body.announce-open .footer { display: none; }
 /* ===== Two-column announcement (EN | KO) ===== */
 .announce-cols { display: flex; text-align: center; }
 .announce-col { flex: 1; padding: 0 1.1rem; }
-.announce-col:first-child { border-right: 1px solid var(--line); }
+.announce-col:first-child { border-right: 1px solid var(--line); text-align: right; }
+.announce-col:last-child { text-align: left; }
 .announce-h { font-size: 1.05em; font-weight: 700; margin-bottom: 0.4rem; }
 .announce-col .announce-lang { width: 100%; margin-top: 1.25rem; }
 
