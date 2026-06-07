@@ -52,22 +52,39 @@ a { color: inherit; }
 }
 
 .header-left {
-    flex: 1;
+    flex: 0 0 auto;
     display: flex;
     align-items: baseline;
     gap: 0.6rem;
     min-width: 0;
 }
 
-.header-back {
+/* Dot leader filling the gap between 'mura' and 'book or enquire'.
+   The number of dots adapts to the available width. */
+.header-dots {
+    flex: 1 1 auto;
+    align-self: center;
+    min-width: 1rem;
+    height: 0.7em;
+    margin: 0 1rem;
+    background-image: radial-gradient(currentColor 1.6px, transparent 1.9px);
+    background-size: 0.75em 0.75em;
+    background-position: left center;
+    background-repeat: repeat-x;
     color: #d8dce2;
+}
+
+/* Back-to-home row below the header (menu pages) */
+.page-back {
+    display: block;
+    padding: 0.7rem 1.25rem;
+    color: var(--header);
     text-decoration: none;
-    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    white-space: nowrap;
+    font-size: 0.9rem;
 }
-.header-back:hover { opacity: 0.7; }
+.page-back:hover { opacity: 0.6; }
 
 /* Unbold all text in the header and footer */
 .site-header, .site-header *,
@@ -163,6 +180,20 @@ a { color: inherit; }
 /* Notice bar */
 .menu-bar--notice { color: var(--text); }
 
+/* ===== Dark-bar variant (solid dark fill) ===== */
+.menu-bars--dark { border-top: none; }
+.menu-bars--dark .menu-bar {
+    background: var(--header);
+    border-bottom: 2px solid var(--bg);
+}
+.menu-bars--dark .menu-bar:last-child { border-bottom: none; }
+
+/* ===== Triple-size menu type (main page) ===== */
+.menu-bars--home .menu-text { height: 18rem; }
+.menu-bars--home .marquee-word { font-size: 15rem; }
+.menu-bars--home .menu-bar--half .menu-text { height: 9rem; }
+.menu-bars--home .menu-bar--half .marquee-word { font-size: 6.3rem; }
+
 
 /* ===== Site watermark (hand-drawn logo, pinned to the right edge, over content) ===== */
 /* On the menu pages, fill the page so the watermark sits in the gap
@@ -178,13 +209,14 @@ body:has(.menu-bars) {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2.5rem 1rem 5.5rem; /* bottom padding clears the fixed footer */
-    opacity: 0.9;
+    padding: 2.5rem 1.5rem 5.5rem; /* side padding + bottom clears the fixed footer */
+    opacity: 0.5;
     pointer-events: none;
 }
 
 .site-watermark img {
-    width: min(55vw, 260px);
+    width: 100%;               /* fit the screen width (within the padding) */
+    max-width: 100%;
     height: auto;
     display: block;
     -webkit-user-drag: none;
@@ -310,7 +342,7 @@ body.lang-ko .lang-only-en { display: none; }
 
 .notice-heading::after {
     content: "+";
-    font-size: 0.45em;
+    font-size: 0.9em; /* close to the heading text size */
     font-weight: 300;
     color: var(--muted);
     flex: none;
@@ -320,6 +352,9 @@ body.lang-ko .lang-only-en { display: none; }
 
 .notice-section ul,
 .notice-section > p { margin-bottom: 1.5rem; }
+
+/* Extra breathing room beneath an expanded notice article */
+.notice-section[open] { padding-bottom: 1.5rem; }
 
 .notice ul { list-style: none; padding: 0; margin: 0; }
 
@@ -825,6 +860,12 @@ body.announce-open .footer { display: none; }
     .menu-bar--half .menu-text { height: 2.6rem; }
     .menu-bar--half .marquee-word { font-size: 1.8rem; }
 
+    /* main page: triple */
+    .menu-bars--home .menu-text { height: 13.8rem; }
+    .menu-bars--home .marquee-word { font-size: 10.2rem; }
+    .menu-bars--home .menu-bar--half .menu-text { height: 7.8rem; }
+    .menu-bars--home .menu-bar--half .marquee-word { font-size: 5.4rem; }
+
     .image-grid { column-count: 2; }
     .image-grid--single { column-count: 1; }
     .work-grid { grid-template-columns: 1fr; }
@@ -855,11 +896,17 @@ body.announce-open .footer { display: none; }
     .menu-text { height: 3.6rem; }
     .menu-bar--half .menu-text { height: 2.2rem; }
     .menu-bar--half .marquee-word { font-size: 1.5rem; }
+
+    /* main page: triple */
+    .menu-bars--home .menu-text { height: 10.8rem; }
+    .menu-bars--home .marquee-word { font-size: 7.8rem; }
+    .menu-bars--home .menu-bar--half .menu-text { height: 6.6rem; }
+    .menu-bars--home .menu-bar--half .marquee-word { font-size: 4.5rem; }
 }
 
 /* Header right: pin 'book or enquire' to the far-right corner. */
 .header-right {
-    flex: 1;
+    flex: 0 0 auto;
     display: flex;
     justify-content: flex-end;
     align-items: center;
@@ -897,12 +944,12 @@ body.announce-open .footer { display: none; }
 
 
 /* ===== Two-column announcement (EN | KO) ===== */
-.announce-cols { display: flex; text-align: center; }
-.announce-col { flex: 1; padding: 0 1.1rem; }
+.announce-cols { display: flex; text-align: center; align-items: stretch; }
+.announce-col { flex: 1; padding: 0 1.1rem; display: flex; flex-direction: column; }
 .announce-col:first-child { border-right: 1px solid var(--line); text-align: right; }
 .announce-col:last-child { text-align: left; }
-.announce-h { font-size: 1.05em; font-weight: 700; margin-bottom: 0.4rem; }
-.announce-col .announce-lang { width: 100%; margin-top: 1.25rem; }
+.announce-h { font-size: 1.05em; font-weight: 700; margin-bottom: 0.4rem; min-height: 2.5em; } /* reserve 2 lines so EN/KO use equal lines */
+.announce-col .announce-lang { width: 100%; margin-top: auto; } /* pin both buttons to the bottom so they align */
 
 /* Footer language switch link */
 .lang-switch {
