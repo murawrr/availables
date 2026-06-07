@@ -114,17 +114,26 @@ function renderHeader() {
 
     mount.className = 'site-header';
     const back = mount.dataset.back;
-    const backLink = back
-        ? `<a href="${back}" class="header-back" data-en="← home" data-ko="← 홈">← home</a>`
-        : '';
     mount.innerHTML = `
         <div class="header-left">
             <a href="index.html" class="site-name">mura</a>
-            ${backLink}
         </div>
+        <span class="header-dots" aria-hidden="true"></span>
         <div class="header-right">
             <button type="button" class="header-action" onclick="openBooking()" data-en="book or enquire" data-ko="예약 혹은 문의">book or enquire</button>
         </div>`;
+
+    // Back-to-home link, relocated to its own row just below the header.
+    document.querySelector('.page-back')?.remove();
+    if (back) {
+        const b = document.createElement('a');
+        b.href = back;
+        b.className = 'page-back';
+        b.setAttribute('data-en', '← home');
+        b.setAttribute('data-ko', '← 홈');
+        b.textContent = currentLanguage === 'ko' ? '← 홈' : '← home';
+        mount.insertAdjacentElement('afterend', b);
+    }
 }
 
 // ===== Booking modal =====
