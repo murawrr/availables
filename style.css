@@ -140,18 +140,20 @@ a { color: inherit; }
     flex-direction: column;
     align-items: stretch;
     margin-top: 1.75rem;
-    gap: 2px; /* thin separation between the colour strips */
+    gap: 0;
     background: var(--bg);
+    border-top: 1px solid var(--header); /* dark-grey divider above the first bar */
     position: relative;
     z-index: 1;
 }
 
 .menu-bar {
     display: block;
-    background-color: var(--greyish-azure);
+    background: transparent; /* no bar fill */
     color: var(--text);
     text-decoration: none;
     overflow: hidden;
+    border-bottom: 1px solid var(--header); /* dark-grey divider between bars */
 }
 
 /* Notice bar: full width, half the height of the other bars */
@@ -163,20 +165,26 @@ a { color: inherit; }
 
 
 /* ===== Site watermark (hand-drawn logo, pinned to the right edge, over content) ===== */
+/* On the menu pages, fill the page so the watermark sits in the gap
+   between the bars and the (fixed) footer. */
+body:has(.menu-bars) {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
 .site-watermark {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    right: 0;
+    flex: 1 1 auto;            /* grow into the space below the menus */
     display: flex;
     align-items: center;
-    opacity: 0.8;
+    justify-content: center;
+    padding: 2.5rem 1rem 5.5rem; /* bottom padding clears the fixed footer */
+    opacity: 0.9;
     pointer-events: none;
-    z-index: 50;
 }
 
 .site-watermark img {
-    width: min(105vw, 950px);
+    width: min(55vw, 260px);
     height: auto;
     display: block;
     -webkit-user-drag: none;
@@ -364,7 +372,7 @@ body.lang-ko .lang-only-en { display: none; }
     text-transform: uppercase;
     letter-spacing: 2px;
     line-height: 1;
-    color: #2e3037; /* dark text reads on the pastel accent strips */
+    color: var(--mint); /* sage menu text */
     padding-right: 15rem; /* gap between repeated words (uniform = seamless seam) */
 }
 

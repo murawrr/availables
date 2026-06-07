@@ -50,9 +50,9 @@ const ANNOUNCEMENT_HTML = `
         </div>
     </div>`;
 
-// Optional site watermark (hand-drawn logo). Set to a path to enable,
-// or '' to disable. Currently disabled.
-const WATERMARK_SRC = '';
+// Site watermark logo shown between the menus and the footer.
+// Drop your logo into images/watermark/ as logo.png (or change the name here).
+const WATERMARK_SRC = 'images/watermark/logo.png';
 
 // ===== Language switching (English + Korean) =====
 let currentLanguage = localStorage.getItem('preferredLanguage') || 'ko';
@@ -245,17 +245,22 @@ function renderFooter() {
     document.body.appendChild(footer);
 }
 
-// ===== Site watermark (single faint logo above the footer) =====
+// ===== Site watermark (logo in the space between the menus and the footer) =====
 function renderWatermark() {
     if (!WATERMARK_SRC || document.querySelector('.site-watermark')) return;
+    // Only on the menu pages (home / availables), in the gap below the bars.
+    const menus = document.querySelector('.menu-bars');
+    if (!menus) return;
     const wrap = document.createElement('div');
     wrap.className = 'site-watermark';
     const img = document.createElement('img');
     img.src = WATERMARK_SRC;
     img.alt = '';
     img.setAttribute('aria-hidden', 'true');
+    // If the logo file isn't there yet, quietly remove the placeholder.
+    img.onerror = () => wrap.remove();
     wrap.appendChild(img);
-    document.body.appendChild(wrap);
+    menus.insertAdjacentElement('afterend', wrap);
 }
 
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeBooking(); closeAnnounce(); closeLightbox(); } });
