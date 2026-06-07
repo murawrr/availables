@@ -663,7 +663,7 @@ body.announce-open .footer { display: none; }
     letter-spacing: 0.5px;
 }
 
-.footer-line a { color: var(--text); text-decoration: none; }
+.footer-line a { color: var(--text); text-transform: none; text-decoration: underline; }
 .footer-line a:hover { opacity: 0.6; }
 
 .footer-rights {
@@ -888,7 +888,7 @@ body.announce-open .footer { display: none; }
     border: none;
     padding: 0;
     font: inherit;
-    color: var(--text);
+    color: #4f8a7b; /* distinct accent for the language switch */
     cursor: pointer;
     text-decoration: none;
 }
