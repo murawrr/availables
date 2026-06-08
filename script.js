@@ -34,7 +34,6 @@ const ANNOUNCEMENT_HTML = `
                 <p>Jeju</p>
                 <p>Seoul</p>
             </div>
-            <button type="button" class="announce-lang" onclick="chooseLanguageHome('en')">go to page</button>
         </div>
         <div class="announce-col">
             <h3 class="announce-h">예약 가능 일정</h3>
@@ -46,13 +45,12 @@ const ANNOUNCEMENT_HTML = `
                 <p>제주</p>
                 <p>서울</p>
             </div>
-            <button type="button" class="announce-lang" onclick="chooseLanguageHome('ko')">페이지 가기</button>
         </div>
+    </div>
+    <div class="announce-btns">
+        <button type="button" class="announce-lang" onclick="chooseLanguageHome('en')">go to page</button>
+        <button type="button" class="announce-lang" onclick="chooseLanguageHome('ko')">페이지 가기</button>
     </div>`;
-
-// Site watermark logo shown between the menus and the footer.
-// Drop your logo into images/watermark/ as logo.png (or change the name here).
-const WATERMARK_SRC = 'images/watermark/logo.png';
 
 // ===== Language switching (English + Korean) =====
 let currentLanguage = localStorage.getItem('preferredLanguage') || 'ko';
@@ -254,23 +252,7 @@ function renderFooter() {
     document.body.appendChild(footer);
 }
 
-// ===== Site watermark (logo in the space between the menus and the footer) =====
-function renderWatermark() {
-    if (!WATERMARK_SRC || document.querySelector('.site-watermark')) return;
-    // Only on the menu pages (home / availables), in the gap below the bars.
-    const menus = document.querySelector('.menu-bars');
-    if (!menus) return;
-    const wrap = document.createElement('div');
-    wrap.className = 'site-watermark';
-    const img = document.createElement('img');
-    img.src = WATERMARK_SRC;
-    img.alt = '';
-    img.setAttribute('aria-hidden', 'true');
-    // If the logo file isn't there yet, quietly remove the placeholder.
-    img.onerror = () => wrap.remove();
-    wrap.appendChild(img);
-    menus.insertAdjacentElement('afterend', wrap);
-}
+// Watermark is now the CSS backdrop of .menu-bars (see style.css).
 
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeBooking(); closeAnnounce(); closeLightbox(); } });
 
@@ -471,7 +453,6 @@ function renderBackToTop() {
 
 // ===== Init =====
 function init() {
-    renderWatermark();
     renderHeader();
     renderBookingModal();
     renderAnnouncement();
