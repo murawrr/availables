@@ -23,8 +23,18 @@ const EMAIL = 'murarctic123@gmail.com';
 
 // Opening announcement (shown once per browser session). Bilingual in one box.
 const ANNOUNCEMENT_HTML = `
-    <div class="announce-cols">
-        <div class="announce-col">
+    <!-- Step 1: pick a language -->
+    <div class="announce-step announce-step--lang">
+        <h3 class="announce-h">select language<span class="announce-sub">언어 선택</span></h3>
+        <div class="announce-langs">
+            <button type="button" class="announce-lang" onclick="pickAnnounceLanguage('en')">English</button>
+            <button type="button" class="announce-lang" onclick="pickAnnounceLanguage('ko')">한국어</button>
+        </div>
+    </div>
+
+    <!-- Step 2: schedule in the chosen language -->
+    <div class="announce-step announce-step--schedule" hidden>
+        <div class="announce-schedule" data-lang="en">
             <h3 class="announce-h">available schedule</h3>
             <div class="announce-slots">
                 <p class="slot-month">june</p>
@@ -35,7 +45,7 @@ const ANNOUNCEMENT_HTML = `
                 <p>Seoul</p>
             </div>
         </div>
-        <div class="announce-col">
+        <div class="announce-schedule" data-lang="ko" hidden>
             <h3 class="announce-h">예약 가능 일정</h3>
             <div class="announce-slots">
                 <p class="slot-month">6월</p>
@@ -46,10 +56,9 @@ const ANNOUNCEMENT_HTML = `
                 <p>서울</p>
             </div>
         </div>
-    </div>
-    <div class="announce-btns">
-        <button type="button" class="announce-lang" onclick="chooseLanguageHome('en')">go to page</button>
-        <button type="button" class="announce-lang" onclick="chooseLanguageHome('ko')">페이지 가기</button>
+        <div class="announce-btns">
+            <button type="button" class="announce-lang" onclick="closeAnnounce()" data-en="go to page" data-ko="페이지 가기">go to page</button>
+        </div>
     </div>`;
 
 // ===== Language switching (English + Korean) =====
@@ -103,6 +112,18 @@ function chooseLanguageHome(lang) {
     sessionStorage.setItem('announceSeen', '1'); // don't reshow the popup
     localStorage.setItem('preferredLanguage', lang);
     window.location.href = 'index.html';
+}
+
+// Opening popup step 1 -> apply the chosen language and reveal the schedule step.
+function pickAnnounceLanguage(lang) {
+    setLanguage(lang);
+    const m = document.getElementById('announce-modal');
+    if (!m) return;
+    m.querySelector('.announce-step--lang').hidden = true;
+    m.querySelector('.announce-step--schedule').hidden = false;
+    m.querySelectorAll('.announce-schedule').forEach(s => {
+        s.hidden = (s.dataset.lang !== lang);
+    });
 }
 
 // ===== Shared header (injected into #site-header on every page) =====
