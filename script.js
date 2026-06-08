@@ -160,7 +160,7 @@ function renderBookingModal() {
             <div class="contact-options">
                 <a class="contact-btn ig" href="${INSTAGRAM_URL}" target="_blank" rel="noopener">dm</a>
                 ${kakaoBtn}
-                <a class="contact-btn email" href="mailto:${EMAIL}">email</a>
+                <a class="contact-btn email" href="mailto:${EMAIL}">e-mail</a>
             </div>
             <p class="modal-foot en-only"><a href="waitlist.html" data-en="Not in your area yet? Join the waitlist →">Not in your area yet? Join the waitlist →</a></p>
         </div>`;
@@ -204,7 +204,7 @@ async function copyTemplate() {
         const prev = btn.textContent;
         btn.textContent = (currentLanguage === 'ko') ? '복사됨!' : 'Copied!';
         btn.classList.add('copied');
-        setTimeout(() => { btn.textContent = prev; btn.classList.remove('copied'); }, 1500);
+        setTimeout(() => { btn.textContent = prev; btn.classList.remove('copied'); }, 1000);
     }
 }
 

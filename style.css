@@ -640,6 +640,7 @@ body.modal-open { overflow: hidden; }
     font: inherit;
     font-size: 0.8rem;
     font-weight: 600;
+    text-transform: uppercase;
     cursor: pointer;
     transition: border-color 0.2s ease, color 0.2s ease;
 }
