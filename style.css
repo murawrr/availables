@@ -86,13 +86,13 @@ a { color: inherit; }
 }
 .page-back:hover { opacity: 0.6; }
 
-/* Thin header text; keep footer at regular weight */
-.site-header, .site-header * { font-weight: 300; }
+/* Unbold all text in the header and footer */
+.site-header, .site-header *,
 .footer, .footer * { font-weight: 400; }
 
 .site-name {
-    font-weight: 300;
-    text-transform: uppercase;
+    font-weight: 900;
+    text-transform: none;
     text-decoration: none;
     color: #f1f3f5;
     letter-spacing: 0.5px;
@@ -121,7 +121,7 @@ a { color: inherit; }
     padding: 0;
     font: inherit;
     color: #d8dce2;
-    font-weight: 300;
+    font-weight: 700;
     text-transform: uppercase;
     cursor: pointer;
     letter-spacing: 0.6px;
@@ -390,7 +390,7 @@ body.lang-ko .lang-only-en { display: none; }
     display: inline-block;
     white-space: nowrap;
     font-size: 5rem;
-    font-weight: 300; /* thin menu text */
+    font-weight: 900; /* heavy menu text */
     text-transform: uppercase;
     letter-spacing: 2px;
     line-height: 1;
@@ -931,19 +931,16 @@ body.announce-open .footer { display: none; }
 .to-top:hover { border-color: var(--text); }
 
 
-/* ===== Two-column announcement (EN | KO) ===== */
-.announce-cols { display: flex; text-align: center; align-items: stretch; }
-.announce-col { flex: 1; padding: 0 1.1rem; }
-.announce-col:first-child { border-right: 1px solid var(--line); text-align: right; text-transform: uppercase; } /* divider + English all caps */
-.announce-col:last-child { text-align: left; }
-.announce-h { font-size: 1.05em; font-weight: 700; margin-bottom: 0.4rem; min-height: 2.5em; } /* reserve 2 lines so EN/KO use equal lines */
+/* ===== Two-step announcement (pick language -> schedule) ===== */
+.announce-h { font-size: 1.05em; font-weight: 700; margin-bottom: 0.4rem; }
+.announce-step--lang .announce-h { margin-bottom: 1.5rem; }
+.announce-schedule { text-align: center; }
 
-/* Buttons in their own row below the columns, so the divider stops above them */
+/* Button row below the schedule */
 .announce-btns {
     display: flex;
-    gap: 2.2rem;
-    margin-top: 2rem;   /* padding between the schedule text and the buttons */
-    padding: 0 1.1rem;  /* aligns each button under its column */
+    gap: 1rem;
+    margin-top: 2rem;   /* padding between the schedule text and the button */
 }
 .announce-btns .announce-lang { flex: 1; }
 .announce-btns .announce-lang:first-child { text-transform: uppercase; } /* English button caps */
