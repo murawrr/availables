@@ -23,6 +23,7 @@ const EMAIL = 'murarctic123@gmail.com';
 
 // Opening announcement (shown once per browser session). Bilingual in one box.
 const ANNOUNCEMENT_HTML = `
+    <img class="announce-cover" alt="" draggable="false" hidden>
     <!-- Step 1: pick a language -->
     <div class="announce-step announce-step--lang">
         <h3 class="announce-h">select language<span class="announce-sub">언어 선택</span></h3>
@@ -46,7 +47,7 @@ const ANNOUNCEMENT_HTML = `
             </div>
         </div>
         <div class="announce-schedule" data-lang="ko" hidden>
-            <h3 class="announce-h">예약 가능 일정</h3>
+            <h3 class="announce-h">도안</h3>
             <div class="announce-slots">
                 <p class="slot-month">6월</p>
                 <p>서울</p>
@@ -242,6 +243,16 @@ function renderAnnouncement() {
         </div>`;
     overlay.addEventListener('click', (e) => { if (e.target === overlay) closeAnnounce(); });
     document.body.appendChild(overlay);
+    loadAnnounceCover(overlay);
+}
+
+// Optional popup image: drop a file named cover.* (or 01.*) into images/popup/.
+function loadAnnounceCover(overlay) {
+    const img = overlay.querySelector('.announce-cover');
+    if (!img) return;
+    probeImage('images/popup/cover')
+        .then(src => src || probeImage('images/popup/01'))
+        .then(src => { if (src) { img.src = src; img.hidden = false; } });
 }
 
 function openAnnounce() {
@@ -275,7 +286,12 @@ function renderFooter() {
 
 // Watermark is now the CSS backdrop of .menu-bars (see style.css).
 
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeBooking(); closeAnnounce(); closeLightbox(); } });
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { closeBooking(); closeAnnounce(); closeLightbox(); }
+    const lbOpen = document.getElementById('lightbox')?.classList.contains('open');
+    if (lbOpen && e.key === 'ArrowLeft') lbStep(-1);
+    if (lbOpen && e.key === 'ArrowRight') lbStep(1);
+});
 
 // ===== Light copy / save deterrents (note: screenshots still work) =====
 function showCopyToast() {
@@ -361,53 +377,98 @@ function buildMarquees() {
     });
 }
 
-// ===== Gallery auto-loader =====
-// Each .image-grid[data-images="folder"] loads files named 01, 02, 03 ...
-// trying common extensions, stopping at the first number that has no file.
-function loadGallery(grid) {
-    const folder = grid.getAttribute('data-images');
-    if (!folder) return;
-    const exts = ['jpg', 'jpeg', 'png', 'webp', 'JPG', 'PNG'];
-    const alt = grid.getAttribute('data-alt') || 'mura';
-    let index = 1;
-    let loaded = 0;
+// ===== Gallery auto-loader (Instagram-style square grid) =====
+// Two layouts are supported per .image-grid[data-images="folder"]:
+//   * Grouped: subfolders 01/, 02/, 03/ ... where each subfolder is one design
+//     (one grid square). Inside, 01.*, 02.* ... are the versions you swipe
+//     through. An optional caption.json ({"en":"...","ko":"..."}) is shown.
+//   * Flat (fallback): 01.*, 02.* ... directly in the folder; every image is a
+//     square and the viewer swipes through all of them. Optional captions.json
+//     ([{"en":"...","ko":"..."}, ...]) gives one caption per image.
+const IMG_EXTS = ['jpg', 'jpeg', 'png', 'webp', 'JPG', 'PNG'];
 
-    const finish = () => {
-        if (loaded === 0) {
-            const fig = document.createElement('figure');
-            fig.className = 'image-tile is-placeholder';
-            fig.innerHTML = '<span class="placeholder-label">Images coming soon</span>';
-            grid.appendChild(fig);
-        }
-    };
-
-    const next = () => {
-        const pad = String(index).padStart(2, '0');
-        const tryExt = (i) => {
-            if (i >= exts.length) { finish(); return; } // no file for this number -> stop
-            const src = `${folder}/${pad}.${exts[i]}`;
+function probeImage(pathNoExt) {
+    return new Promise(resolve => {
+        let i = 0;
+        const tryNext = () => {
+            if (i >= IMG_EXTS.length) { resolve(null); return; }
+            const src = `${pathNoExt}.${IMG_EXTS[i++]}`;
             const probe = new Image();
-            probe.onload = () => {
-                const fig = document.createElement('figure');
-                fig.className = 'image-tile';
-                const img = document.createElement('img');
-                img.src = src;
-                img.alt = `${alt} ${pad}`;
-                img.loading = 'lazy';
-                fig.appendChild(img);
-                grid.appendChild(fig);
-                fig.addEventListener('click', () => openLightbox(src));
-                loaded++;
-                index++;
-                next();
-            };
-            probe.onerror = () => tryExt(i + 1);
+            probe.onload = () => resolve(src);
+            probe.onerror = tryNext;
             probe.src = src;
         };
-        tryExt(0);
-    };
+        tryNext();
+    });
+}
 
-    next();
+function fetchJSON(url) {
+    return fetch(url).then(r => (r.ok ? r.json() : null)).catch(() => null);
+}
+
+function pad2(n) { return String(n).padStart(2, '0'); }
+
+async function loadGallery(grid) {
+    const folder = grid.getAttribute('data-images');
+    if (!folder) return;
+    const alt = grid.getAttribute('data-alt') || 'mura';
+
+    const grouped = await probeImage(`${folder}/01/01`);
+    const designs = grouped ? await collectGrouped(folder) : await collectFlat(folder);
+
+    if (!designs.length) {
+        const fig = document.createElement('figure');
+        fig.className = 'image-tile is-placeholder';
+        fig.innerHTML = '<span class="placeholder-label">Images coming soon</span>';
+        grid.appendChild(fig);
+        return;
+    }
+
+    designs.forEach((design, i) => {
+        const start = design.start || 0;
+        const fig = document.createElement('figure');
+        fig.className = 'image-tile';
+        const img = document.createElement('img');
+        img.src = design.items[start].src;
+        img.alt = `${alt} ${i + 1}`;
+        img.loading = 'lazy';
+        fig.appendChild(img);
+        fig.addEventListener('click', () => openLightbox(design.items, start));
+        grid.appendChild(fig);
+    });
+}
+
+// Grouped: 01/, 02/ ... -> each design carries its own versions + caption.
+async function collectGrouped(folder) {
+    const designs = [];
+    for (let d = 1; ; d++) {
+        const dir = `${folder}/${pad2(d)}`;
+        const cover = await probeImage(`${dir}/01`);
+        if (!cover) break;
+        const caption = await fetchJSON(`${dir}/caption.json`);
+        const items = [{ src: cover, caption }];
+        for (let v = 2; ; v++) {
+            const src = await probeImage(`${dir}/${pad2(v)}`);
+            if (!src) break;
+            items.push({ src, caption });
+        }
+        designs.push({ items, start: 0 });
+    }
+    return designs;
+}
+
+// Flat: 01.*, 02.* ... -> every image is its own square; the viewer holds them all.
+async function collectFlat(folder) {
+    const srcs = [];
+    for (let i = 1; ; i++) {
+        const src = await probeImage(`${folder}/${pad2(i)}`);
+        if (!src) break;
+        srcs.push(src);
+    }
+    if (!srcs.length) return [];
+    const captions = await fetchJSON(`${folder}/captions.json`);
+    const items = srcs.map((src, i) => ({ src, caption: captions ? captions[i] : null }));
+    return items.map((_, i) => ({ items, start: i }));
 }
 
 // ===== Listing thumbnails =====
@@ -435,25 +496,109 @@ function loadThumb(card) {
     tryExt(0);
 }
 
-// ===== Lightbox =====
-function openLightbox(src) {
-    let lb = document.getElementById('lightbox');
-    if (!lb) {
-        lb = document.createElement('div');
-        lb.id = 'lightbox';
-        lb.className = 'lightbox';
-        lb.innerHTML = '<img alt="">';
-        lb.addEventListener('click', closeLightbox);
-        document.body.appendChild(lb);
-    }
-    lb.querySelector('img').src = src;
-    lb.classList.add('open');
+// ===== Lightbox carousel (swipe versions, zoom, caption) =====
+const lb = { items: [], index: 0, scale: 1, tx: 0, ty: 0 };
+
+function openLightbox(items, index) {
+    if (typeof items === 'string') items = [{ src: items, caption: null }]; // legacy single-image
+    lb.items = items || [];
+    lb.index = index || 0;
+    const el = document.getElementById('lightbox') || buildLightbox();
+    renderLightbox();
+    el.classList.add('open');
     document.body.classList.add('modal-open');
 }
 
+function buildLightbox() {
+    const el = document.createElement('div');
+    el.id = 'lightbox';
+    el.className = 'lightbox';
+    el.innerHTML =
+        '<button class="lb-close" type="button" aria-label="Close">&times;</button>' +
+        '<button class="lb-nav lb-prev" type="button" aria-label="Previous">&#8249;</button>' +
+        '<div class="lb-stage"><img alt="" draggable="false"></div>' +
+        '<button class="lb-nav lb-next" type="button" aria-label="Next">&#8250;</button>' +
+        '<div class="lb-meta"><p class="lb-caption"></p><span class="lb-count"></span></div>';
+    document.body.appendChild(el);
+
+    el.querySelector('.lb-close').addEventListener('click', closeLightbox);
+    el.querySelector('.lb-prev').addEventListener('click', () => lbStep(-1));
+    el.querySelector('.lb-next').addEventListener('click', () => lbStep(1));
+
+    // One pointer handler covers tap-to-zoom, drag-to-pan and swipe-to-change.
+    const stage = el.querySelector('.lb-stage');
+    let down = false, sx = 0, sy = 0, lx = 0, ly = 0, moved = 0, startTarget = null;
+    stage.addEventListener('pointerdown', (e) => {
+        down = true; startTarget = e.target;
+        sx = lx = e.clientX; sy = ly = e.clientY; moved = 0;
+        try { stage.setPointerCapture(e.pointerId); } catch (_) {}
+    });
+    stage.addEventListener('pointermove', (e) => {
+        if (!down) return;
+        const dx = e.clientX - lx, dy = e.clientY - ly;
+        lx = e.clientX; ly = e.clientY;
+        moved += Math.abs(dx) + Math.abs(dy);
+        if (lb.scale > 1) { lb.tx += dx; lb.ty += dy; applyZoom(); }
+    });
+    stage.addEventListener('pointerup', (e) => {
+        if (!down) return;
+        down = false;
+        const totalX = e.clientX - sx, totalY = e.clientY - sy;
+        if (lb.scale > 1) {
+            if (moved < 6) resetZoom();                 // tap while zoomed -> zoom out
+            return;
+        }
+        if (Math.abs(totalX) > 45 && Math.abs(totalX) > Math.abs(totalY)) {
+            lbStep(totalX < 0 ? 1 : -1);                // horizontal swipe
+        } else if (moved < 6) {
+            if (startTarget === stage.querySelector('img')) zoomIn(); // tap image -> zoom in
+            else closeLightbox();                       // tap backdrop -> close
+        }
+    });
+    return el;
+}
+
+function renderLightbox() {
+    const el = document.getElementById('lightbox');
+    if (!el) return;
+    const item = lb.items[lb.index] || {};
+    el.querySelector('img').src = item.src || '';
+    const cap = captionText(item.caption);
+    const capEl = el.querySelector('.lb-caption');
+    capEl.textContent = cap;
+    capEl.style.display = cap ? '' : 'none';
+    el.querySelector('.lb-count').textContent =
+        lb.items.length > 1 ? `${lb.index + 1} / ${lb.items.length}` : '';
+    el.classList.toggle('single', lb.items.length <= 1);
+    resetZoom();
+}
+
+function captionText(cap) {
+    if (!cap) return '';
+    if (typeof cap === 'string') return cap;
+    return cap[currentLanguage] || cap.en || cap.ko || '';
+}
+
+function lbStep(dir) {
+    if (!lb.items.length) return;
+    lb.index = (lb.index + dir + lb.items.length) % lb.items.length;
+    renderLightbox();
+}
+
+function zoomIn() { lb.scale = 2.4; lb.tx = 0; lb.ty = 0; applyZoom(); }
+function resetZoom() { lb.scale = 1; lb.tx = 0; lb.ty = 0; applyZoom(); }
+function applyZoom() {
+    const el = document.getElementById('lightbox');
+    if (!el) return;
+    el.querySelector('img').style.transform =
+        `translate(${lb.tx}px, ${lb.ty}px) scale(${lb.scale})`;
+    el.classList.toggle('is-zoomed', lb.scale > 1);
+}
+
 function closeLightbox() {
-    const lb = document.getElementById('lightbox');
-    if (lb) { lb.classList.remove('open'); document.body.classList.remove('modal-open'); }
+    const el = document.getElementById('lightbox');
+    if (el) { el.classList.remove('open'); document.body.classList.remove('modal-open'); }
+    resetZoom();
 }
 
 // ===== Back-to-top button =====
