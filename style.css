@@ -183,7 +183,7 @@ a { color: inherit; }
 /* ===== Dark-bar variant (solid dark fill) ===== */
 .menu-bars--dark { border-top: none; }
 .menu-bars--dark .menu-bar {
-    background: rgba(74, 79, 89, 0.78); /* translucent so the watermark shows through */
+    background: var(--header);
     border-bottom: 2px solid var(--bg);
 }
 .menu-bars--dark .menu-bar:last-child { border-bottom: none; }
@@ -195,8 +195,8 @@ a { color: inherit; }
 .menu-bars--home .menu-bar--half .marquee-word { font-size: 6.3rem; }
 
 
-/* ===== Watermark as the menu-bars backdrop ===== */
-.menu-bars::before {
+/* ===== Watermark over the menu bars (faint logo, both pages) ===== */
+.menu-bars::after {
     content: "";
     position: absolute;
     inset: 0;
@@ -204,12 +204,12 @@ a { color: inherit; }
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
-    opacity: 0.25;
+    opacity: 0.1;            /* subtle on the light availables page */
     pointer-events: none;
-    z-index: 0;
+    z-index: 2;              /* sits over the bars so it shows on solid dark bars too */
 }
-.menu-bars--dark::before { filter: invert(1); } /* show the logo against the dark bars */
-.menu-bar { position: relative; z-index: 1; }   /* bars sit above the watermark */
+.menu-bars--dark::after { filter: invert(1); opacity: 0.18; } /* invert + a touch stronger on dark */
+.menu-bar { position: relative; z-index: 1; }
 
 .container { position: relative; z-index: 1; }
 
@@ -447,19 +447,20 @@ body.lang-ko .lang-only-en { display: none; }
 
 /* Dense masonry (flash-sheet) gallery */
 .image-grid {
-    column-count: 3;
-    column-gap: 0.5rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Instagram-style 3-up grid */
+    gap: 0.5rem;
 }
 
 /* Single design: one full-width image (keeps its natural ratio). */
-.image-grid--single { column-count: 1; }
+.image-grid--single { grid-template-columns: 1fr; }
 
 /* No white card behind the artwork (lets the page show through). */
 .image-grid--nobg .image-tile { background: transparent; }
 
 .image-tile {
-    break-inside: avoid;
-    margin: 0 0 0.5rem;
+    margin: 0;
+    aspect-ratio: 1 / 1;     /* square thumbnails */
     border-radius: 4px;
     overflow: hidden;
     background: #ffffff; /* white card so dark/transparent artwork stays visible */
@@ -469,30 +470,99 @@ body.lang-ko .lang-only-en { display: none; }
 .image-tile img {
     display: block;
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;       /* fill the square, cropping as needed */
 }
 
-/* ===== Lightbox (tap a design to zoom) ===== */
+/* Single full image keeps its natural ratio. */
+.image-grid--single .image-tile { aspect-ratio: auto; }
+.image-grid--single .image-tile img { height: auto; object-fit: contain; }
+
+/* ===== Lightbox carousel (tap a square -> swipe versions, zoom) ===== */
 .lightbox {
     position: fixed;
     inset: 0;
-    background: rgba(20, 25, 22, 0.92);
+    background: rgba(20, 25, 22, 0.96);
     display: none;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
     z-index: 3000;
-    padding: 1.25rem;
-    cursor: zoom-out;
 }
 .lightbox.open { display: flex; }
-.lightbox img {
-    max-width: 96vw;
-    max-height: 92vh;
+
+.lb-stage {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    touch-action: none;
+    cursor: zoom-in;
+}
+.lightbox.is-zoomed .lb-stage { cursor: grab; }
+.lb-stage img {
+    max-width: 94vw;
+    max-height: 78vh;
     width: auto;
     height: auto;
+    transform-origin: center center;
+    transition: transform 0.12s ease;
     -webkit-user-drag: none;
     user-drag: none;
     -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.lb-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 2.6rem;
+    line-height: 1;
+    padding: 0.4rem 1rem;
+    opacity: 0.65;
+    cursor: pointer;
+    z-index: 3;
+}
+.lb-nav:hover { opacity: 1; }
+.lb-prev { left: 0.2rem; }
+.lb-next { right: 0.2rem; }
+.lightbox.single .lb-nav { display: none; }
+
+.lb-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.9rem;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 2.1rem;
+    line-height: 1;
+    opacity: 0.8;
+    cursor: pointer;
+    z-index: 4;
+}
+.lb-close:hover { opacity: 1; }
+
+.lb-meta {
+    flex: 0 0 auto;
+    padding: 0.7rem 1.2rem 1.3rem;
+    text-align: center;
+    color: #e8ece9;
+}
+.lb-caption {
+    margin: 0 auto 0.35rem;
+    max-width: 640px;
+    font-size: 0.9rem;
+    line-height: 1.55;
+}
+.lb-count {
+    font-size: 0.72rem;
+    letter-spacing: 0.6px;
+    opacity: 0.6;
 }
 
 .image-tile.is-placeholder {
@@ -854,8 +924,7 @@ body.announce-open .footer { display: none; }
     .menu-bars--home .menu-bar--half .menu-text { height: 7.8rem; }
     .menu-bars--home .menu-bar--half .marquee-word { font-size: 5.4rem; }
 
-    .image-grid { column-count: 2; }
-    .image-grid--single { column-count: 1; }
+    .image-grid { gap: 0.3rem; } /* keep the 3-up square grid on mobile */
     .work-grid { grid-template-columns: 1fr; }
 
     .form-row { grid-template-columns: 1fr; gap: 1.25rem; }
@@ -932,9 +1001,22 @@ body.announce-open .footer { display: none; }
 
 
 /* ===== Two-step announcement (pick language -> schedule) ===== */
+/* Opaque backdrop so the page behind the opening popup is hidden. */
+#announce-modal { background: rgb(20, 25, 22); }
+
 .announce-h { font-size: 1.05em; font-weight: 700; margin-bottom: 0.4rem; }
 .announce-step--lang .announce-h { margin-bottom: 1.5rem; }
 .announce-schedule { text-align: center; }
+
+/* Optional popup image (drop a file into images/popup/) */
+.announce-cover {
+    display: block;
+    width: 100%;
+    max-height: 38vh;
+    object-fit: contain;
+    margin: 0 auto 1.4rem;
+}
+.announce-cover[hidden] { display: none; }
 
 /* Button row below the schedule */
 .announce-btns {
