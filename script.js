@@ -62,7 +62,7 @@ const ANNOUNCEMENT_HTML = `
         </div>
         <div class="announce-actions">
             <button type="button" class="announce-action" onclick="announceWaitlist()" data-en="waitlist" data-ko="대기 신청">waitlist</button>
-            <button type="button" class="announce-action" onclick="announceDesigns()" data-en="see designs" data-ko="도안 보기">see designs</button>
+            <button type="button" class="announce-action" onclick="announceDesigns()" data-en="skip — just pick a design" data-ko="날짜 건너뛰고 도안 선택">skip — just pick a design</button>
         </div>
     </div>`;
 
@@ -140,14 +140,11 @@ function announceWaitlist() {
     window.location.href = 'waitlist.html';
 }
 
+// Skip the date and go straight to choosing a design (books with design only).
 function announceDesigns() {
-    const onHome = /(^|\/)(index\.html)?$/.test(location.pathname);
-    if (onHome) {
-        closeAnnounce();
-    } else {
-        sessionStorage.setItem('announceSeen', '1');
-        window.location.href = 'index.html';
-    }
+    sessionStorage.setItem('announceSeen', '1');
+    sessionStorage.removeItem('pendingDate');
+    window.location.href = 'availables.html';
 }
 
 // ===== Availability calendar (shown in the opening popup) =====
