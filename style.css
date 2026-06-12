@@ -770,6 +770,27 @@ body.modal-open { overflow: hidden; }
 
 /* Booking page (booking.html) */
 .booking-wrap { max-width: 560px; margin: 0 auto; }
+
+/* Inline availability calendar on the booking page */
+.booking-date {
+    margin-bottom: 1.3rem;
+    padding-bottom: 1.2rem;
+    border-bottom: 1px solid var(--line);
+}
+.booking-date-current { font-weight: 600; margin: 0 0 0.7rem; }
+.booking-cal {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.4rem;
+}
+.booking-date-hint {
+    font-size: 0.76rem;
+    color: var(--muted);
+    text-align: center;
+    margin: 0.7rem 0 0;
+}
+.cal-cell.is-selected { box-shadow: inset 0 0 0 2px #111; font-weight: 700; }
 .booking-selected {
     margin: 0 0 1.3rem;
     text-align: center;
