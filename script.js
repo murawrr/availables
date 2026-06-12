@@ -53,7 +53,7 @@ const ANNOUNCEMENT_HTML = `
     <!-- Step 2: available-dates calendar -->
     <div class="announce-step announce-step--schedule" hidden>
         <h3 class="announce-h" data-en="available dates" data-ko="예약 가능 날짜">available dates</h3>
-        <p class="announce-hint" data-en="click a date to book it" data-ko="원하는 날짜를 눌러 예약하세요">click a date to book it</p>
+        <p class="announce-hint" data-en="click a date, then choose a design" data-ko="날짜를 고른 뒤 도안을 선택하세요">click a date, then choose a design</p>
         <div class="announce-cal"></div>
         <div class="announce-legend">
             <span class="leg leg--seoul" data-en="Seoul" data-ko="서울">Seoul</span>
@@ -171,26 +171,54 @@ function dateInfoFor(sched, year, month, day) {
     return (sched.dates || []).find(x => x.date === key) || null;
 }
 
-// Click "book this design" in the image viewer -> booking page with the design
-// reference (name + image link) pre-filled into the form.
+// Booking flow: pick a date -> pick a design -> the form is filled with both.
+
+// Step A: click an available date -> remember it, then go choose a design.
+function bookDate(info) {
+    sessionStorage.setItem('announceSeen', '1');
+    sessionStorage.setItem('pendingDate', JSON.stringify({
+        date: info.date, place: info.place || '', time: info.time || ''
+    }));
+    window.location.href = 'availables.html';
+}
+
+// Step B: click "book this design" in the viewer -> booking page with the
+// design AND the date they picked earlier pre-filled into the form.
 function bookCurrentImage() {
     const item = lb.items[lb.index];
     if (!item) return;
     sessionStorage.setItem('announceSeen', '1');
     const q = new URLSearchParams();
+    try {
+        const pend = JSON.parse(sessionStorage.getItem('pendingDate') || 'null');
+        if (pend && pend.date) {
+            q.set('date', pend.date);
+            if (pend.place) q.set('place', pend.place);
+            if (pend.time) q.set('time', pend.time);
+        }
+    } catch (e) { /* ignore */ }
     const cap = captionText(item.caption);
     if (cap) q.set('design', cap);
     if (item.src) q.set('img', new URL(item.src, location.href).href);
+    sessionStorage.removeItem('pendingDate');
     window.location.href = 'booking.html?' + q.toString();
 }
 
-// Click an available date -> booking page with the date pre-filled.
-function bookDate(info) {
-    sessionStorage.setItem('announceSeen', '1');
-    const q = new URLSearchParams({ date: info.date });
-    if (info.place) q.set('place', info.place);
-    if (info.time) q.set('time', info.time);
-    window.location.href = 'booking.html?' + q.toString();
+// On the designs page, if a date was picked, show a reminder to pick a design.
+function showPendingDateBanner() {
+    const grid = document.querySelector('.image-grid[data-collection]');
+    if (!grid) return;
+    let pend;
+    try { pend = JSON.parse(sessionStorage.getItem('pendingDate') || 'null'); } catch (e) { pend = null; }
+    if (!pend || !pend.date) return;
+    const ko = currentLanguage === 'ko';
+    let when = pend.date + (pend.time ? ` ${pend.time}` : '') + (pend.place ? ` (${pend.place})` : '');
+    const bar = document.createElement('div');
+    bar.className = 'pending-banner';
+    bar.textContent = ko
+        ? `선택한 날짜: ${when} — 예약할 도안을 선택하세요`
+        : `Selected: ${when} — now pick a design to book`;
+    grid.parentNode.insertBefore(bar, grid);
 }
 
 function buildAnnounceCalendar(container) {
@@ -926,6 +954,7 @@ function init() {
     document.querySelectorAll('.image-grid[data-collection]').forEach(loadDesignGrid);
     document.querySelectorAll('.image-grid[data-images]').forEach(loadGallery);
     document.querySelectorAll('.work-card[data-thumb]').forEach(loadThumb);
+    showPendingDateBanner();
 
     // Show the opening announcement once per session.
     if (!sessionStorage.getItem('announceSeen')) openAnnounce();
