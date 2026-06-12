@@ -62,7 +62,7 @@ const ANNOUNCEMENT_HTML = `
         </div>
         <div class="announce-actions">
             <button type="button" class="announce-action" onclick="announceWaitlist()" data-en="waitlist" data-ko="대기 신청">waitlist</button>
-            <button type="button" class="announce-action" onclick="announceDesigns()" data-en="skip — just pick a design" data-ko="날짜 건너뛰고 도안 선택">skip — just pick a design</button>
+            <button type="button" class="announce-action" onclick="announceDesigns()" data-en="browse designs" data-ko="도안 둘러보기">browse designs</button>
         </div>
     </div>`;
 
@@ -169,25 +169,34 @@ function bookDate(info) {
 
 // Step B: click "book this design" in the viewer -> booking page with the
 // design AND the date they picked earlier pre-filled into the form.
-function bookCurrentImage() {
-    const item = lb.items[lb.index];
+// True if the visitor picked a date earlier (date-first flow).
+function pendingDate() {
+    try {
+        const p = JSON.parse(sessionStorage.getItem('pendingDate') || 'null');
+        return (p && p.date) ? p : null;
+    } catch (e) { return null; }
+}
+
+// Go to the booking page for a given image, carrying any picked date + the design.
+function bookItem(item) {
     if (!item) return;
     sessionStorage.setItem('announceSeen', '1');
     const q = new URLSearchParams();
-    try {
-        const pend = JSON.parse(sessionStorage.getItem('pendingDate') || 'null');
-        if (pend && pend.date) {
-            q.set('date', pend.date);
-            if (pend.place) q.set('place', pend.place);
-            if (pend.time) q.set('time', pend.time);
-        }
-    } catch (e) { /* ignore */ }
+    const pend = pendingDate();
+    if (pend) {
+        q.set('date', pend.date);
+        if (pend.place) q.set('place', pend.place);
+        if (pend.time) q.set('time', pend.time);
+    }
     const cap = captionText(item.caption);
     if (cap) q.set('design', cap);
     if (item.src) q.set('img', new URL(item.src, location.href).href);
     sessionStorage.removeItem('pendingDate');
     window.location.href = 'booking.html?' + q.toString();
 }
+
+// "book this design" in the viewer.
+function bookCurrentImage() { bookItem(lb.items[lb.index]); }
 
 // On the designs page, if a date was picked, show a reminder to pick a design.
 function showPendingDateBanner() {
@@ -253,10 +262,13 @@ function buildCalMonth(sched, year, month, onPick) {
         blank.className = 'cal-cell cal-blank';
         grid.appendChild(blank);
     }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     for (let day = 1; day <= daysInMonth; day++) {
         const info = dateInfoFor(sched, year, month, day);
+        const isPast = new Date(year, month - 1, day) < today;
         const cell = document.createElement('span');
-        if (info) {
+        if (info && !isPast) {
             cell.className = `cal-cell is-available cal--${normPlace(info.place)}`;
             cell.dataset.date = info.date;
             cell.innerHTML = `<span class="cal-d">${day}</span>` +
@@ -269,7 +281,8 @@ function buildCalMonth(sched, year, month, onPick) {
                 if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick(info); }
             });
         } else {
-            cell.className = 'cal-cell cal-off';
+            // not available, or a date that has already passed
+            cell.className = isPast ? 'cal-cell cal-off cal-past' : 'cal-cell cal-off';
             cell.textContent = day;
         }
         grid.appendChild(cell);
@@ -319,9 +332,14 @@ function bookingContentHTML() {
     return `
         <h1 class="booking-title" data-en="book or enquire" data-ko="예약 혹은 문의">book or enquire</h1>
         <div class="booking-date">
-            <h3 class="booking-policy-h" data-en="your date" data-ko="예약 날짜">your date</h3>
+            <h3 class="booking-policy-h" data-en="availability — your date" data-ko="예약 가능 일정 — 날짜 선택">availability — your date</h3>
             <p class="booking-date-current"></p>
             <div class="booking-cal"></div>
+            <div class="announce-legend">
+                <span class="leg leg--seoul" data-en="Seoul" data-ko="서울">Seoul</span>
+                <span class="leg leg--busan" data-en="Busan" data-ko="부산">Busan</span>
+                <span class="leg leg--jeju" data-en="Jeju" data-ko="제주">Jeju</span>
+            </div>
             <p class="booking-date-hint" data-en="tap a date to add it (optional)" data-ko="원하는 날짜를 눌러 추가하세요 (선택)">tap a date to add it (optional)</p>
         </div>
         <div class="booking-policy">
@@ -707,7 +725,12 @@ function loadDesignGrid(grid) {
             img.loading = 'lazy';
             img.decoding = 'async';
             fig.appendChild(img);
-            fig.addEventListener('click', () => openLightbox(items, idx)); // viewer = full-res
+            fig.addEventListener('click', () => {
+                // With a date already chosen, one tap books this design; otherwise
+                // open the viewer to browse/zoom/swipe.
+                if (pendingDate()) bookItem(item);
+                else openLightbox(items, idx);
+            });
             frag.appendChild(fig);
         });
     });
@@ -720,6 +743,23 @@ function loadDesignGrid(grid) {
         return;
     }
     grid.appendChild(frag);
+}
+
+// Available <-> archive tabs above a grid (designs page).
+function setupGridTabs() {
+    document.querySelectorAll('.grid-tabs').forEach(tabs => {
+        const grid = tabs.parentElement.querySelector('.image-grid[data-collection]');
+        if (!grid) return;
+        tabs.querySelectorAll('.grid-tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (grid.getAttribute('data-collection') === btn.dataset.collection) return;
+                grid.setAttribute('data-collection', btn.dataset.collection);
+                grid.innerHTML = '';
+                loadDesignGrid(grid);
+                tabs.querySelectorAll('.grid-tab').forEach(b => b.classList.toggle('is-active', b === btn));
+            });
+        });
+    });
 }
 
 // ===== Lightbox carousel (swipe versions, zoom, caption) =====
@@ -860,6 +900,7 @@ function init() {
     applyLanguage(currentLanguage);
     buildMarquees();
     document.querySelectorAll('.image-grid[data-collection]').forEach(loadDesignGrid);
+    setupGridTabs();
     showPendingDateBanner();
 
     // Show the opening announcement once per session.
