@@ -106,10 +106,12 @@ function setLanguage(lang) {
 
 // Header language buttons: clicking the current language stays on the page;
 // clicking the other language jumps to the MAIN page in that language.
+// Footer language switch: re-render the CURRENT page in the other language
+// (reloading keeps the page + any ?date/?design context, unlike jumping home).
 function setLanguageHome(lang) {
     if (lang === currentLanguage) return;
     localStorage.setItem('preferredLanguage', lang);
-    window.location.href = 'index.html';
+    window.location.reload();
 }
 
 // Opening popup step 1 -> apply the chosen language and reveal the calendar.
@@ -454,7 +456,7 @@ function renderBookingPage() {
     if (bookingState.img) {
         const fig = document.createElement('figure');
         fig.className = 'booking-selected';
-        fig.innerHTML = `<img src="${bookingState.img}" alt="" draggable="false">` +
+        fig.innerHTML = `<img src="${thumbURL(bookingState.img, 700)}" alt="" draggable="false">` +
             `<figcaption data-en="your selected design" data-ko="선택한 도안">your selected design</figcaption>`;
         mount.insertBefore(fig, mount.querySelector('.booking-date'));
     }
@@ -726,9 +728,9 @@ function loadDesignGrid(grid) {
             img.decoding = 'async';
             fig.appendChild(img);
             fig.addEventListener('click', () => {
-                // With a date already chosen, one tap books this design; otherwise
-                // open the viewer to browse/zoom/swipe.
-                if (pendingDate()) bookItem(item);
+                // With a date chosen, one tap books an AVAILABLE design; archive
+                // items (sold out) and the no-date case open the viewer to browse.
+                if (pendingDate() && coll === 'available') bookItem(item);
                 else openLightbox(items, idx);
             });
             frag.appendChild(fig);
@@ -894,17 +896,21 @@ function renderBackToTop() {
 function init() {
     renderHeader();
     renderBookingPage();
-    renderAnnouncement();
     renderFooter();
     renderBackToTop();
+
+    // Build + show the opening popup only when it will actually appear
+    // (once per session) — avoids needlessly probing for the popup cover image.
+    if (!sessionStorage.getItem('announceSeen')) {
+        renderAnnouncement();
+        openAnnounce();
+    }
+
     applyLanguage(currentLanguage);
     buildMarquees();
     document.querySelectorAll('.image-grid[data-collection]').forEach(loadDesignGrid);
     setupGridTabs();
     showPendingDateBanner();
-
-    // Show the opening announcement once per session.
-    if (!sessionStorage.getItem('announceSeen')) openAnnounce();
 }
 
 if (document.readyState === 'loading') {
