@@ -1,34 +1,57 @@
 /* ============================================================================
-   AVAILABILITY CALENDAR  —  edit this file to update the popup. That's it.
+   AVAILABILITY CALENDAR  —  edit this file to update the popup calendar.
 
-   You only change the two lists below. Keep the quotes and commas as shown.
    After you save/commit on GitHub, the website updates within ~1 minute.
 
    ----------------------------------------------------------------------------
-   1) MONTHS  — which months the calendar shows.
-        Format: "YYYY-MM"  (year-month).  Example: "2026-08" is August 2026.
-        You can list one, two, or more months.
+   1) MONTHS  — which months the calendar shows.  Format "YYYY-MM".
 
-   2) TRIPS   — the days you are AWAY from Seoul.
-        Each line is one trip:
-            { place: "Busan", from: "2026-07-06", to: "2026-07-12" },
-        - place : "Busan" or "Jeju"   (these get their own colours)
-        - from  : first day,  format "YYYY-MM-DD"
-        - to    : last day,   format "YYYY-MM-DD"   (this day is included)
-        Every day that is NOT inside a trip is shown as Seoul automatically.
-        If you have no trips, leave it like this:   trips: []
+   2) DATES   — your available appointment days. Each one becomes a coloured,
+                clickable day on the calendar. Clicking it opens the booking
+                page with that date already filled into the form.
 
-   Tip: to add another trip, copy a whole line, paste it on a new line,
-        and change the place/dates. Keep the comma at the end of each line.
+        { date: "2026-07-07", place: "Busan", time: "18:00" },
+
+        - date  : the day,  format "YYYY-MM-DD"
+        - place : "Seoul", "Busan" or "Jeju"   (each has its own colour)
+        - time  : OPTIONAL. Leave it out for all-day. Put any text you like,
+                  e.g. "18:00"  or  "12:00 / 18:00".
+
+   To add a day: copy a line, paste it, change the date/place/time.
+   To remove a day: delete its line.
    ============================================================================ */
 
 window.SCHEDULE = {
 
   months: ["2026-06", "2026-07"],
 
-  trips: [
-    { place: "Busan", from: "2026-07-06", to: "2026-07-12" },
-    { place: "Jeju",  from: "2026-07-20", to: "2026-07-26" },
+  dates: [
+    // ----- Seoul -----
+    { date: "2026-06-23", place: "Seoul" },
+    { date: "2026-06-24", place: "Seoul" },
+    { date: "2026-06-27", place: "Seoul" },
+    { date: "2026-07-01", place: "Seoul" },
+    { date: "2026-07-03", place: "Seoul" },
+    { date: "2026-07-14", place: "Seoul" },
+    { date: "2026-07-15", place: "Seoul" },
+    { date: "2026-07-17", place: "Seoul" },
+    { date: "2026-07-18", place: "Seoul" },
+    { date: "2026-07-28", place: "Seoul" },
+    { date: "2026-07-29", place: "Seoul" },
+    { date: "2026-07-31", place: "Seoul" },
+
+    // ----- Busan (July) -----
+    { date: "2026-07-07", place: "Busan", time: "18:00" },
+    { date: "2026-07-10", place: "Busan", time: "18:00" },
+    { date: "2026-07-11", place: "Busan", time: "12:00 / 18:00" },
+    { date: "2026-07-12", place: "Busan", time: "12:00" },
+
+    // ----- Jeju (July) -----
+    { date: "2026-07-21", place: "Jeju" },
+    { date: "2026-07-22", place: "Jeju" },
+    { date: "2026-07-23", place: "Jeju" },
+    { date: "2026-07-24", place: "Jeju" },
+    { date: "2026-07-25", place: "Jeju" },
   ],
 
 };
