@@ -16,6 +16,23 @@ ideas for customising the design or creating a custom design:`,
 (선택) 주문 제작 아이디어:`
 };
 
+// Booking policy shown on the Book screen (no pricing). Edit freely; keep the
+// two lists the same length so EN/KO line up.
+const BOOKING_POLICY = {
+    en: [
+        'No minors.',
+        'Bookings are confirmed in the order deposits are received; the deposit is non-refundable.',
+        'Your appointment is cancelled if you are more than 30 minutes late.',
+        'Re-scheduling must be requested at least 72 hours in advance.'
+    ],
+    ko: [
+        '미성년자는 작업하지 않습니다.',
+        '예약금 입금 순으로 예약이 확정되며, 예약금은 환불되지 않습니다.',
+        '30분 이상 지각 시 예약이 취소됩니다.',
+        '일정 변경은 작업일 3일 전까지 요청해 주세요.'
+    ]
+};
+
 // KakaoTalk open-chat / channel link. Leave empty until provided.
 const KAKAO_URL = 'https://open.kakao.com/me/murarctic';
 const INSTAGRAM_URL = 'https://instagram.com/murarctic';
@@ -41,6 +58,11 @@ const ANNOUNCEMENT_HTML = `
             <span class="leg leg--seoul" data-en="Seoul" data-ko="서울">Seoul</span>
             <span class="leg leg--busan" data-en="Busan" data-ko="부산">Busan</span>
             <span class="leg leg--jeju" data-en="Jeju" data-ko="제주">Jeju</span>
+        </div>
+        <div class="announce-actions">
+            <button type="button" class="announce-action" onclick="announceBook()" data-en="book" data-ko="예약하기">book</button>
+            <button type="button" class="announce-action" onclick="announceWaitlist()" data-en="waitlist" data-ko="대기 신청">waitlist</button>
+            <button type="button" class="announce-action" onclick="announceDesigns()" data-en="see designs" data-ko="도안 보기">see designs</button>
         </div>
     </div>`;
 
@@ -105,6 +127,24 @@ function pickAnnounceLanguage(lang) {
     m.querySelector('.announce-step--lang').hidden = true;
     m.querySelector('.announce-step--schedule').hidden = false;
     buildAnnounceCalendar(m.querySelector('.announce-cal'));
+}
+
+// Step 3 of the opening popup: the three choices after the calendar.
+function announceBook() { closeAnnounce(); openBooking(); }
+
+function announceWaitlist() {
+    sessionStorage.setItem('announceSeen', '1');
+    window.location.href = 'waitlist.html';
+}
+
+function announceDesigns() {
+    const onHome = /(^|\/)(index\.html)?$/.test(location.pathname);
+    if (onHome) {
+        closeAnnounce();
+    } else {
+        sessionStorage.setItem('announceSeen', '1');
+        window.location.href = 'index.html';
+    }
 }
 
 // ===== Availability calendar (shown in the opening popup) =====
@@ -234,6 +274,10 @@ function renderBookingModal() {
         ? `<a class="contact-btn kakao" href="${KAKAO_URL}" target="_blank" rel="noopener">kakao</a>`
         : '';
 
+    const policyItems = BOOKING_POLICY.en
+        .map((en, i) => `<li data-en="${en}" data-ko="${BOOKING_POLICY.ko[i]}">${en}</li>`)
+        .join('');
+
     const overlay = document.createElement('div');
     overlay.id = 'booking-modal';
     overlay.className = 'modal-overlay';
@@ -241,6 +285,10 @@ function renderBookingModal() {
         <div class="modal" role="dialog" aria-modal="true" aria-label="Booking">
             <button class="modal-close" onclick="closeBooking()" aria-label="Close">&times;</button>
             <h2 class="modal-title" data-en="book or enquire" data-ko="예약 혹은 문의">book or enquire</h2>
+            <div class="booking-policy">
+                <h3 class="booking-policy-h" data-en="booking policy" data-ko="예약 규정">booking policy</h3>
+                <ul class="booking-policy-list">${policyItems}</ul>
+            </div>
             <p class="modal-intro" data-en="To book, copy and fill in the template below — or feel free to ignore it and just ask me a question. Either way, reach me by DM." data-ko="예약을 원하시면 아래 양식을 복사해 작성해 주세요. 양식은 건너뛰고 편하게 질문만 보내주셔도 괜찮습니다. DM 또는 카카오톡으로 연락 주세요.">To book, copy and fill in the template below — or feel free to ignore it and just ask me a question. Either way, reach me by DM.</p>
             <div class="booking-template-wrap">
                 <textarea id="booking-template" class="booking-template" rows="5" readonly></textarea>
