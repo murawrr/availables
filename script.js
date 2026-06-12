@@ -414,7 +414,8 @@ async function loadGallery(grid) {
     const alt = grid.getAttribute('data-alt') || 'mura';
 
     const grouped = await probeImage(`${folder}/01/01`);
-    const designs = grouped ? await collectGrouped(folder) : await collectFlat(folder);
+    let designs = grouped ? await collectGrouped(folder) : await collectFlat(folder);
+    if (grouped && !designs.length) designs = await collectFlat(folder); // safety net
 
     if (!designs.length) {
         const fig = document.createElement('figure');
