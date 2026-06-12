@@ -218,17 +218,20 @@ function showPendingDateBanner() {
     grid.parentNode.insertBefore(bar, grid);
 }
 
-function buildAnnounceCalendar(container) {
+// onPick(info) runs when an available date is clicked. Defaults to bookDate
+// (calendar in the opening popup); the booking page passes setBookingDate.
+function buildAnnounceCalendar(container, onPick) {
     if (!container) return;
+    const pick = onPick || bookDate;
     container.innerHTML = '';
     const sched = getSchedule();
     sched.months.forEach(ym => {
         const [year, month] = String(ym).split('-').map(Number);
-        if (year && month) container.appendChild(buildCalMonth(sched, year, month));
+        if (year && month) container.appendChild(buildCalMonth(sched, year, month, pick));
     });
 }
 
-function buildCalMonth(sched, year, month) {
+function buildCalMonth(sched, year, month, onPick) {
     const ko = currentLanguage === 'ko';
     const monthsEn = ['', 'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'];
@@ -267,14 +270,15 @@ function buildCalMonth(sched, year, month) {
         const cell = document.createElement('span');
         if (info) {
             cell.className = `cal-cell is-available cal--${normPlace(info.place)}`;
+            cell.dataset.date = info.date;
             cell.innerHTML = `<span class="cal-d">${day}</span>` +
                 (info.time ? '<span class="cal-dot" aria-hidden="true"></span>' : '');
             cell.setAttribute('role', 'button');
             cell.tabIndex = 0;
             cell.title = info.time ? `${info.date} · ${info.time}` : info.date;
-            cell.addEventListener('click', () => bookDate(info));
+            cell.addEventListener('click', () => onPick(info));
             cell.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); bookDate(info); }
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick(info); }
             });
         } else {
             cell.className = 'cal-cell cal-off';
@@ -326,6 +330,12 @@ function bookingContentHTML() {
         .join('');
     return `
         <h1 class="booking-title" data-en="book or enquire" data-ko="예약 혹은 문의">book or enquire</h1>
+        <div class="booking-date">
+            <h3 class="booking-policy-h" data-en="your date" data-ko="예약 날짜">your date</h3>
+            <p class="booking-date-current"></p>
+            <div class="booking-cal"></div>
+            <p class="booking-date-hint" data-en="tap a date to add it (optional)" data-ko="원하는 날짜를 눌러 추가하세요 (선택)">tap a date to add it (optional)</p>
+        </div>
         <div class="booking-policy">
             <h3 class="booking-policy-h" data-en="booking policy" data-ko="예약 규정">booking policy</h3>
             <ul class="booking-policy-list">${policyItems}</ul>
@@ -348,32 +358,51 @@ function bookingContentHTML() {
 // Booking template text, with "preferred date" and/or "selected design" lines
 // prepended when the user arrived from a calendar date or an image
 // (booking.html?date=...&time=...&place=...  or  ?design=...&img=...).
+// Current booking selection on the booking page (date + design), editable.
+let bookingState = null;
+
 function bookingTemplateValue() {
     const base = BOOKING_TEMPLATE[currentLanguage] || BOOKING_TEMPLATE.en;
-    const params = new URLSearchParams(location.search);
+    const s = bookingState || {};
     const ko = currentLanguage === 'ko';
     const lines = [];
 
-    const date = params.get('date');
-    if (date) {
-        let line = (ko ? '예약 희망일: ' : 'preferred date: ') + date;
-        const time = params.get('time');
-        const place = params.get('place');
-        if (time) line += ` ${time}`;
-        if (place) line += ` (${place})`;
+    if (s.date) {
+        let line = (ko ? '예약 희망일: ' : 'preferred date: ') + s.date;
+        if (s.time) line += ` ${s.time}`;
+        if (s.place) line += ` (${s.place})`;
         lines.push(line);
     }
-
-    const design = params.get('design');
-    const img = params.get('img');
-    if (design || img) {
+    if (s.design || s.img) {
         let line = ko ? '선택한 도안: ' : 'selected design: ';
-        if (design) line += design;
-        if (img) line += (design ? ' — ' : '') + img;
+        if (s.design) line += s.design;
+        if (s.img) line += (s.design ? ' — ' : '') + s.img;
         lines.push(line);
     }
-
     return lines.length ? lines.join('\n') + '\n' + base : base;
+}
+
+function bookingDateLabel() {
+    const s = bookingState || {};
+    if (!s.date) return (currentLanguage === 'ko') ? '아직 선택되지 않음' : 'not selected yet';
+    return s.date + (s.time ? ` · ${s.time}` : '') + (s.place ? ` (${s.place})` : '');
+}
+
+// Tap a date on the booking-page calendar -> set it and refresh the form live.
+function setBookingDate(info) {
+    if (!bookingState) bookingState = {};
+    bookingState.date = info.date;
+    bookingState.time = info.time || '';
+    bookingState.place = info.place || '';
+    document.querySelectorAll('.booking-cal .cal-cell.is-selected')
+        .forEach(c => c.classList.remove('is-selected'));
+    const cell = document.querySelector(`.booking-cal .cal-cell[data-date="${info.date}"]`);
+    if (cell) cell.classList.add('is-selected');
+    const disp = document.querySelector('.booking-date-current');
+    if (disp) disp.textContent = bookingDateLabel();
+    const ta = document.getElementById('booking-template');
+    if (ta) { ta.value = bookingTemplateValue(); autosizeTemplate(); }
+    updateBookingContactLinks();
 }
 
 // E-mail can carry the whole filled form automatically (subject + body).
@@ -406,17 +435,33 @@ function showToast(msg) {
 function renderBookingPage() {
     const mount = document.getElementById('booking-page');
     if (!mount) return;
+
+    const p = new URLSearchParams(location.search);
+    bookingState = {
+        date: p.get('date') || '', time: p.get('time') || '', place: p.get('place') || '',
+        design: p.get('design') || '', img: p.get('img') || ''
+    };
+
     mount.innerHTML = bookingContentHTML();
 
     // Show the chosen image (if the user came from "book this design").
-    const img = new URLSearchParams(location.search).get('img');
-    if (img) {
+    if (bookingState.img) {
         const fig = document.createElement('figure');
         fig.className = 'booking-selected';
-        fig.innerHTML = `<img src="${img}" alt="" draggable="false">` +
+        fig.innerHTML = `<img src="${bookingState.img}" alt="" draggable="false">` +
             `<figcaption data-en="your selected design" data-ko="선택한 도안">your selected design</figcaption>`;
-        mount.insertBefore(fig, mount.querySelector('.booking-template-wrap'));
+        mount.insertBefore(fig, mount.querySelector('.booking-date'));
     }
+
+    // Inline availability calendar — tap to set/change the date.
+    const calEl = mount.querySelector('.booking-cal');
+    buildAnnounceCalendar(calEl, setBookingDate);
+    if (bookingState.date) {
+        const c = calEl.querySelector(`.cal-cell[data-date="${bookingState.date}"]`);
+        if (c) c.classList.add('is-selected');
+    }
+    const disp = mount.querySelector('.booking-date-current');
+    if (disp) disp.textContent = bookingDateLabel();
 
     const ta = document.getElementById('booking-template');
     if (ta) ta.value = bookingTemplateValue();
