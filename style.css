@@ -459,6 +459,7 @@ body.lang-ko .lang-only-en { display: none; }
 .image-grid--nobg .image-tile { background: transparent; }
 
 .image-tile {
+    position: relative;      /* anchor for the absolutely-filled image */
     margin: 0;
     aspect-ratio: 1 / 1;     /* square thumbnails */
     border-radius: 4px;
@@ -467,16 +468,29 @@ body.lang-ko .lang-only-en { display: none; }
     cursor: zoom-in;
 }
 
+/* The image fills the square box; absolute so it can't collapse the tile's
+   height (grid's stretch vs aspect-ratio) and so it works without aspect-ratio. */
 .image-tile img {
-    display: block;
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;       /* fill the square, cropping as needed */
+    display: block;
+}
+
+/* Fallback for browsers without aspect-ratio: classic padding-box square. */
+@supports not (aspect-ratio: 1 / 1) {
+    .image-grid:not(.image-grid--single) .image-tile { height: 0; padding-bottom: 100%; }
 }
 
 /* Single full image keeps its natural ratio. */
-.image-grid--single .image-tile { aspect-ratio: auto; }
-.image-grid--single .image-tile img { height: auto; object-fit: contain; }
+.image-grid--single .image-tile { position: static; aspect-ratio: auto; }
+.image-grid--single .image-tile img {
+    position: static;
+    height: auto;
+    object-fit: contain;
+}
 
 /* ===== Lightbox carousel (tap a square -> swipe versions, zoom) ===== */
 .lightbox {
