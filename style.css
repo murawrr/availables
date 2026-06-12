@@ -398,6 +398,27 @@ body.lang-ko .lang-only-en { display: none; }
     padding-right: 15rem; /* gap between repeated words (uniform = seamless seam) */
 }
 
+/* ===== Vertical Korean menu text (home page) — two variants ===== */
+.ko-vert .marquee-word {
+    writing-mode: vertical-rl;
+    line-height: 1.05;
+    font-size: 4rem;          /* smaller so stacked syllables fit the bar height */
+    padding-right: 4rem;       /* horizontal gap between repeated words */
+    padding-bottom: 0;
+}
+.ko-vert .menu-bar--half .marquee-word { font-size: 2.4rem; }
+
+/* Variant 1: letters upright, with space between each */
+.ko-vert-spaced .marquee-word {
+    text-orientation: upright;
+    letter-spacing: 0.3em;
+}
+/* Variant 2: the word visually turned 90 degrees */
+.ko-vert-rotated .marquee-word {
+    text-orientation: sideways;
+    letter-spacing: 0.05em;
+}
+
 @keyframes slideText {
     from { transform: translateX(0); }
     to   { transform: translateX(-50%); }

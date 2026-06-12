@@ -108,23 +108,51 @@ function pickAnnounceLanguage(lang) {
 }
 
 // ===== Availability calendar (shown in the opening popup) =====
-// Where I'll be, by date. Anything not listed defaults to Seoul.
-function availabilityFor(year, month, day) {
-    if (year === 2026 && month === 7) {
-        if (day >= 6 && day <= 12) return 'busan';
-        if (day >= 20 && day <= 26) return 'jeju';
+// The months + trips come from schedule.js (window.SCHEDULE) so they can be
+// edited in one simple file. If that's missing/broken, we fall back to defaults.
+function getSchedule() {
+    const s = window.SCHEDULE;
+    if (s && Array.isArray(s.months) && s.months.length) {
+        return { months: s.months, trips: Array.isArray(s.trips) ? s.trips : [] };
+    }
+    return {
+        months: ['2026-06', '2026-07'],
+        trips: [
+            { place: 'Busan', from: '2026-07-06', to: '2026-07-12' },
+            { place: 'Jeju', from: '2026-07-20', to: '2026-07-26' },
+        ],
+    };
+}
+
+function parseYMD(s) {
+    const p = String(s || '').split('-').map(Number);
+    return (p.length === 3 && p[0] && p[1] && p[2]) ? new Date(p[0], p[1] - 1, p[2]) : null;
+}
+
+// Where I'll be on a given day. Anything not inside a trip defaults to Seoul.
+function availabilityFor(sched, year, month, day) {
+    const date = new Date(year, month - 1, day);
+    for (const t of sched.trips) {
+        const from = parseYMD(t.from), to = parseYMD(t.to);
+        if (from && to && date >= from && date <= to) {
+            const p = String(t.place || '').toLowerCase();
+            if (p === 'busan' || p === 'jeju') return p;
+        }
     }
     return 'seoul';
 }
-const CAL_MONTHS = [[2026, 6], [2026, 7]]; // June + July 2026
 
 function buildAnnounceCalendar(container) {
     if (!container) return;
     container.innerHTML = '';
-    CAL_MONTHS.forEach(([year, month]) => container.appendChild(buildCalMonth(year, month)));
+    const sched = getSchedule();
+    sched.months.forEach(ym => {
+        const [year, month] = String(ym).split('-').map(Number);
+        if (year && month) container.appendChild(buildCalMonth(sched, year, month));
+    });
 }
 
-function buildCalMonth(year, month) {
+function buildCalMonth(sched, year, month) {
     const ko = currentLanguage === 'ko';
     const monthsEn = ['', 'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'];
@@ -160,7 +188,7 @@ function buildCalMonth(year, month) {
     }
     for (let day = 1; day <= daysInMonth; day++) {
         const cell = document.createElement('span');
-        cell.className = `cal-cell cal--${availabilityFor(year, month, day)}`;
+        cell.className = `cal-cell cal--${availabilityFor(sched, year, month, day)}`;
         cell.textContent = day;
         grid.appendChild(cell);
     }
@@ -375,12 +403,25 @@ document.addEventListener('copy', (e) => {
 // Each .menu-bar carries data-en/ko/jp labels. We render two identical
 // segments side by side and slide the track by exactly one segment width,
 // so the loop never visibly "refreshes".
+// Korean main-page (home) menu text orientation. Try: 'spaced' (letters stacked
+// upright with space between them), 'rotated' (the word turned 90°), or 'off'.
+const KO_MENU_VERTICAL = 'spaced';
+
 const MARQUEE_SPEED = 90; // px per second
 // Per-bar horizontal start offset (px) so the bars don't all line up.
 const MARQUEE_OFFSETS = [-15, -180, -90, -260, -45, -200, -120, -310];
 
 // ===== Looping menu marquee =====
 function buildMarquees() {
+    // Vertical Korean treatment on the home menus (see KO_MENU_VERTICAL).
+    const home = document.querySelector('.menu-bars--home');
+    if (home) {
+        const mode = (currentLanguage === 'ko') ? KO_MENU_VERTICAL : 'off';
+        home.classList.toggle('ko-vert', mode === 'spaced' || mode === 'rotated');
+        home.classList.toggle('ko-vert-spaced', mode === 'spaced');
+        home.classList.toggle('ko-vert-rotated', mode === 'rotated');
+    }
+
     let index = -1;
     document.querySelectorAll('.menu-bar').forEach(bar => {
         const menuText = bar.querySelector('.menu-text');
