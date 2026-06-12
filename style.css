@@ -676,15 +676,30 @@ body.modal-open { overflow: hidden; }
 
 .modal-close {
     position: absolute;
-    top: 0.75rem;
-    right: 0.9rem;
+    top: 0.6rem;
+    right: 0.6rem;
+    width: 2.2rem;
+    height: 2.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: none;
     border: none;
-    font-size: 1.6rem;
+    font-size: 1.7rem;
     line-height: 1;
-    color: var(--muted);
+    color: var(--text);
+    border-radius: 50%;
     cursor: pointer;
 }
+.modal-close:hover { background: rgba(0, 0, 0, 0.08); }
+
+/* Prominent close on the opening popup (filled dark circle, white X) */
+#announce-modal .modal-close {
+    background: var(--text);
+    color: #fff;
+    opacity: 0.92;
+}
+#announce-modal .modal-close:hover { background: var(--text); opacity: 1; }
 
 .modal-title {
     font-size: 1.5rem;
@@ -1020,7 +1035,7 @@ body.announce-open .footer { display: none; }
 
 .announce-h { font-size: 1.05em; font-weight: 700; margin-bottom: 0.4rem; }
 .announce-step--lang .announce-h { margin-bottom: 1.5rem; }
-.announce-schedule { text-align: center; }
+.announce-step--schedule .announce-h { margin-bottom: 1.3rem; }
 
 /* Optional popup image (drop a file into images/popup/) */
 .announce-cover {
@@ -1032,14 +1047,66 @@ body.announce-open .footer { display: none; }
 }
 .announce-cover[hidden] { display: none; }
 
-/* Button row below the schedule */
-.announce-btns {
+/* ----- Availability calendar (June + July) ----- */
+.announce-cal {
     display: flex;
-    gap: 1rem;
-    margin-top: 2rem;   /* padding between the schedule text and the button */
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.4rem;
 }
-.announce-btns .announce-lang { flex: 1; }
-.announce-btns .announce-lang:first-child { text-transform: uppercase; } /* English button caps */
+.cal-month { width: 220px; max-width: 100%; }
+.cal-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+}
+.cal-dow { margin-bottom: 3px; }
+.cal-dow-cell {
+    text-align: center;
+    font-size: 0.6rem;
+    letter-spacing: 0.3px;
+    color: var(--muted);
+    text-transform: uppercase;
+}
+.cal-cell {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    border-radius: 4px;
+    color: #23271f;
+}
+.cal-blank { background: none; }
+.cal--seoul { background: #a7c4ac; }
+.cal--busan { background: #e6a279; }
+.cal--jeju  { background: #8fb9d6; }
+
+.announce-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.3rem;
+    font-size: 0.8rem;
+}
+.leg { display: inline-flex; align-items: center; }
+.leg::before {
+    content: "";
+    width: 0.8em;
+    height: 0.8em;
+    border-radius: 3px;
+    margin-right: 0.4em;
+}
+.leg--seoul::before { background: #a7c4ac; }
+.leg--busan::before { background: #e6a279; }
+.leg--jeju::before  { background: #8fb9d6; }
 
 /* Footer language switch link */
 .lang-switch {
