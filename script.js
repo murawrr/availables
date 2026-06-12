@@ -172,6 +172,19 @@ function dateInfoFor(sched, year, month, day) {
     return (sched.dates || []).find(x => x.date === key) || null;
 }
 
+// Click "book this design" in the image viewer -> booking page with the design
+// reference (name + image link) pre-filled into the form.
+function bookCurrentImage() {
+    const item = lb.items[lb.index];
+    if (!item) return;
+    sessionStorage.setItem('announceSeen', '1');
+    const q = new URLSearchParams();
+    const cap = captionText(item.caption);
+    if (cap) q.set('design', cap);
+    if (item.src) q.set('img', new URL(item.src, location.href).href);
+    window.location.href = 'booking.html?' + q.toString();
+}
+
 // Click an available date -> booking page with the date pre-filled.
 function bookDate(info) {
     sessionStorage.setItem('announceSeen', '1');
@@ -308,26 +321,52 @@ function bookingContentHTML() {
         <p class="modal-foot en-only"><a href="waitlist.html" data-en="Not in your area yet? Join the waitlist →">Not in your area yet? Join the waitlist →</a></p>`;
 }
 
-// Booking template text, with a "preferred date" line prepended if the user
-// arrived from clicking a calendar date (booking.html?date=...&time=...&place=...).
+// Booking template text, with "preferred date" and/or "selected design" lines
+// prepended when the user arrived from a calendar date or an image
+// (booking.html?date=...&time=...&place=...  or  ?design=...&img=...).
 function bookingTemplateValue() {
     const base = BOOKING_TEMPLATE[currentLanguage] || BOOKING_TEMPLATE.en;
     const params = new URLSearchParams(location.search);
-    const date = params.get('date');
-    if (!date) return base;
     const ko = currentLanguage === 'ko';
-    let line = (ko ? '예약 희망일: ' : 'preferred date: ') + date;
-    const time = params.get('time');
-    const place = params.get('place');
-    if (time) line += ` ${time}`;
-    if (place) line += ` (${place})`;
-    return line + '\n' + base;
+    const lines = [];
+
+    const date = params.get('date');
+    if (date) {
+        let line = (ko ? '예약 희망일: ' : 'preferred date: ') + date;
+        const time = params.get('time');
+        const place = params.get('place');
+        if (time) line += ` ${time}`;
+        if (place) line += ` (${place})`;
+        lines.push(line);
+    }
+
+    const design = params.get('design');
+    const img = params.get('img');
+    if (design || img) {
+        let line = ko ? '선택한 도안: ' : 'selected design: ';
+        if (design) line += design;
+        if (img) line += (design ? ' — ' : '') + img;
+        lines.push(line);
+    }
+
+    return lines.length ? lines.join('\n') + '\n' + base : base;
 }
 
 function renderBookingPage() {
     const mount = document.getElementById('booking-page');
     if (!mount) return;
     mount.innerHTML = bookingContentHTML();
+
+    // Show the chosen image (if the user came from "book this design").
+    const img = new URLSearchParams(location.search).get('img');
+    if (img) {
+        const fig = document.createElement('figure');
+        fig.className = 'booking-selected';
+        fig.innerHTML = `<img src="${img}" alt="" draggable="false">` +
+            `<figcaption data-en="your selected design" data-ko="선택한 도안">your selected design</figcaption>`;
+        mount.insertBefore(fig, mount.querySelector('.booking-template-wrap'));
+    }
+
     const ta = document.getElementById('booking-template');
     if (ta) ta.value = bookingTemplateValue();
     requestAnimationFrame(autosizeTemplate);
@@ -722,12 +761,17 @@ function buildLightbox() {
         '<button class="lb-nav lb-prev" type="button" aria-label="Previous">&#8249;</button>' +
         '<div class="lb-stage"><img alt="" draggable="false"></div>' +
         '<button class="lb-nav lb-next" type="button" aria-label="Next">&#8250;</button>' +
-        '<div class="lb-meta"><p class="lb-caption"></p><span class="lb-count"></span></div>';
+        '<div class="lb-meta">' +
+            '<p class="lb-caption"></p>' +
+            '<span class="lb-count"></span>' +
+            '<button class="lb-book" type="button" data-en="book this design" data-ko="이 도안 예약하기">book this design</button>' +
+        '</div>';
     document.body.appendChild(el);
 
     el.querySelector('.lb-close').addEventListener('click', closeLightbox);
     el.querySelector('.lb-prev').addEventListener('click', () => lbStep(-1));
     el.querySelector('.lb-next').addEventListener('click', () => lbStep(1));
+    el.querySelector('.lb-book').addEventListener('click', bookCurrentImage);
 
     // One pointer handler covers tap-to-zoom, drag-to-pan and swipe-to-change.
     const stage = el.querySelector('.lb-stage');
@@ -773,6 +817,8 @@ function renderLightbox() {
     capEl.style.display = cap ? '' : 'none';
     el.querySelector('.lb-count').textContent =
         lb.items.length > 1 ? `${lb.index + 1} / ${lb.items.length}` : '';
+    el.querySelector('.lb-book').textContent =
+        (currentLanguage === 'ko') ? '이 도안 예약하기' : 'book this design';
     el.classList.toggle('single', lb.items.length <= 1);
     resetZoom();
 }
