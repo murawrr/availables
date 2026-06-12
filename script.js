@@ -95,7 +95,7 @@ function applyLanguage(lang) {
 
     // Swap the copyable booking template to the current language.
     const ta = document.getElementById('booking-template');
-    if (ta) { ta.value = bookingTemplateValue(); autosizeTemplate(); }
+    if (ta) { ta.value = bookingTemplateValue(); updateBookingContactLinks(); autosizeTemplate(); }
 }
 
 function setLanguage(lang) {
@@ -295,7 +295,7 @@ function renderHeader() {
 function bookingContentHTML() {
     // Kakao only shows on the Korean site (CSS hides .contact-btn.kakao in EN).
     const kakaoBtn = KAKAO_URL
-        ? `<a class="contact-btn kakao" href="${KAKAO_URL}" target="_blank" rel="noopener">kakao</a>`
+        ? `<a class="contact-btn kakao" href="${KAKAO_URL}" target="_blank" rel="noopener" onclick="copyForChat()">kakao</a>`
         : '';
     const policyItems = BOOKING_POLICY.en
         .map((en, i) => `<li data-en="${en}" data-ko="${BOOKING_POLICY.ko[i]}">${en}</li>`)
@@ -314,7 +314,7 @@ function bookingContentHTML() {
             </div>
         </div>
         <div class="contact-options">
-            <a class="contact-btn ig" href="${INSTAGRAM_URL}" target="_blank" rel="noopener">dm</a>
+            <a class="contact-btn ig" href="${INSTAGRAM_URL}" target="_blank" rel="noopener" onclick="copyForChat()">dm</a>
             ${kakaoBtn}
             <a class="contact-btn email" href="mailto:${EMAIL}">e-mail</a>
         </div>
@@ -352,6 +352,33 @@ function bookingTemplateValue() {
     return lines.length ? lines.join('\n') + '\n' + base : base;
 }
 
+// E-mail can carry the whole filled form automatically (subject + body).
+// Instagram/Kakao can't be pre-filled by a link, so we copy the form to the
+// clipboard when those are tapped — the user just pastes it in the chat.
+function updateBookingContactLinks() {
+    const ta = document.getElementById('booking-template');
+    const emailBtn = document.querySelector('.contact-btn.email');
+    if (!ta || !emailBtn) return;
+    const subject = (currentLanguage === 'ko') ? '예약 문의 — mura' : 'Booking enquiry — mura';
+    emailBtn.href = `mailto:${EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(ta.value)}`;
+}
+
+function copyForChat() {
+    const ta = document.getElementById('booking-template');
+    if (!ta) return;
+    try { navigator.clipboard.writeText(ta.value); } catch (e) { ta.select(); document.execCommand('copy'); }
+    showToast(currentLanguage === 'ko' ? '복사됐어요 — 채팅에 붙여넣어 주세요' : 'Copied — paste it into the chat');
+}
+
+function showToast(msg) {
+    let t = document.getElementById('copy-toast');
+    if (!t) { t = document.createElement('div'); t.id = 'copy-toast'; t.className = 'copy-toast'; document.body.appendChild(t); }
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
 function renderBookingPage() {
     const mount = document.getElementById('booking-page');
     if (!mount) return;
@@ -369,6 +396,7 @@ function renderBookingPage() {
 
     const ta = document.getElementById('booking-template');
     if (ta) ta.value = bookingTemplateValue();
+    updateBookingContactLinks();
     requestAnimationFrame(autosizeTemplate);
 }
 
