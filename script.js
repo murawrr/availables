@@ -33,32 +33,14 @@ const ANNOUNCEMENT_HTML = `
         </div>
     </div>
 
-    <!-- Step 2: schedule in the chosen language -->
+    <!-- Step 2: available-dates calendar -->
     <div class="announce-step announce-step--schedule" hidden>
-        <div class="announce-schedule" data-lang="en">
-            <h3 class="announce-h">available schedule</h3>
-            <div class="announce-slots">
-                <p class="slot-month">june</p>
-                <p>Seoul</p>
-                <p class="slot-month">july</p>
-                <p>Busan</p>
-                <p>Jeju</p>
-                <p>Seoul</p>
-            </div>
-        </div>
-        <div class="announce-schedule" data-lang="ko" hidden>
-            <h3 class="announce-h">도안</h3>
-            <div class="announce-slots">
-                <p class="slot-month">6월</p>
-                <p>서울</p>
-                <p class="slot-month">7월</p>
-                <p>부산</p>
-                <p>제주</p>
-                <p>서울</p>
-            </div>
-        </div>
-        <div class="announce-btns">
-            <button type="button" class="announce-lang" onclick="closeAnnounce()" data-en="go to page" data-ko="페이지 가기">go to page</button>
+        <h3 class="announce-h" data-en="available dates" data-ko="예약 가능 날짜">available dates</h3>
+        <div class="announce-cal"></div>
+        <div class="announce-legend">
+            <span class="leg leg--seoul" data-en="Seoul" data-ko="서울">Seoul</span>
+            <span class="leg leg--busan" data-en="Busan" data-ko="부산">Busan</span>
+            <span class="leg leg--jeju" data-en="Jeju" data-ko="제주">Jeju</span>
         </div>
     </div>`;
 
@@ -115,16 +97,75 @@ function chooseLanguageHome(lang) {
     window.location.href = 'index.html';
 }
 
-// Opening popup step 1 -> apply the chosen language and reveal the schedule step.
+// Opening popup step 1 -> apply the chosen language and reveal the calendar.
 function pickAnnounceLanguage(lang) {
     setLanguage(lang);
     const m = document.getElementById('announce-modal');
     if (!m) return;
     m.querySelector('.announce-step--lang').hidden = true;
     m.querySelector('.announce-step--schedule').hidden = false;
-    m.querySelectorAll('.announce-schedule').forEach(s => {
-        s.hidden = (s.dataset.lang !== lang);
+    buildAnnounceCalendar(m.querySelector('.announce-cal'));
+}
+
+// ===== Availability calendar (shown in the opening popup) =====
+// Where I'll be, by date. Anything not listed defaults to Seoul.
+function availabilityFor(year, month, day) {
+    if (year === 2026 && month === 7) {
+        if (day >= 6 && day <= 12) return 'busan';
+        if (day >= 20 && day <= 26) return 'jeju';
+    }
+    return 'seoul';
+}
+const CAL_MONTHS = [[2026, 6], [2026, 7]]; // June + July 2026
+
+function buildAnnounceCalendar(container) {
+    if (!container) return;
+    container.innerHTML = '';
+    CAL_MONTHS.forEach(([year, month]) => container.appendChild(buildCalMonth(year, month)));
+}
+
+function buildCalMonth(year, month) {
+    const ko = currentLanguage === 'ko';
+    const monthsEn = ['', 'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'];
+    const dow = ko ? ['일', '월', '화', '수', '목', '금', '토']
+                   : ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+    const wrap = document.createElement('div');
+    wrap.className = 'cal-month';
+
+    const title = document.createElement('div');
+    title.className = 'cal-title';
+    title.textContent = ko ? `${year}년 ${month}월` : `${monthsEn[month]} ${year}`;
+    wrap.appendChild(title);
+
+    const head = document.createElement('div');
+    head.className = 'cal-grid cal-dow';
+    dow.forEach(d => {
+        const c = document.createElement('span');
+        c.className = 'cal-dow-cell';
+        c.textContent = d;
+        head.appendChild(c);
     });
+    wrap.appendChild(head);
+
+    const grid = document.createElement('div');
+    grid.className = 'cal-grid';
+    const startDay = new Date(year, month - 1, 1).getDay();        // 0 = Sunday
+    const daysInMonth = new Date(year, month, 0).getDate();
+    for (let i = 0; i < startDay; i++) {
+        const blank = document.createElement('span');
+        blank.className = 'cal-cell cal-blank';
+        grid.appendChild(blank);
+    }
+    for (let day = 1; day <= daysInMonth; day++) {
+        const cell = document.createElement('span');
+        cell.className = `cal-cell cal--${availabilityFor(year, month, day)}`;
+        cell.textContent = day;
+        grid.appendChild(cell);
+    }
+    wrap.appendChild(grid);
+    return wrap;
 }
 
 // ===== Shared header (injected into #site-header on every page) =====
