@@ -459,6 +459,27 @@ body.lang-ko .lang-only-en { display: none; }
 }
 
 /* Dense masonry (flash-sheet) gallery */
+/* Available <-> archive tabs above the designs grid */
+.grid-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+.grid-tab {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 0.3rem 0.1rem;
+    font: inherit;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+}
+.grid-tab:hover { color: var(--text); }
+.grid-tab.is-active { color: var(--text); border-bottom-color: var(--text); font-weight: 600; }
+
 .image-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr); /* Instagram-style 3-up grid */
@@ -1108,6 +1129,7 @@ body.announce-open .footer { display: none; }
 }
 .cal-blank { background: none; }
 .cal-off { color: #b8beb2; }              /* not available: muted, no fill */
+.cal-past { opacity: 0.5; text-decoration: line-through; } /* date already passed */
 .cal--seoul { background: #a7c4ac; }
 .cal--busan { background: #e6a279; }
 .cal--jeju  { background: #8fb9d6; }

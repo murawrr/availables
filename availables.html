@@ -20,7 +20,12 @@
                 </span>
             </div>
 
-            <!-- The grid is built from gallery.js (window.GALLERY.available). -->
+            <div class="grid-tabs">
+                <button type="button" class="grid-tab is-active" data-collection="available" data-en="available" data-ko="예약 가능">available</button>
+                <button type="button" class="grid-tab" data-collection="archive" data-en="archive" data-ko="아카이브">archive</button>
+            </div>
+
+            <!-- The grid is built from gallery.js (window.GALLERY.*). -->
             <div class="image-grid" data-collection="available"></div>
         </section>
     </main>
