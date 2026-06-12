@@ -53,6 +53,7 @@ const ANNOUNCEMENT_HTML = `
     <!-- Step 2: available-dates calendar -->
     <div class="announce-step announce-step--schedule" hidden>
         <h3 class="announce-h" data-en="available dates" data-ko="예약 가능 날짜">available dates</h3>
+        <p class="announce-hint" data-en="click a date to book it" data-ko="원하는 날짜를 눌러 예약하세요">click a date to book it</p>
         <div class="announce-cal"></div>
         <div class="announce-legend">
             <span class="leg leg--seoul" data-en="Seoul" data-ko="서울">Seoul</span>
@@ -94,7 +95,7 @@ function applyLanguage(lang) {
 
     // Swap the copyable booking template to the current language.
     const ta = document.getElementById('booking-template');
-    if (ta) { ta.value = BOOKING_TEMPLATE[lang] || BOOKING_TEMPLATE.en; autosizeTemplate(); }
+    if (ta) { ta.value = bookingTemplateValue(); autosizeTemplate(); }
 }
 
 function setLanguage(lang) {
@@ -130,7 +131,10 @@ function pickAnnounceLanguage(lang) {
 }
 
 // Step 3 of the opening popup: the three choices after the calendar.
-function announceBook() { closeAnnounce(); openBooking(); }
+function announceBook() {
+    sessionStorage.setItem('announceSeen', '1');
+    window.location.href = 'booking.html';
+}
 
 function announceWaitlist() {
     sessionStorage.setItem('announceSeen', '1');
@@ -148,38 +152,33 @@ function announceDesigns() {
 }
 
 // ===== Availability calendar (shown in the opening popup) =====
-// The months + trips come from schedule.js (window.SCHEDULE) so they can be
-// edited in one simple file. If that's missing/broken, we fall back to defaults.
+// Months + available dates come from schedule.js (window.SCHEDULE).
 function getSchedule() {
     const s = window.SCHEDULE;
     if (s && Array.isArray(s.months) && s.months.length) {
-        return { months: s.months, trips: Array.isArray(s.trips) ? s.trips : [] };
+        return { months: s.months, dates: Array.isArray(s.dates) ? s.dates : [] };
     }
-    return {
-        months: ['2026-06', '2026-07'],
-        trips: [
-            { place: 'Busan', from: '2026-07-06', to: '2026-07-12' },
-            { place: 'Jeju', from: '2026-07-20', to: '2026-07-26' },
-        ],
-    };
+    return { months: ['2026-06', '2026-07'], dates: [] };
 }
 
-function parseYMD(s) {
-    const p = String(s || '').split('-').map(Number);
-    return (p.length === 3 && p[0] && p[1] && p[2]) ? new Date(p[0], p[1] - 1, p[2]) : null;
+function normPlace(p) {
+    p = String(p || '').toLowerCase();
+    return (p === 'busan' || p === 'jeju') ? p : 'seoul';
 }
 
-// Where I'll be on a given day. Anything not inside a trip defaults to Seoul.
-function availabilityFor(sched, year, month, day) {
-    const date = new Date(year, month - 1, day);
-    for (const t of sched.trips) {
-        const from = parseYMD(t.from), to = parseYMD(t.to);
-        if (from && to && date >= from && date <= to) {
-            const p = String(t.place || '').toLowerCase();
-            if (p === 'busan' || p === 'jeju') return p;
-        }
-    }
-    return 'seoul';
+// Look up an available date entry for a given day, or null.
+function dateInfoFor(sched, year, month, day) {
+    const key = `${year}-${pad2(month)}-${pad2(day)}`;
+    return (sched.dates || []).find(x => x.date === key) || null;
+}
+
+// Click an available date -> booking page with the date pre-filled.
+function bookDate(info) {
+    sessionStorage.setItem('announceSeen', '1');
+    const q = new URLSearchParams({ date: info.date });
+    if (info.place) q.set('place', info.place);
+    if (info.time) q.set('time', info.time);
+    window.location.href = 'booking.html?' + q.toString();
 }
 
 function buildAnnounceCalendar(container) {
@@ -227,9 +226,23 @@ function buildCalMonth(sched, year, month) {
         grid.appendChild(blank);
     }
     for (let day = 1; day <= daysInMonth; day++) {
+        const info = dateInfoFor(sched, year, month, day);
         const cell = document.createElement('span');
-        cell.className = `cal-cell cal--${availabilityFor(sched, year, month, day)}`;
-        cell.textContent = day;
+        if (info) {
+            cell.className = `cal-cell is-available cal--${normPlace(info.place)}`;
+            cell.innerHTML = `<span class="cal-d">${day}</span>` +
+                (info.time ? '<span class="cal-dot" aria-hidden="true"></span>' : '');
+            cell.setAttribute('role', 'button');
+            cell.tabIndex = 0;
+            cell.title = info.time ? `${info.date} · ${info.time}` : info.date;
+            cell.addEventListener('click', () => bookDate(info));
+            cell.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); bookDate(info); }
+            });
+        } else {
+            cell.className = 'cal-cell cal-off';
+            cell.textContent = day;
+        }
         grid.appendChild(cell);
     }
     wrap.appendChild(grid);
@@ -249,7 +262,7 @@ function renderHeader() {
         </div>
         <span class="header-dots" aria-hidden="true"></span>
         <div class="header-right">
-            <button type="button" class="header-action" onclick="openBooking()" data-en="book or enquire" data-ko="예약 혹은 문의">book or enquire</button>
+            <a class="header-action" href="booking.html" data-en="book or enquire" data-ko="예약 혹은 문의">book or enquire</a>
         </div>`;
 
     // Back-to-home link, relocated to its own row just below the header.
@@ -265,56 +278,59 @@ function renderHeader() {
     }
 }
 
-// ===== Booking modal =====
-function renderBookingModal() {
-    if (document.getElementById('booking-modal')) return;
-
+// ===== Booking (its own page: booking.html, so Back returns to the designs) =====
+function bookingContentHTML() {
     // Kakao only shows on the Korean site (CSS hides .contact-btn.kakao in EN).
     const kakaoBtn = KAKAO_URL
         ? `<a class="contact-btn kakao" href="${KAKAO_URL}" target="_blank" rel="noopener">kakao</a>`
         : '';
-
     const policyItems = BOOKING_POLICY.en
         .map((en, i) => `<li data-en="${en}" data-ko="${BOOKING_POLICY.ko[i]}">${en}</li>`)
         .join('');
-
-    const overlay = document.createElement('div');
-    overlay.id = 'booking-modal';
-    overlay.className = 'modal-overlay';
-    overlay.innerHTML = `
-        <div class="modal" role="dialog" aria-modal="true" aria-label="Booking">
-            <button class="modal-close" onclick="closeBooking()" aria-label="Close">&times;</button>
-            <h2 class="modal-title" data-en="book or enquire" data-ko="예약 혹은 문의">book or enquire</h2>
-            <div class="booking-policy">
-                <h3 class="booking-policy-h" data-en="booking policy" data-ko="예약 규정">booking policy</h3>
-                <ul class="booking-policy-list">${policyItems}</ul>
+    return `
+        <h1 class="booking-title" data-en="book or enquire" data-ko="예약 혹은 문의">book or enquire</h1>
+        <div class="booking-policy">
+            <h3 class="booking-policy-h" data-en="booking policy" data-ko="예약 규정">booking policy</h3>
+            <ul class="booking-policy-list">${policyItems}</ul>
+        </div>
+        <p class="modal-intro" data-en="To book, copy and fill in the template below — or feel free to ignore it and just ask me a question. Either way, reach me by DM." data-ko="예약을 원하시면 아래 양식을 복사해 작성해 주세요. 양식은 건너뛰고 편하게 질문만 보내주셔도 괜찮습니다. DM 또는 카카오톡으로 연락 주세요.">To book, copy and fill in the template below — or feel free to ignore it and just ask me a question. Either way, reach me by DM.</p>
+        <div class="booking-template-wrap">
+            <textarea id="booking-template" class="booking-template" rows="5" readonly></textarea>
+            <div class="copy-row">
+                <button class="copy-btn" onclick="copyTemplate()" data-en="copy" data-ko="복사하기">copy</button>
             </div>
-            <p class="modal-intro" data-en="To book, copy and fill in the template below — or feel free to ignore it and just ask me a question. Either way, reach me by DM." data-ko="예약을 원하시면 아래 양식을 복사해 작성해 주세요. 양식은 건너뛰고 편하게 질문만 보내주셔도 괜찮습니다. DM 또는 카카오톡으로 연락 주세요.">To book, copy and fill in the template below — or feel free to ignore it and just ask me a question. Either way, reach me by DM.</p>
-            <div class="booking-template-wrap">
-                <textarea id="booking-template" class="booking-template" rows="5" readonly></textarea>
-                <div class="copy-row">
-                    <button class="copy-btn" onclick="copyTemplate()" data-en="copy" data-ko="복사하기">copy</button>
-                </div>
-            </div>
-            <div class="contact-options">
-                <a class="contact-btn ig" href="${INSTAGRAM_URL}" target="_blank" rel="noopener">dm</a>
-                ${kakaoBtn}
-                <a class="contact-btn email" href="mailto:${EMAIL}">e-mail</a>
-            </div>
-            <p class="modal-foot en-only"><a href="waitlist.html" data-en="Not in your area yet? Join the waitlist →">Not in your area yet? Join the waitlist →</a></p>
-        </div>`;
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeBooking(); });
-    document.body.appendChild(overlay);
-    document.getElementById('booking-template').value = BOOKING_TEMPLATE[currentLanguage] || BOOKING_TEMPLATE.en;
+        </div>
+        <div class="contact-options">
+            <a class="contact-btn ig" href="${INSTAGRAM_URL}" target="_blank" rel="noopener">dm</a>
+            ${kakaoBtn}
+            <a class="contact-btn email" href="mailto:${EMAIL}">e-mail</a>
+        </div>
+        <p class="modal-foot en-only"><a href="waitlist.html" data-en="Not in your area yet? Join the waitlist →">Not in your area yet? Join the waitlist →</a></p>`;
 }
 
-function openBooking() {
-    const m = document.getElementById('booking-modal');
-    if (m) {
-        m.classList.add('open');
-        document.body.classList.add('modal-open');
-        requestAnimationFrame(autosizeTemplate);
-    }
+// Booking template text, with a "preferred date" line prepended if the user
+// arrived from clicking a calendar date (booking.html?date=...&time=...&place=...).
+function bookingTemplateValue() {
+    const base = BOOKING_TEMPLATE[currentLanguage] || BOOKING_TEMPLATE.en;
+    const params = new URLSearchParams(location.search);
+    const date = params.get('date');
+    if (!date) return base;
+    const ko = currentLanguage === 'ko';
+    let line = (ko ? '예약 희망일: ' : 'preferred date: ') + date;
+    const time = params.get('time');
+    const place = params.get('place');
+    if (time) line += ` ${time}`;
+    if (place) line += ` (${place})`;
+    return line + '\n' + base;
+}
+
+function renderBookingPage() {
+    const mount = document.getElementById('booking-page');
+    if (!mount) return;
+    mount.innerHTML = bookingContentHTML();
+    const ta = document.getElementById('booking-template');
+    if (ta) ta.value = bookingTemplateValue();
+    requestAnimationFrame(autosizeTemplate);
 }
 
 // Shrink the template box to fit its text (no empty space). Only when visible.
@@ -323,11 +339,6 @@ function autosizeTemplate() {
     if (!ta || !ta.offsetParent) return;
     ta.style.height = 'auto';
     ta.style.height = ta.scrollHeight + 'px';
-}
-
-function closeBooking() {
-    const m = document.getElementById('booking-modal');
-    if (m) { m.classList.remove('open'); document.body.classList.remove('modal-open'); }
 }
 
 async function copyTemplate() {
@@ -404,7 +415,7 @@ function renderFooter() {
 // Watermark is now the CSS backdrop of .menu-bars (see style.css).
 
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') { closeBooking(); closeAnnounce(); closeLightbox(); }
+    if (e.key === 'Escape') { closeAnnounce(); closeLightbox(); }
     const lbOpen = document.getElementById('lightbox')?.classList.contains('open');
     if (lbOpen && e.key === 'ArrowLeft') lbStep(-1);
     if (lbOpen && e.key === 'ArrowRight') lbStep(1);
@@ -617,19 +628,23 @@ function loadDesignGrid(grid) {
         const ext = d.ext || 'png';
         const count = Math.max(0, parseInt(d.count, 10) || 0);
         if (!d.folder || !count) return;
+        // Build this design's full image list once; every image is its own square,
+        // and clicking any of them opens the viewer scoped to THIS design only.
         const items = [];
         for (let i = 1; i <= count; i++) {
             items.push({ src: `${d.folder}/${pad2(i)}.${ext}`, caption: d.caption || null });
         }
-        const fig = document.createElement('figure');
-        fig.className = 'image-tile';
-        const img = document.createElement('img');
-        img.src = items[0].src;
-        img.alt = (d.caption && (d.caption.en || d.caption.ko)) || 'design';
-        img.loading = 'lazy';
-        fig.appendChild(img);
-        fig.addEventListener('click', () => openLightbox(items, 0));
-        frag.appendChild(fig);
+        items.forEach((item, idx) => {
+            const fig = document.createElement('figure');
+            fig.className = 'image-tile';
+            const img = document.createElement('img');
+            img.src = item.src;
+            img.alt = (d.caption && (d.caption.en || d.caption.ko)) || 'design';
+            img.loading = 'lazy';
+            fig.appendChild(img);
+            fig.addEventListener('click', () => openLightbox(items, idx));
+            frag.appendChild(fig);
+        });
     });
 
     if (!frag.childNodes.length) {
@@ -809,7 +824,7 @@ function renderBackToTop() {
 // ===== Init =====
 function init() {
     renderHeader();
-    renderBookingModal();
+    renderBookingPage();
     renderAnnouncement();
     renderFooter();
     renderBackToTop();

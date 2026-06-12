@@ -123,6 +123,7 @@ a { color: inherit; }
     color: #d8dce2;
     font-weight: 700;
     text-transform: uppercase;
+    text-decoration: none;
     cursor: pointer;
     letter-spacing: 0.6px;
     transition: opacity 0.2s ease;
@@ -409,25 +410,22 @@ body.lang-ko .lang-only-en { display: none; }
 }
 
 /* ===== Vertical Korean menu text (home page) — two variants ===== */
+/* Sized so the stacked syllables fit inside the bar height (full bar holds the
+   2-char 도안; the half bars must hold 4-char 공지사항 / 아카이브). */
 .ko-vert .marquee-word {
     writing-mode: vertical-rl;
     line-height: 1.05;
-    font-size: 4rem;          /* smaller so stacked syllables fit the bar height */
-    padding-right: 4rem;       /* horizontal gap between repeated words */
+    font-size: 4rem;
+    padding-right: 3rem;       /* horizontal gap between repeated words */
     padding-bottom: 0;
 }
-.ko-vert .menu-bar--half .marquee-word { font-size: 2.4rem; }
+.ko-vert .menu-bar--half .marquee-word { font-size: 1.7rem; }
 
 /* Variant 1: letters upright, with space between each */
-.ko-vert-spaced .marquee-word {
-    text-orientation: upright;
-    letter-spacing: 0.3em;
-}
+.ko-vert-spaced .marquee-word { text-orientation: upright; letter-spacing: 0.25em; }
+.ko-vert-spaced .menu-bar--half .marquee-word { letter-spacing: 0.12em; }
 /* Variant 2: the word visually turned 90 degrees */
-.ko-vert-rotated .marquee-word {
-    text-orientation: sideways;
-    letter-spacing: 0.05em;
-}
+.ko-vert-rotated .marquee-word { text-orientation: sideways; letter-spacing: 0.05em; }
 
 @keyframes slideText {
     from { transform: translateX(0); }
@@ -741,6 +739,16 @@ body.modal-open { overflow: hidden; }
 .modal-intro {
     color: var(--muted);
     margin-bottom: 1.25rem;
+}
+
+/* Booking page (booking.html) */
+.booking-wrap { max-width: 560px; margin: 0 auto; }
+.booking-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 1.3rem;
 }
 
 /* Booking policy block (no pricing) */
@@ -1128,6 +1136,7 @@ body.announce-open .footer { display: none; }
     text-transform: uppercase;
 }
 .cal-cell {
+    position: relative;
     aspect-ratio: 1 / 1;
     display: flex;
     align-items: center;
@@ -1137,9 +1146,36 @@ body.announce-open .footer { display: none; }
     color: #23271f;
 }
 .cal-blank { background: none; }
+.cal-off { color: #b8beb2; }              /* not available: muted, no fill */
 .cal--seoul { background: #a7c4ac; }
 .cal--busan { background: #e6a279; }
 .cal--jeju  { background: #8fb9d6; }
+
+/* Available dates are clickable */
+.cal-cell.is-available { cursor: pointer; font-weight: 600; }
+.cal-cell.is-available:hover,
+.cal-cell.is-available:focus-visible {
+    outline: 2px solid rgba(0, 0, 0, 0.45);
+    outline-offset: -2px;
+}
+/* Small dot marks days that have a set time (e.g. Busan) */
+.cal-dot {
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.announce-hint {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin: 0 0 1rem;
+}
 
 .announce-legend {
     display: flex;
