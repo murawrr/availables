@@ -11,38 +11,21 @@
     <!-- Shared header (rendered by script.js) -->
     <div id="site-header" data-back="index.html"></div>
 
-    <!-- Menu Bars: mini-tattoos + the individual episode / mura-type subpages -->
-    <nav class="menu-bars">
-        <a href="mini-tattoos.html" class="menu-bar" data-en="mini-tattoos" data-ko="미니 타투">
-            <div class="menu-text"></div>
-        </a>
+    <main class="container">
+        <section class="project">
+            <div class="project-desc">
+                <span class="desc-label">
+                    <span class="dot"></span>
+                    <span data-en="available designs" data-ko="도안">available designs</span>
+                </span>
+            </div>
 
-        <!-- episodes (brought out as individual subpages) -->
-        <a href="episode-1.html" class="menu-bar" data-en="Hello, world!" data-ko="Hello, world!">
-            <div class="menu-text"></div>
-        </a>
-        <a href="protege-me.html" class="menu-bar" data-en="Protege-me" data-ko="Protege-me">
-            <div class="menu-text"></div>
-        </a>
-        <a href="immortality.html" class="menu-bar" data-en="immortality" data-ko="immortality">
-            <div class="menu-text"></div>
-        </a>
+            <!-- The grid is built from gallery.js (window.GALLERY.available). -->
+            <div class="image-grid" data-collection="available"></div>
+        </section>
+    </main>
 
-        <!-- mura-types (brought out as individual subpages) -->
-        <a href="mura-type-01.html" class="menu-bar" data-en="평화" data-ko="평화">
-            <div class="menu-text"></div>
-        </a>
-        <a href="mura-type-02.html" class="menu-bar" data-en="해방" data-ko="해방">
-            <div class="menu-text"></div>
-        </a>
-        <a href="mura-type-03.html" class="menu-bar" data-en="태양" data-ko="태양">
-            <div class="menu-text"></div>
-        </a>
-        <a href="mura-type-04.html" class="menu-bar" data-en="자유" data-ko="자유">
-            <div class="menu-text"></div>
-        </a>
-    </nav>
-
+    <script src="gallery.js"></script>
     <script src="schedule.js"></script>
     <script src="script.js"></script>
 </body>

@@ -605,6 +605,43 @@ async function loadGallery(grid) {
     grid.appendChild(frag);
 }
 
+// ===== Config-driven design grid (fast: no probing) =====
+// Reads window.GALLERY from gallery.js. Each design becomes one square; tapping
+// it opens that design's own images in the viewer.
+function loadDesignGrid(grid) {
+    const coll = grid.getAttribute('data-collection');
+    const designs = (window.GALLERY && Array.isArray(window.GALLERY[coll])) ? window.GALLERY[coll] : [];
+    const frag = document.createDocumentFragment();
+
+    designs.forEach(d => {
+        const ext = d.ext || 'png';
+        const count = Math.max(0, parseInt(d.count, 10) || 0);
+        if (!d.folder || !count) return;
+        const items = [];
+        for (let i = 1; i <= count; i++) {
+            items.push({ src: `${d.folder}/${pad2(i)}.${ext}`, caption: d.caption || null });
+        }
+        const fig = document.createElement('figure');
+        fig.className = 'image-tile';
+        const img = document.createElement('img');
+        img.src = items[0].src;
+        img.alt = (d.caption && (d.caption.en || d.caption.ko)) || 'design';
+        img.loading = 'lazy';
+        fig.appendChild(img);
+        fig.addEventListener('click', () => openLightbox(items, 0));
+        frag.appendChild(fig);
+    });
+
+    if (!frag.childNodes.length) {
+        const f = document.createElement('figure');
+        f.className = 'image-tile is-placeholder';
+        f.innerHTML = '<span class="placeholder-label">Coming soon</span>';
+        grid.appendChild(f);
+        return;
+    }
+    grid.appendChild(frag);
+}
+
 // Flat: every image is its own square; the viewer holds them all.
 async function collectFlat(folder, first) {
     const srcs = await collectSequence(`${folder}/`, first);
@@ -778,6 +815,7 @@ function init() {
     renderBackToTop();
     applyLanguage(currentLanguage);
     buildMarquees();
+    document.querySelectorAll('.image-grid[data-collection]').forEach(loadDesignGrid);
     document.querySelectorAll('.image-grid[data-images]').forEach(loadGallery);
     document.querySelectorAll('.work-card[data-thumb]').forEach(loadThumb);
 
