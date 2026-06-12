@@ -112,13 +112,6 @@ function setLanguageHome(lang) {
     window.location.href = 'index.html';
 }
 
-// Opening popup: always go to the main page in the chosen language.
-function chooseLanguageHome(lang) {
-    sessionStorage.setItem('announceSeen', '1'); // don't reshow the popup
-    localStorage.setItem('preferredLanguage', lang);
-    window.location.href = 'index.html';
-}
-
 // Opening popup step 1 -> apply the chosen language and reveal the calendar.
 function pickAnnounceLanguage(lang) {
     setLanguage(lang);
@@ -129,12 +122,7 @@ function pickAnnounceLanguage(lang) {
     buildAnnounceCalendar(m.querySelector('.announce-cal'));
 }
 
-// Step 3 of the opening popup: the three choices after the calendar.
-function announceBook() {
-    sessionStorage.setItem('announceSeen', '1');
-    window.location.href = 'booking.html';
-}
-
+// The opening popup's two choices below the calendar.
 function announceWaitlist() {
     sessionStorage.setItem('announceSeen', '1');
     window.location.href = 'waitlist.html';
@@ -652,18 +640,11 @@ function buildMarquees() {
     });
 }
 
-// ===== Gallery auto-loader (Instagram-style square grid) =====
-// Two layouts are supported per .image-grid[data-images="folder"]:
-//   * Flat: 01.*, 02.* ... directly in the folder; every image is a square and
-//     the viewer swipes through all of them. Optional captions.json
-//     ([{"en":"...","ko":"..."}, ...]) gives one caption per image.
-//   * Grouped: subfolders 01/, 02/, 03/ ... where each subfolder is one design
-//     (one grid square). Inside, 01.*, 02.* ... are the versions you swipe
-//     through. An optional caption.json ({"en":"...","ko":"..."}) is shown.
+// ===== Image helpers =====
 const IMG_EXTS = ['png', 'jpg', 'jpeg', 'webp', 'JPG', 'PNG'];
 
-// Probe one numbered image, trying extensions in PARALLEL (fast). Resolves to
-// { src, ext } for the first that loads, or null if none do.
+// Probe one image path, trying extensions in PARALLEL. Resolves to { src, ext }
+// for the first that loads, or null. Used for the optional opening-popup cover.
 function probeImage(pathNoExt, exts = IMG_EXTS) {
     return new Promise(resolve => {
         let pending = exts.length;
@@ -676,10 +657,6 @@ function probeImage(pathNoExt, exts = IMG_EXTS) {
             im.src = src;
         });
     });
-}
-
-function fetchJSON(url) {
-    return fetch(url).then(r => (r.ok ? r.json() : null)).catch(() => null);
 }
 
 function pad2(n) { return String(n).padStart(2, '0'); }
@@ -701,73 +678,6 @@ function thumbURL(src, w) {
     } catch (e) {
         return src;
     }
-}
-
-// Collect the contiguous run prefix/02, prefix/03 ... reusing the known
-// extension, probing in parallel batches. Returns the list of srcs.
-async function collectSequence(prefix, first) {
-    const srcs = [first.src];
-    const BATCH = 8;
-    let n = 2;
-    for (;;) {
-        const batch = [];
-        for (let k = 0; k < BATCH; k++) {
-            batch.push(probeImage(`${prefix}${pad2(n + k)}`, [first.ext]));
-        }
-        const res = await Promise.all(batch);
-        let stop = false;
-        for (let j = 0; j < res.length; j++) {
-            let r = res[j];
-            // confirm a miss with a full-extension probe (handles mixed types)
-            if (!r) r = await probeImage(`${prefix}${pad2(n + j)}`);
-            if (!r) { stop = true; break; }
-            srcs.push(r.src);
-        }
-        if (stop) break;
-        n += BATCH;
-    }
-    return srcs;
-}
-
-async function loadGallery(grid) {
-    const folder = grid.getAttribute('data-images');
-    if (!folder) return;
-    const alt = grid.getAttribute('data-alt') || 'mura';
-
-    // Flat is the common case, so check it first (one parallel probe). Only if
-    // there's no flat 01.* do we look for the grouped (subfolder) layout.
-    let designs = [];
-    const flatFirst = await probeImage(`${folder}/01`);
-    if (flatFirst) {
-        designs = await collectFlat(folder, flatFirst);
-    } else {
-        const groupFirst = await probeImage(`${folder}/01/01`);
-        if (groupFirst) designs = await collectGrouped(folder, groupFirst);
-    }
-
-    if (!designs.length) {
-        const fig = document.createElement('figure');
-        fig.className = 'image-tile is-placeholder';
-        fig.innerHTML = '<span class="placeholder-label">Images coming soon</span>';
-        grid.appendChild(fig);
-        return;
-    }
-
-    const frag = document.createDocumentFragment();
-    designs.forEach((design, i) => {
-        const start = design.start || 0;
-        const fig = document.createElement('figure');
-        fig.className = 'image-tile';
-        const img = document.createElement('img');
-        img.src = thumbURL(design.items[start].src, 600);
-        img.alt = `${alt} ${i + 1}`;
-        img.loading = 'lazy';
-        img.decoding = 'async';
-        fig.appendChild(img);
-        fig.addEventListener('click', () => openLightbox(design.items, start));
-        frag.appendChild(fig);
-    });
-    grid.appendChild(frag);
 }
 
 // ===== Config-driven design grid (fast: no probing) =====
@@ -810,50 +720,6 @@ function loadDesignGrid(grid) {
         return;
     }
     grid.appendChild(frag);
-}
-
-// Flat: every image is its own square; the viewer holds them all.
-async function collectFlat(folder, first) {
-    const srcs = await collectSequence(`${folder}/`, first);
-    const captions = await fetchJSON(`${folder}/captions.json`);
-    const items = srcs.map((src, i) => ({ src, caption: captions ? captions[i] : null }));
-    return items.map((_, i) => ({ items, start: i }));
-}
-
-// Grouped: 01/, 02/ ... -> each design carries its own versions + caption.
-async function collectGrouped(folder, first) {
-    const designs = [];
-    let d = 1;
-    let cover = first;
-    for (;;) {
-        const dir = `${folder}/${pad2(d)}`;
-        const versions = await collectSequence(`${dir}/`, cover);
-        const caption = await fetchJSON(`${dir}/caption.json`);
-        designs.push({ items: versions.map(src => ({ src, caption })), start: 0 });
-        cover = await probeImage(`${folder}/${pad2(++d)}/01`);
-        if (!cover) break;
-    }
-    return designs;
-}
-
-// ===== Listing thumbnails =====
-// Each .work-card[data-thumb="folder"] shows the work's first image (01.* or 01/01.*).
-function loadThumb(card) {
-    const folder = card.getAttribute('data-thumb');
-    const thumb = card.querySelector('.thumb');
-    if (!folder || !thumb) return;
-    probeImage(`${folder}/01`)
-        .then(r => r || probeImage(`${folder}/01/01`)) // grouped layout cover
-        .then(r => {
-            if (!r) return;
-            thumb.innerHTML = '';
-            const img = document.createElement('img');
-            img.src = thumbURL(r.src, 600);
-            img.alt = '';
-            img.loading = 'lazy';
-            img.decoding = 'async';
-            thumb.appendChild(img);
-        });
 }
 
 // ===== Lightbox carousel (swipe versions, zoom, caption) =====
@@ -994,8 +860,6 @@ function init() {
     applyLanguage(currentLanguage);
     buildMarquees();
     document.querySelectorAll('.image-grid[data-collection]').forEach(loadDesignGrid);
-    document.querySelectorAll('.image-grid[data-images]').forEach(loadGallery);
-    document.querySelectorAll('.work-card[data-thumb]').forEach(loadThumb);
     showPendingDateBanner();
 
     // Show the opening announcement once per session.

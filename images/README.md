@@ -1,73 +1,24 @@
 # Portfolio images
 
-Each work page loads its images automatically from its own folder.
-Just drop image files into the right folder — no code editing needed.
+The **design grids** (the `available` and `archive` pages) are controlled by one
+file in the project root: **`gallery.js`**. That file lists each design — its
+folder, how many images it has, and its caption — and whether it's in the
+`available` or `archive` group.
 
-## Where each page looks
+## To add / change images
 
-| Page         | Folder                          |
-|--------------|---------------------------------|
-| episode 1    | images/episodes/episode-1/      |
-| episode 2    | images/episodes/episode-2/      |
-| mura-type 01 | images/mura-types/mura-type-01/ |
-| mura-type 02 | images/mura-types/mura-type-02/ |
-| mura-type 03 | images/mura-types/mura-type-03/ |
-| mura-type 04 | images/mura-types/mura-type-04/ |
+1. Upload your image files into a folder under `images/`, named in order and
+   zero-padded: `01.png`, `02.png`, `03.png` …
+2. Open **`gallery.js`** and either bump a design's `count`, or paste a new
+   `{ folder, count, ext, caption }` block. (Full instructions are inside that
+   file.)
 
-The page shows a square (1:1) grid. Tapping a square opens a viewer where you
-can swipe left/right between images and tap to zoom.
+To **archive** a design (sold out), move its block from `available` to
+`archive` in `gallery.js` — no image files need to move.
 
-There are two ways to organize a folder.
+## Notes
 
-## Option A — Grouped (recommended): one square per design, with versions
-
-Put each design in its own numbered subfolder. The subfolder becomes ONE square
-in the grid (its cover is `01`). Inside, `01`, `02`, `03` ... are the versions
-you swipe through in the viewer.
-
-```
-images/mura-types/mura-type-01/
-  01/                 <- design 1 = first square
-    01.jpg            <- cover (shown in the grid)
-    02.jpg            <- swipe to this version
-    03.png
-    caption.json      <- optional caption for this design
-  02/                 <- design 2 = second square
-    01.jpg
-    02.jpg
-  03/                 <- design 3 = third square
-    01.jpg
-```
-
-`caption.json` (optional) holds the flash details, in either language:
-```json
-{ "en": "Fine-line, palm-sized. ~2 hrs.", "ko": "파인라인, 손바닥 크기. 약 2시간." }
-```
-
-## Option B — Flat: every image is its own square
-
-Drop images straight into the folder. Each image is a square; tapping any one
-opens the viewer over all of them.
-
-```
-images/mura-types/mura-type-01/01.jpg
-images/mura-types/mura-type-01/02.jpg
-images/mura-types/mura-type-01/03.png
-```
-
-Optional `captions.json` in the folder gives one caption per image, in order:
-```json
-[
-  { "en": "Design one", "ko": "도안 1" },
-  { "en": "Design two", "ko": "도안 2" }
-]
-```
-
-## Naming rules (both options)
-
-- Name files/subfolders in order, zero-padded: `01`, `02`, `03`, ...
-- Allowed image types: `.jpg` `.jpeg` `.png` `.webp`
-- Loading stops at the first missing number, so don't skip (01, 02, 03 — not 01, 03).
-- The number controls the display order.
-
-Recommended: web-optimized JPG/WebP, ~1600px on the long edge, sRGB.
+- Allowed types: `.png` `.jpg` `.jpeg` `.webp` (set `ext` to match).
+- Grid thumbnails are auto-resized for fast loading; the viewer shows the
+  full-resolution original. Recommended originals: ~1600px on the long edge.
+- The opening-popup cover image is separate — see `images/popup/`.
