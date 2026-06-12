@@ -1046,6 +1046,10 @@ body.announce-open .footer { display: none; }
     .menu-bars--home .menu-bar--half .menu-text { height: 7.8rem; }
     .menu-bars--home .menu-bar--half .marquee-word { font-size: 5.4rem; }
 
+    /* Vertical Korean: shrink so stacked syllables fit the shorter tablet bars */
+    .ko-vert .marquee-word { font-size: 3rem; }
+    .ko-vert .menu-bar--half .marquee-word { font-size: 1.5rem; }
+
     .image-grid { gap: 0.3rem; } /* keep the 3-up square grid on mobile */
     .work-grid { grid-template-columns: 1fr; }
 
@@ -1081,6 +1085,12 @@ body.announce-open .footer { display: none; }
     .menu-bars--home .marquee-word { font-size: 7.8rem; }
     .menu-bars--home .menu-bar--half .menu-text { height: 6.6rem; }
     .menu-bars--home .menu-bar--half .marquee-word { font-size: 4.5rem; }
+
+    /* Vertical Korean: fit the short phone bars (half bar is only 6.6rem tall) */
+    .ko-vert .marquee-word { font-size: 2.5rem; }
+    .ko-vert .menu-bar--half .marquee-word { font-size: 1.2rem; }
+    .ko-vert-spaced .marquee-word { letter-spacing: 0.18em; }
+    .ko-vert-spaced .menu-bar--half .marquee-word { letter-spacing: 0.08em; }
 }
 
 /* Header right: pin 'book or enquire' to the far-right corner. */

@@ -61,7 +61,6 @@ const ANNOUNCEMENT_HTML = `
             <span class="leg leg--jeju" data-en="Jeju" data-ko="제주">Jeju</span>
         </div>
         <div class="announce-actions">
-            <button type="button" class="announce-action" onclick="announceBook()" data-en="book" data-ko="예약하기">book</button>
             <button type="button" class="announce-action" onclick="announceWaitlist()" data-en="waitlist" data-ko="대기 신청">waitlist</button>
             <button type="button" class="announce-action" onclick="announceDesigns()" data-en="see designs" data-ko="도안 보기">see designs</button>
         </div>
@@ -433,10 +432,8 @@ function renderAnnouncement() {
     overlay.className = 'modal-overlay';
     overlay.innerHTML = `
         <div class="modal modal--announce" role="dialog" aria-modal="true" aria-label="Announcement">
-            <button class="modal-close" onclick="closeAnnounce()" aria-label="Close">&times;</button>
             ${ANNOUNCEMENT_HTML}
         </div>`;
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeAnnounce(); });
     document.body.appendChild(overlay);
     loadAnnounceCover(overlay);
 }
@@ -617,6 +614,25 @@ function fetchJSON(url) {
 
 function pad2(n) { return String(n).padStart(2, '0'); }
 
+// Grid images are routed through a free image-resizing CDN so the page loads
+// small, fast thumbnails instead of the full 1-2 MB originals. The viewer
+// always uses the full-resolution original. Set USE_IMAGE_CDN = false to turn
+// this off (e.g. if you'd rather pre-resize images yourself).
+const USE_IMAGE_CDN = true;
+function thumbURL(src, w) {
+    if (!USE_IMAGE_CDN) return src;
+    try {
+        const abs = new URL(src, location.href);
+        // Only proxy real public hosts (skip local previews / file://).
+        if (abs.protocol !== 'https:' && abs.protocol !== 'http:') return src;
+        if (/^(localhost|127\.|0\.0\.0\.0|192\.168\.)/.test(abs.hostname) || !abs.hostname.includes('.')) return src;
+        const ref = 'ssl:' + abs.host + abs.pathname;
+        return `https://images.weserv.nl/?url=${encodeURIComponent(ref)}&w=${w || 600}&output=webp&q=72`;
+    } catch (e) {
+        return src;
+    }
+}
+
 // Collect the contiguous run prefix/02, prefix/03 ... reusing the known
 // extension, probing in parallel batches. Returns the list of srcs.
 async function collectSequence(prefix, first) {
@@ -673,9 +689,10 @@ async function loadGallery(grid) {
         const fig = document.createElement('figure');
         fig.className = 'image-tile';
         const img = document.createElement('img');
-        img.src = design.items[start].src;
+        img.src = thumbURL(design.items[start].src, 600);
         img.alt = `${alt} ${i + 1}`;
         img.loading = 'lazy';
+        img.decoding = 'async';
         fig.appendChild(img);
         fig.addEventListener('click', () => openLightbox(design.items, start));
         frag.appendChild(fig);
@@ -705,11 +722,12 @@ function loadDesignGrid(grid) {
             const fig = document.createElement('figure');
             fig.className = 'image-tile';
             const img = document.createElement('img');
-            img.src = item.src;
+            img.src = thumbURL(item.src, 600);     // small, fast thumbnail
             img.alt = (d.caption && (d.caption.en || d.caption.ko)) || 'design';
             img.loading = 'lazy';
+            img.decoding = 'async';
             fig.appendChild(img);
-            fig.addEventListener('click', () => openLightbox(items, idx));
+            fig.addEventListener('click', () => openLightbox(items, idx)); // viewer = full-res
             frag.appendChild(fig);
         });
     });
@@ -760,9 +778,10 @@ function loadThumb(card) {
             if (!r) return;
             thumb.innerHTML = '';
             const img = document.createElement('img');
-            img.src = r.src;
+            img.src = thumbURL(r.src, 600);
             img.alt = '';
             img.loading = 'lazy';
+            img.decoding = 'async';
             thumb.appendChild(img);
         });
 }
