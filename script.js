@@ -110,6 +110,13 @@ function pickLang(btn, lang) {
     setTimeout(() => pickAnnounceLanguage(lang), 320);
 }
 
+// Main page: tap the flower/squares -> show its label, then open that category.
+function pickHomeMenu(btn, cat) {
+    document.querySelectorAll('.art-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    setTimeout(() => openCategoryDrawer(cat), 320);
+}
+
 // Go to the booking page for a chosen design (its code + cover for preview).
 function bookItem(item) {
     if (!item) return;
