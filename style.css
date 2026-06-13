@@ -812,6 +812,13 @@ body.modal-open { overflow: hidden; }
 }
 
 /* ===== Design detail (drawer) ===== */
+.design-desc {
+    margin: 0 0 1.2rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text);
+    max-width: 640px;
+}
 .design-sheet { margin: 0 0 1rem; }
 .design-sheet img {
     display: block;
