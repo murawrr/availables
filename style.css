@@ -457,7 +457,7 @@ body.lang-ko .lang-only-en { display: none; }
 .image-tile {
     position: relative;      /* anchor for the absolutely-filled image */
     margin: 0;
-    aspect-ratio: 1 / 1;     /* square thumbnails */
+    aspect-ratio: 3 / 4;     /* portrait thumbnails */
     border-radius: 4px;
     overflow: hidden;
     background: #ffffff; /* white card so dark/transparent artwork stays visible */
@@ -475,9 +475,9 @@ body.lang-ko .lang-only-en { display: none; }
     display: block;
 }
 
-/* Fallback for browsers without aspect-ratio: classic padding-box square. */
-@supports not (aspect-ratio: 1 / 1) {
-    .image-grid .image-tile { height: 0; padding-bottom: 100%; }
+/* Fallback for browsers without aspect-ratio: classic padding-box (3:4). */
+@supports not (aspect-ratio: 3 / 4) {
+    .image-grid .image-tile { height: 0; padding-bottom: 133%; }
 }
 
 /* ===== Availables: two category menus ===== */
@@ -1159,13 +1159,35 @@ body.announce-open .footer { display: none; }
 #announce-modal { background: #0d0d0d; } /* opaque black backdrop */
 .modal--announce { background: transparent; border: none; box-shadow: none; padding: 0; max-width: none; }
 
-.lang-pick { display: flex; justify-content: center; }
-.yy { width: min(72vw, 280px); height: auto; }
-.yy-half { cursor: pointer; }
-/* outline only — both halves jade, no fill */
-.yy-shape { fill: none; stroke: var(--jade); stroke-width: 1.4; pointer-events: all; }
-.yy-half:hover .yy-shape { stroke-width: 2.4; }
-.yy text { fill: var(--jade); font-size: 7px; font-weight: 600; letter-spacing: 1.5px; }
+/* ===== Language picker: english · [art] · 한국어 ===== */
+.lang-pick {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.8rem, 5vw, 3rem);
+}
+.lang-art {
+    width: min(42vw, 240px);
+    height: auto;
+    pointer-events: none;
+    -webkit-user-drag: none;
+    user-drag: none;
+}
+.lang-opt {
+    background: none;
+    border: 1.5px solid transparent;
+    border-radius: 3px;
+    color: var(--jade);
+    font: inherit;
+    font-size: 1.4rem;
+    letter-spacing: 0.5px;
+    padding: 0.35rem 0.7rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.18s ease, opacity 0.18s ease;
+}
+.lang-opt:hover { opacity: 0.7; }
+.lang-opt.selected { border-color: var(--jade); } /* rectangular outline on tap */
 
 /* Footer language switch link */
 .lang-switch {

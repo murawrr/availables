@@ -41,20 +41,10 @@ const EMAIL = 'murarctic123@gmail.com';
 // button; one half is the inverted colour of the other.
 const ANNOUNCEMENT_HTML = `
     <div class="lang-pick">
-        <svg class="yy" viewBox="0 0 100 100" role="group" aria-label="Select language">
-            <defs>
-                <path id="yy-arc-en" d="M50,4 A46,46 0 0,0 50,96"/>
-                <path id="yy-arc-ko" d="M50,4 A46,46 0 0,1 50,96"/>
-            </defs>
-            <g class="yy-half yy-ko" role="button" tabindex="0" onclick="pickAnnounceLanguage('ko')">
-                <path class="yy-shape" d="M50,0 A25,25 0 0,1 50,50 A25,25 0 0,0 50,100 A50,50 0 0,0 50,0 Z"/>
-                <text text-anchor="middle"><textPath href="#yy-arc-ko" startOffset="50%">한국어</textPath></text>
-            </g>
-            <g class="yy-half yy-en" role="button" tabindex="0" onclick="pickAnnounceLanguage('en')">
-                <path class="yy-shape" d="M50,0 A25,25 0 0,1 50,50 A25,25 0 0,0 50,100 A50,50 0 0,1 50,0 Z"/>
-                <text text-anchor="middle"><textPath href="#yy-arc-en" startOffset="50%">English</textPath></text>
-            </g>
-        </svg>
+        <button type="button" class="lang-opt" onclick="pickLang(this,'en')">english</button>
+        <img class="lang-art" src="images/ui/language.png" alt="" draggable="false"
+             onerror="if(this.src.indexOf('.png')>-1){this.src='images/ui/language.jpg';}else{this.style.display='none';}">
+        <button type="button" class="lang-opt" onclick="pickLang(this,'ko')">한국어</button>
     </div>`;
 
 // ===== Language switching (English + Korean) =====
@@ -111,6 +101,13 @@ function pickAnnounceLanguage(lang) {
     setLanguage(lang);
     sessionStorage.setItem('announceSeen', '1');
     window.location.href = 'index.html';
+}
+
+// Tap a language word -> show the rectangular outline (selected), then proceed.
+function pickLang(btn, lang) {
+    document.querySelectorAll('.lang-opt').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    setTimeout(() => pickAnnounceLanguage(lang), 320);
 }
 
 // Go to the booking page for a chosen design (its code + cover for preview).
