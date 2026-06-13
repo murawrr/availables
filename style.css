@@ -764,6 +764,17 @@ body.modal-open { overflow: hidden; }
     margin: 0 0 1.3rem;
 }
 
+/* ===== Design detail (drawer) ===== */
+.design-sheet { margin: 0 0 1rem; }
+.design-sheet img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    -webkit-user-drag: none;
+    user-drag: none;
+}
+
 /* ===== Design page (design.html) ===== */
 .design-code {
     margin: 0 0 0.4rem;
