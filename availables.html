@@ -12,22 +12,10 @@
     <div id="site-header" data-back="index.html"></div>
 
     <main class="container">
-        <section class="project">
-            <div class="project-desc">
-                <span class="desc-label">
-                    <span class="dot"></span>
-                    <span data-en="available designs" data-ko="도안">available designs</span>
-                </span>
-            </div>
-
-            <div class="grid-tabs">
-                <button type="button" class="grid-tab is-active" data-collection="available" data-en="available" data-ko="예약 가능">available</button>
-                <button type="button" class="grid-tab" data-collection="archive" data-en="archive" data-ko="아카이브">archive</button>
-            </div>
-
-            <!-- The grid is built from gallery.js (window.GALLERY.*). -->
-            <div class="image-grid" data-collection="available"></div>
-        </section>
+        <nav class="cat-menu">
+            <button type="button" class="cat-item" data-cat="episodes" data-en="episodes" data-ko="에피소드">episodes</button>
+            <button type="button" class="cat-item" data-cat="muratypes" data-en="mura-types" data-ko="무라체">mura-types</button>
+        </nav>
     </main>
 
     <script src="gallery.js"></script>

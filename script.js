@@ -42,13 +42,13 @@ const EMAIL = 'murarctic123@gmail.com';
 const ANNOUNCEMENT_HTML = `
     <div class="lang-pick">
         <svg class="yy" viewBox="0 0 100 100" role="group" aria-label="Select language">
-            <g class="yy-half yy-ko" role="button" tabindex="0" onclick="pickAnnounceLanguage('ko')" transform="translate(-1.5 0)">
-                <path d="M50,0 A50,50 0 0,0 50,100 A25,25 0 0,0 50,50 A25,25 0 0,1 50,0 Z"/>
-                <text x="27" y="51">한국어</text>
+            <g class="yy-half yy-ko" role="button" tabindex="0" onclick="pickAnnounceLanguage('ko')">
+                <path d="M50,0 A25,25 0 0,1 50,50 A25,25 0 0,0 50,100 A50,50 0 0,0 50,0 Z"/>
+                <text x="28" y="50">한국어</text>
             </g>
-            <g class="yy-half yy-en" role="button" tabindex="0" onclick="pickAnnounceLanguage('en')" transform="translate(1.5 0)">
-                <path d="M50,0 A50,50 0 0,1 50,100 A25,25 0 0,1 50,50 A25,25 0 0,0 50,0 Z"/>
-                <text x="73" y="51">English</text>
+            <g class="yy-half yy-en" role="button" tabindex="0" onclick="pickAnnounceLanguage('en')">
+                <path d="M50,0 A25,25 0 0,1 50,50 A25,25 0 0,0 50,100 A50,50 0 0,1 50,0 Z"/>
+                <text x="72" y="50">English</text>
             </g>
         </svg>
     </div>`;
@@ -106,7 +106,7 @@ function setLanguageHome(lang) {
 function pickAnnounceLanguage(lang) {
     setLanguage(lang);
     sessionStorage.setItem('announceSeen', '1');
-    window.location.href = 'availables.html';
+    window.location.href = 'index.html';
 }
 
 // Go to the booking page for a chosen design (its code + cover for preview).
@@ -136,7 +136,7 @@ function renderHeader() {
         </div>
         <span class="header-dots" aria-hidden="true"></span>
         <div class="header-right">
-            <a class="header-action" href="booking.html" data-en="enquire" data-ko="문의">enquire</a>
+            <button type="button" class="header-action" onclick="openInfoDrawer()" data-en="info" data-ko="공지">info</button>
         </div>`;
 
     // Back-to-home link, relocated to its own row just below the header.
@@ -359,8 +359,12 @@ function renderFooter() {
 // Watermark is now the CSS backdrop of .menu-bars (see style.css).
 
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') { closeAnnounce(); closeLightbox(); }
     const lbOpen = document.getElementById('lightbox')?.classList.contains('open');
+    if (e.key === 'Escape') {
+        if (lbOpen) closeLightbox();
+        else if (drawerStack.length) closeDrawer();
+        else closeAnnounce();
+    }
     if (lbOpen && e.key === 'ArrowLeft') lbStep(-1);
     if (lbOpen && e.key === 'ArrowRight') lbStep(1);
 });
@@ -607,6 +611,140 @@ function renderDesignPage() {
     }
 }
 
+// ===== Cascading subpage drawers (open ~4/5 width over the previous page) =====
+const drawerStack = [];
+
+function ensureScrim() {
+    let s = document.getElementById('drawer-scrim');
+    if (!s) {
+        s = document.createElement('div');
+        s.id = 'drawer-scrim';
+        s.className = 'drawer-scrim';
+        s.addEventListener('click', closeDrawer);
+        document.body.appendChild(s);
+    }
+    return s;
+}
+
+function openDrawer(innerHTML) {
+    ensureScrim().classList.add('show');
+    const d = document.createElement('div');
+    d.className = 'drawer';
+    d.innerHTML = '<button class="drawer-close" type="button" aria-label="Back">←</button>' +
+        `<div class="drawer-body">${innerHTML}</div>`;
+    document.body.appendChild(d);
+    drawerStack.push(d);
+    d.querySelector('.drawer-close').addEventListener('click', (e) => { e.stopPropagation(); closeDrawer(); });
+    d.addEventListener('click', (e) => {
+        // clicking the exposed strip of a drawer that isn't on top pops back to it
+        if (drawerStack[drawerStack.length - 1] !== d) { e.stopPropagation(); closeToDrawer(d); }
+    });
+    requestAnimationFrame(() => { d.classList.add('open'); layoutDrawers(); });
+    document.body.classList.add('modal-open');
+    return d.querySelector('.drawer-body');
+}
+
+function layoutDrawers() {
+    const peek = 7; // vw of each lower drawer kept visible on the left
+    const n = drawerStack.length;
+    drawerStack.forEach((d, i) => {
+        const depth = n - 1 - i;          // 0 = top
+        d.style.zIndex = 2000 + i;
+        d.style.setProperty('--peek', (depth * peek) + 'vw');
+        d.classList.toggle('behind', depth > 0);
+    });
+}
+
+function closeDrawer() {
+    const d = drawerStack.pop();
+    if (!d) return;
+    d.classList.remove('open', 'behind');
+    d.classList.add('closing');
+    setTimeout(() => d.remove(), 280);
+    layoutDrawers();
+    if (!drawerStack.length) {
+        document.getElementById('drawer-scrim')?.classList.remove('show');
+        document.body.classList.remove('modal-open');
+    }
+}
+
+function closeToDrawer(target) {
+    while (drawerStack.length && drawerStack[drawerStack.length - 1] !== target) closeDrawer();
+}
+
+// ----- Availables: two category menus -> design list -> design images -----
+function categoryDesigns(cat) { return allDesigns().filter(d => (d.category || '') === cat); }
+
+function renderAvailables() {
+    document.querySelectorAll('.cat-item').forEach(btn => {
+        btn.addEventListener('click', () => openCategoryDrawer(btn.dataset.cat));
+    });
+}
+
+function openCategoryDrawer(cat) {
+    const ko = currentLanguage === 'ko';
+    const heading = cat === 'muratypes' ? (ko ? '무라체' : 'mura-types') : (ko ? '에피소드' : 'episodes');
+    const body = openDrawer(`<h2 class="drawer-title">${heading}</h2><div class="image-grid"></div>`);
+    const grid = body.querySelector('.image-grid');
+    categoryDesigns(cat).forEach(d => {
+        const items = designItems(d);
+        if (!items.length) return;
+        const a = document.createElement('a');
+        a.className = 'image-tile loading';
+        a.href = '#';
+        const img = document.createElement('img');
+        img.src = thumbURL(items[0].src, 600);
+        img.alt = (d.caption && (d.caption.en || d.caption.ko)) || 'design';
+        img.loading = 'lazy'; img.decoding = 'async';
+        img.addEventListener('load', () => a.classList.remove('loading'));
+        img.addEventListener('error', () => a.classList.remove('loading'));
+        a.appendChild(img);
+        a.addEventListener('click', (e) => { e.preventDefault(); openDesignDrawer(d); });
+        grid.appendChild(a);
+    });
+}
+
+function openDesignDrawer(d) {
+    const ko = currentLanguage === 'ko';
+    const items = designItems(d);
+    const title = captionText(d.caption) || 'design';
+    const code = d.code ? `<p class="design-code"><span>${ko ? '도안 코드' : 'design code'}</span>: <strong>${d.code}</strong></p>` : '';
+    const body = openDrawer(`<h2 class="drawer-title">${title}</h2>${code}<div class="design-images"></div><div class="design-cta"></div>`);
+    const wrap = body.querySelector('.design-images');
+    items.forEach((item, idx) => {
+        const fig = document.createElement('figure');
+        fig.className = 'design-img loading';
+        const img = document.createElement('img');
+        img.src = thumbURL(item.src, 900);
+        img.alt = title; img.loading = 'lazy'; img.decoding = 'async';
+        img.addEventListener('load', () => fig.classList.remove('loading'));
+        img.addEventListener('error', () => fig.classList.remove('loading'));
+        fig.appendChild(img);
+        fig.addEventListener('click', () => openLightbox(items, idx));
+        wrap.appendChild(fig);
+    });
+    const a = document.createElement('a');
+    a.className = 'design-enquire';
+    a.href = '#';
+    a.textContent = ko ? '이 도안 문의하기 →' : 'enquire about this design →';
+    a.addEventListener('click', (e) => { e.preventDefault(); bookItem(items[0]); });
+    body.querySelector('.design-cta').appendChild(a);
+}
+
+// ----- Info / notice drawer (opened from the header) -----
+function openInfoDrawer() {
+    const body = openDrawer('<p class="modal-intro">…</p>');
+    fetch('notice.html')
+        .then(r => r.text())
+        .then(html => {
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const main = doc.querySelector('main.container');
+            body.innerHTML = main ? main.innerHTML : '';
+            applyLanguage(currentLanguage);
+        })
+        .catch(() => { body.innerHTML = '<p class="modal-intro">Unavailable.</p>'; });
+}
+
 // ===== Lightbox carousel (swipe versions, zoom, caption) =====
 const lb = { items: [], index: 0, scale: 1, tx: 0, ty: 0 };
 
@@ -751,6 +889,7 @@ function init() {
 
     applyLanguage(currentLanguage);
     buildMarquees();
+    renderAvailables();
     document.querySelectorAll('.image-grid[data-collection]').forEach(loadDesignGrid);
     setupGridTabs();
 }

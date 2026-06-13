@@ -96,7 +96,7 @@ a { color: inherit; }
     text-decoration: none;
     color: #f1f3f5;
     letter-spacing: 0.5px;
-    font-size: 2.6rem;
+    font-size: 0.55rem;
     line-height: 1;
 }
 
@@ -478,6 +478,85 @@ body.lang-ko .lang-only-en { display: none; }
 @supports not (aspect-ratio: 1 / 1) {
     .image-grid .image-tile { height: 0; padding-bottom: 100%; }
 }
+
+/* ===== Availables: two category menus ===== */
+.cat-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 3rem 0;
+    align-items: center;
+}
+.cat-item {
+    background: none;
+    border: none;
+    font: inherit;
+    font-size: 2.6rem;
+    font-weight: 300;
+    letter-spacing: 1px;
+    color: var(--text);
+    cursor: pointer;
+    text-transform: lowercase;
+    transition: opacity 0.2s ease;
+}
+.cat-item:hover { opacity: 0.55; }
+
+/* ===== Cascading subpage drawers ===== */
+.drawer-scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.18);
+    z-index: 1999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+.drawer-scrim.show { opacity: 1; pointer-events: auto; }
+
+.drawer {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 80vw;
+    background: var(--bg);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    box-shadow: -12px 0 34px rgba(0, 0, 0, 0.32);
+    transform: translateX(100%);
+    transition: transform 0.27s ease;
+    z-index: 2000;
+    padding: 3rem 1.4rem 4rem;
+}
+.drawer.open { transform: translateX(0); }
+.drawer.behind { transform: translateX(calc(-1 * var(--peek, 0px))); }
+.drawer.behind::after { /* dim the part of a lower drawer that peeks out */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.28);
+}
+.drawer.closing { transform: translateX(100%); }
+
+.drawer-close {
+    position: absolute;
+    top: 0.7rem;
+    left: 0.9rem;
+    background: none;
+    border: none;
+    font-size: 1.6rem;
+    line-height: 1;
+    color: var(--text);
+    cursor: pointer;
+    z-index: 1;
+}
+.drawer-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0 0 1.2rem;
+    letter-spacing: 0.5px;
+}
+.drawer-body { max-width: 760px; margin: 0 auto; }
 
 /* ===== Lightbox carousel (tap a square -> swipe versions, zoom) ===== */
 .lightbox {
