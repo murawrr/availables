@@ -541,27 +541,13 @@ body.home-page { background: #aebfb4; } /* soft sage canvas */
     z-index: 1;
 }
 
-/* ===== Availables: two category menus ===== */
-.cat-menu {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    padding: 3rem 0;
-    align-items: center;
-}
-.cat-item {
-    background: none;
-    border: none;
-    font: inherit;
-    font-size: 2.6rem;
+/* ===== Category gallery page (availables.html?cat=) ===== */
+.gallery-title {
+    font-size: 2rem;
     font-weight: 300;
     letter-spacing: 1px;
-    color: var(--text);
-    cursor: pointer;
-    text-transform: lowercase;
-    transition: opacity 0.2s ease;
+    margin: 0.4rem 0 1.4rem;
 }
-.cat-item:hover { opacity: 0.55; }
 
 /* ===== Cascading subpage drawers ===== */
 .drawer-scrim {
