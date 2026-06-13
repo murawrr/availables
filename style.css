@@ -45,7 +45,7 @@ a { color: inherit; }
     gap: 1rem;
     padding: 0.85rem 1.25rem;
     border-bottom: 1px solid #3c404a;
-    font-size: 0.95rem;
+    font-size: calc(0.95rem + 7pt); /* header text enlarged by 7pt */
     position: sticky;
     top: 0;
     background: var(--header);
@@ -541,16 +541,18 @@ body.lang-ko .lang-only-en { display: none; }
 
 .drawer-close {
     position: absolute;
-    top: 0.7rem;
-    left: 0.9rem;
+    top: 0.8rem;
+    left: 1rem;
     background: none;
     border: none;
-    font-size: 1.6rem;
-    line-height: 1;
-    color: var(--text);
+    font: inherit;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    color: var(--muted);
     cursor: pointer;
     z-index: 1;
 }
+.drawer-close:hover { color: var(--text); }
 .drawer-title {
     font-size: 1.4rem;
     font-weight: 700;

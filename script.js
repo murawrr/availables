@@ -136,7 +136,7 @@ function renderHeader() {
         </div>
         <span class="header-dots" aria-hidden="true"></span>
         <div class="header-right">
-            <button type="button" class="header-action" onclick="openInfoDrawer()" data-en="info" data-ko="공지">info</button>
+            <button type="button" class="header-action" onclick="openInfoDrawer()" data-en="info" data-ko="안내">info</button>
         </div>`;
 
     // Back-to-home link, relocated to its own row just below the header.
@@ -630,7 +630,8 @@ function openDrawer(innerHTML) {
     ensureScrim().classList.add('show');
     const d = document.createElement('div');
     d.className = 'drawer';
-    d.innerHTML = '<button class="drawer-close" type="button" aria-label="Back">←</button>' +
+    const closeLabel = currentLanguage === 'ko' ? '(닫기)' : '(close)';
+    d.innerHTML = `<button class="drawer-close" type="button" aria-label="Close">${closeLabel}</button>` +
         `<div class="drawer-body">${innerHTML}</div>`;
     document.body.appendChild(d);
     drawerStack.push(d);
