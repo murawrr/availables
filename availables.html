@@ -11,11 +11,10 @@
     <!-- Shared header (rendered by script.js) -->
     <div id="site-header" data-back="index.html"></div>
 
-    <main class="container">
-        <nav class="cat-menu">
-            <button type="button" class="cat-item" data-cat="episodes" data-en="episodes" data-ko="에피소드">episodes</button>
-            <button type="button" class="cat-item" data-cat="muratypes" data-en="mura-types" data-ko="무라체">mura-types</button>
-        </nav>
+    <main class="container gallery-page">
+        <h1 class="gallery-title"></h1>
+        <!-- 3:4 thumbnails for the category in ?cat= ; built by script.js -->
+        <div class="image-grid" id="gallery-grid"></div>
     </main>
 
     <script src="gallery.js"></script>

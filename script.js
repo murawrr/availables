@@ -110,11 +110,13 @@ function pickLang(btn, lang) {
     setTimeout(() => pickAnnounceLanguage(lang), 320);
 }
 
-// Main page: tap the flower/squares -> show its label, then open that category.
+// Main page: tap the flower/squares -> show its label, then open the full
+// category gallery page.
 function pickHomeMenu(btn, cat) {
     document.querySelectorAll('.art-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
-    setTimeout(() => openCategoryDrawer(cat), 320);
+    sessionStorage.setItem('announceSeen', '1');
+    setTimeout(() => { window.location.href = 'availables.html?cat=' + cat; }, 320);
 }
 
 // Go to the booking page for a chosen design (its code + cover for preview).
@@ -684,17 +686,15 @@ function closeToDrawer(target) {
 // ----- Availables: two category menus -> design list -> design images -----
 function categoryDesigns(cat) { return allDesigns().filter(d => (d.category || '') === cat); }
 
-function renderAvailables() {
-    document.querySelectorAll('.cat-item').forEach(btn => {
-        btn.addEventListener('click', () => openCategoryDrawer(btn.dataset.cat));
-    });
-}
-
-function openCategoryDrawer(cat) {
+// Full category gallery page (availables.html?cat=...): 3:4 thumbnails;
+// tapping one opens the 4/5 detail drawer.
+function renderGalleryPage() {
+    const grid = document.getElementById('gallery-grid');
+    if (!grid) return;
     const ko = currentLanguage === 'ko';
-    const heading = cat === 'muratypes' ? (ko ? '무라체' : 'mura-types') : (ko ? '에피소드' : 'episodes');
-    const body = openDrawer(`<h2 class="drawer-title">${heading}</h2><div class="image-grid"></div>`);
-    const grid = body.querySelector('.image-grid');
+    const cat = new URLSearchParams(location.search).get('cat') || 'muratypes';
+    const titleEl = document.querySelector('.gallery-title');
+    if (titleEl) titleEl.textContent = cat === 'muratypes' ? (ko ? '무라체' : 'mura-types') : (ko ? '에피소드' : 'episodes');
     categoryDesigns(cat).forEach(d => {
         const items = designItems(d);
         if (!items.length) return;
@@ -909,7 +909,7 @@ function init() {
 
     applyLanguage(currentLanguage);
     buildMarquees();
-    renderAvailables();
+    renderGalleryPage();
     document.querySelectorAll('.image-grid[data-collection]').forEach(loadDesignGrid);
     setupGridTabs();
 }
