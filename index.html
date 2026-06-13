@@ -7,16 +7,34 @@
     <title>mura - Tattoo Artist</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <!-- Shared header (rendered by script.js) -->
+<body class="home-page">
+    <!-- Shared header (kept) -->
     <div id="site-header"></div>
 
-    <!-- Menu Bars -->
-    <nav class="menu-bars menu-bars--home menu-bars--dark">
-        <a href="availables.html" class="menu-bar" data-en="availables" data-ko="도안">
-            <div class="menu-text"></div>
-        </a>
-    </nav>
+    <main class="home">
+        <img class="home-vase" src="images/ui/vase.png" alt="" draggable="false"
+             onerror="this.style.display='none'">
+
+        <!-- Flower = episodes -->
+        <button type="button" class="art-btn art-episodes" onclick="pickHomeMenu(this,'episodes')">
+            <img src="images/ui/episodes.png" alt="episodes" draggable="false"
+                 onerror="this.closest('.art-btn').classList.add('noimg')">
+            <span class="art-label" data-en="episode" data-ko="에피소드">episode</span>
+        </button>
+
+        <!-- Framed squares = mura-types -->
+        <button type="button" class="art-btn art-muratype" onclick="pickHomeMenu(this,'muratypes')">
+            <img src="images/ui/muratypes.png" alt="mura-types" draggable="false"
+                 onerror="this.closest('.art-btn').classList.add('noimg')">
+            <span class="art-label" data-en="mura-types" data-ko="무라체">무라체</span>
+        </button>
+
+        <img class="home-sign" src="images/ui/signature.png" alt="" draggable="false"
+             onerror="this.style.display='none'">
+    </main>
+
+    <!-- Footer (kept) is rendered by script.js -->
+    <script src="gallery.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

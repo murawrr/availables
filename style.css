@@ -480,6 +480,67 @@ body.lang-ko .lang-only-en { display: none; }
     .image-grid .image-tile { height: 0; padding-bottom: 133%; }
 }
 
+/* ===== Main page: vase + image buttons (header & footer kept) ===== */
+body.home-page { background: #aebfb4; } /* soft sage canvas */
+.home {
+    position: relative;
+    min-height: calc(100vh - 4rem);
+}
+.home-vase {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    height: 82vh;
+    width: auto;
+    max-width: 94vw;
+    pointer-events: none;
+    z-index: 0;
+}
+.art-btn {
+    position: absolute;
+    z-index: 1;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+.art-btn > img { display: block; width: 100%; height: auto; -webkit-user-drag: none; user-drag: none; }
+.art-episodes { top: 16%; left: 11%; width: clamp(120px, 28vw, 240px); }
+.art-muratype { top: 21%; left: 45%; width: clamp(140px, 33vw, 280px); }
+
+/* label overlays the artwork; shown on tap (or always, if no artwork yet) */
+.art-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f3f6f2;
+    font-size: 1.3rem;
+    letter-spacing: 0.5px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+.art-btn.selected .art-label { opacity: 1; }
+.art-btn.noimg { width: clamp(130px, 34vw, 240px); }
+.art-btn.noimg .art-label {
+    position: static;
+    opacity: 1;
+    color: #2e3b34;
+    border: 1.5px solid #2e3b34;
+    border-radius: 4px;
+    padding: 0.8rem 1rem;
+}
+.home-sign {
+    position: absolute;
+    bottom: 6%; left: 50%;
+    transform: translateX(-50%);
+    width: clamp(140px, 34vw, 260px);
+    height: auto;
+    pointer-events: none;
+    z-index: 1;
+}
+
 /* ===== Availables: two category menus ===== */
 .cat-menu {
     display: flex;
