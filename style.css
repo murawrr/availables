@@ -7,17 +7,18 @@
 }
 
 :root {
-    --greyish-azure: #9bb1a5; /* legacy key colour */
-    --mint: #9bb1a5;          /* button accent */
+    --jade: #00a878;          /* brand accent (jade) */
+    --greyish-azure: #00a878; /* legacy key colour -> jade */
+    --mint: #00a878;          /* button accent -> jade */
     --bg: #edf2ee;            /* page background */
     --surface: #ffffff;       /* cards / modals */
     --field: #ffffff;         /* inputs / textarea */
-    --text: #575b64;          /* primary text / dark (replaces the khaki) */
-    --muted: #8b8f99;         /* secondary text */
+    --text: #141414;          /* primary text / black */
+    --muted: #7e8389;         /* secondary text */
     --line: #d3d6db;          /* borders / separators */
-    --ink: #575b64;
+    --ink: #141414;
     --white: #FFFFFF;
-    --header: #4a4f59;        /* dark header bar */
+    --header: #0e0e0e;        /* black header / bars */
 }
 
 /* ===== Typography (heavy neo-grotesque; Helvetica where present, Inter as the
@@ -1153,17 +1154,17 @@ body.announce-open .footer { display: none; }
 
 
 /* ===== Opening popup: yin-yang language picker ===== */
-#announce-modal { background: rgb(20, 25, 22); } /* opaque backdrop */
+#announce-modal { background: #0d0d0d; } /* opaque black backdrop */
 .modal--announce { background: transparent; border: none; box-shadow: none; padding: 0; max-width: none; }
 
 .lang-pick { display: flex; justify-content: center; }
 .yy { width: min(72vw, 280px); height: auto; }
 .yy-half { cursor: pointer; }
-.yy path { stroke: rgba(236, 239, 233, 0.35); stroke-width: 0.5; }
-.yy-ko path { fill: #3a4048; }   /* dark half */
-.yy-ko text { fill: #ecefe9; }
-.yy-en path { fill: #ecefe9; }   /* light half (inverted colours) */
-.yy-en text { fill: #23271f; }
+.yy path { stroke: rgba(255, 255, 255, 0.18); stroke-width: 0.5; }
+.yy-ko path { fill: #0d0d0d; }   /* black half */
+.yy-ko text { fill: #00a878; }   /* jade text */
+.yy-en path { fill: #00a878; }   /* jade half (inverted colours) */
+.yy-en text { fill: #0d0d0d; }   /* black text */
 .yy text { font-size: 7px; font-weight: 600; text-anchor: middle; dominant-baseline: central; letter-spacing: 0.3px; }
 .yy-half:hover path { opacity: 0.88; }
 

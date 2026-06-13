@@ -44,11 +44,11 @@ const ANNOUNCEMENT_HTML = `
         <svg class="yy" viewBox="0 0 100 100" role="group" aria-label="Select language">
             <g class="yy-half yy-ko" role="button" tabindex="0" onclick="pickAnnounceLanguage('ko')">
                 <path d="M50,0 A25,25 0 0,1 50,50 A25,25 0 0,0 50,100 A50,50 0 0,0 50,0 Z"/>
-                <text x="28" y="50">한국어</text>
+                <text x="72" y="50">한국어</text>
             </g>
             <g class="yy-half yy-en" role="button" tabindex="0" onclick="pickAnnounceLanguage('en')">
                 <path d="M50,0 A25,25 0 0,1 50,50 A25,25 0 0,0 50,100 A50,50 0 0,1 50,0 Z"/>
-                <text x="72" y="50">English</text>
+                <text x="28" y="50">English</text>
             </g>
         </svg>
     </div>`;
