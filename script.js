@@ -137,7 +137,7 @@ function renderHeader() {
         </div>
         <span class="header-dots" aria-hidden="true"></span>
         <div class="header-right">
-            <button type="button" class="header-action" onclick="openInfoDrawer()" data-en="info" data-ko="안내">info</button>
+            <a class="header-action" href="booking.html" data-en="enquire" data-ko="문의·예약">enquire</a>
         </div>`;
 
     // Back-to-home link, relocated to its own row just below the header.
@@ -711,7 +711,18 @@ function openDesignDrawer(d) {
     const items = designItems(d);
     const title = captionText(d.caption) || 'design';
     const code = d.code ? `<p class="design-code"><span>${ko ? '도안 코드' : 'design code'}</span>: <strong>${d.code}</strong></p>` : '';
-    const body = openDrawer(`<h2 class="drawer-title">${title}</h2>${code}<div class="design-images"></div><div class="design-cta"></div>`);
+    const body = openDrawer(`<h2 class="drawer-title">${title}</h2><figure class="design-sheet loading"></figure><div class="design-images"></div>${code}<div class="design-cta"></div>`);
+
+    // Hand-drawn detail sheet first (drop a sheet.png into the design's folder).
+    const sheetFig = body.querySelector('.design-sheet');
+    const sImg = document.createElement('img');
+    sImg.src = `${d.folder}/sheet.png`;
+    sImg.alt = title + ' — details';
+    sImg.loading = 'lazy';
+    sImg.addEventListener('load', () => sheetFig.classList.remove('loading'));
+    sImg.addEventListener('error', () => sheetFig.remove()); // no sheet yet -> skip
+    sheetFig.appendChild(sImg);
+
     const wrap = body.querySelector('.design-images');
     items.forEach((item, idx) => {
         const fig = document.createElement('figure');
