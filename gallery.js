@@ -25,24 +25,26 @@
      { folder: "images/.../my-design", count: 3, ext: "png",
        caption: { en: "English caption", ko: "한국어 설명" } }
      - folder : where the images live (no trailing slash)
+     - code   : a short, unique name for the design (e.g. "PEACE-01"). This is
+                what clients quote when they book — pick something distinguishable.
      - count  : how many images (01 ... count)
      - ext    : file type, usually "png" (or "jpg")
-     - caption: shown in the viewer; can be left as "" if you don't want one
+     - caption: shown on the design page; can be left as "" if you don't want one
    ============================================================================ */
 
 window.GALLERY = {
 
   available: [
-    { folder: "images/mura-types/mura-type-01", count: 9, ext: "png", caption: { en: "pyunghwa — peace",      ko: "평화" } },
-    { folder: "images/mura-types/mura-type-02", count: 1, ext: "png", caption: { en: "haebang — liberation",  ko: "해방" } },
-    { folder: "images/mura-types/mura-type-03", count: 1, ext: "png", caption: { en: "taeyang — sun",         ko: "태양" } },
-    { folder: "images/mura-types/mura-type-04", count: 3, ext: "png", caption: { en: "jayu — freedom",        ko: "자유" } },
-    { folder: "images/episodes/episode-1",      count: 6, ext: "png", caption: { en: "Hello, world!",         ko: "Hello, world!" } },
-    { folder: "images/episodes/episode-2",      count: 16, ext: "png", caption: { en: "mini-tattoos",          ko: "미니 타투" } },
+    { folder: "images/mura-types/mura-type-01", code: "PEACE-01",   count: 9, ext: "png", caption: { en: "pyunghwa — peace",      ko: "평화" } },
+    { folder: "images/mura-types/mura-type-02", code: "LIB-01",     count: 1, ext: "png", caption: { en: "haebang — liberation",  ko: "해방" } },
+    { folder: "images/mura-types/mura-type-03", code: "SUN-01",     count: 1, ext: "png", caption: { en: "taeyang — sun",         ko: "태양" } },
+    { folder: "images/mura-types/mura-type-04", code: "FREE-01",    count: 3, ext: "png", caption: { en: "jayu — freedom",        ko: "자유" } },
+    { folder: "images/episodes/episode-1",      code: "HELLO-01",   count: 6, ext: "png", caption: { en: "Hello, world!",         ko: "Hello, world!" } },
+    { folder: "images/episodes/episode-2",      code: "MINI-01",    count: 16, ext: "png", caption: { en: "mini-tattoos",          ko: "미니 타투" } },
   ],
 
   archive: [
-    { folder: "images/archives", count: 1, ext: "png", caption: { en: "", ko: "" } },
+    { folder: "images/archives", code: "ARCHIVE-01", count: 1, ext: "png", caption: { en: "", ko: "" } },
   ],
 
 };
