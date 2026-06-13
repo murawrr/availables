@@ -718,7 +718,9 @@ function openDesignDrawer(d) {
     const items = designItems(d);
     const title = captionText(d.caption) || 'design';
     const code = d.code ? `<p class="design-code"><span>${ko ? '도안 코드' : 'design code'}</span>: <strong>${d.code}</strong></p>` : '';
-    const body = openDrawer(`<h2 class="drawer-title">${title}</h2><figure class="design-sheet loading"></figure><div class="design-images"></div>${code}<div class="design-cta"></div>`);
+    const descText = d.desc ? (d.desc[currentLanguage] || d.desc.en || '') : '';
+    const desc = descText ? `<p class="design-desc">${descText}</p>` : '';
+    const body = openDrawer(`<h2 class="drawer-title">${title}</h2><figure class="design-sheet loading"></figure>${desc}<div class="design-images"></div>${code}<div class="design-cta"></div>`);
 
     // Hand-drawn detail sheet first (drop a sheet.png into the design's folder).
     const sheetFig = body.querySelector('.design-sheet');
