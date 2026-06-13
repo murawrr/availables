@@ -633,15 +633,15 @@ body.modal-open { overflow: hidden; }
 /* Booking page (booking.html) */
 .booking-wrap { max-width: 560px; margin: 0 auto; }
 
-.booking-note {
-    margin: 0 0 1rem;
-    padding: 0.7rem 0.9rem;
-    background: rgba(0, 0, 0, 0.05);
-    border-left: 3px solid var(--mint);
-    font-size: 0.85rem;
+.booking-manual {
+    margin: 0 0 0.8rem;
+    font-size: 0.82rem;
     line-height: 1.5;
-    color: var(--text);
+    color: var(--muted);
+    font-style: italic;
 }
+.contact-btn.send { order: 0; background: var(--text); color: #fff; border: none; font-family: inherit; cursor: pointer; }
+.contact-btn.send:hover { opacity: 0.88; }
 .booking-waitlist { margin: 0 0 1.3rem; font-size: 0.9rem; }
 .booking-waitlist a { color: var(--text); text-decoration: underline; }
 .booking-waitlist a:hover { opacity: 0.6; }
@@ -705,13 +705,20 @@ body.modal-open { overflow: hidden; }
 }
 
 /* ===== Design page (design.html) ===== */
+.design-code {
+    margin: 0 0 0.4rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    letter-spacing: 0.3px;
+}
+.design-code strong { color: var(--text); letter-spacing: 1px; }
 .design-images {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     margin: 1rem 0 1.6rem;
 }
-.design-img { margin: 0; cursor: zoom-in; }
+.design-img { position: relative; margin: 0; cursor: zoom-in; overflow: hidden; border-radius: 4px; }
 .design-img img {
     display: block;
     width: 100%;
@@ -720,6 +727,18 @@ body.modal-open { overflow: hidden; }
     -webkit-user-drag: none;
     user-drag: none;
 }
+
+/* ===== Image loading shimmer ===== */
+.image-tile.loading, .design-img.loading { background: #e9ece6; min-height: 60px; }
+.image-tile.loading::after, .design-img.loading::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+    transform: translateX(-100%);
+    animation: shimmer 1.2s infinite;
+}
+@keyframes shimmer { 100% { transform: translateX(100%); } }
 .design-cta { text-align: center; margin-bottom: 2rem; }
 .design-book {
     display: inline-block;
@@ -1121,26 +1140,24 @@ body.announce-open .footer { display: none; }
 .cal--jeju  { box-shadow: inset 0 -2px 0 #8fb9d6; }
 .cal-cell.is-available:hover { background: rgba(0, 0, 0, 0.05); }
 
+/* guest-spot line: in-range days that aren't bookable keep the line, muted */
+.cal-inrange { color: #c4cabf; }
+/* the first box of a guest run shows the place name instead of a number */
+.cal-namecell .cal-name {
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+.cal--busan .cal-name { color: #c9743f; }
+.cal--jeju  .cal-name { color: #4f86ad; }
+
 /* selected = filled in the place colour with a dark ring */
 .cal--seoul.is-selected { background: #a7c4ac; }
 .cal--busan.is-selected { background: #e6a279; }
 .cal--jeju.is-selected  { background: #8fb9d6; }
 .cal-cell.is-selected { border-radius: 4px; box-shadow: inset 0 0 0 2px #23271f; }
-
-/* small guest-spot label (busan / jeju) above the start of each run */
-.cal-place {
-    position: absolute;
-    top: -0.9em;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.46rem;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-    white-space: nowrap;
-    pointer-events: none;
-}
-.cal--busan .cal-place { color: #c9743f; }
-.cal--jeju  .cal-place { color: #4f86ad; }
 
 /* dot marks days with a set time */
 .cal-dot {

@@ -3,17 +3,15 @@
 // wording you give me.
 const BOOKING_TEMPLATE = {
     en: `name:
-city / country
-design: (preferrably a screenshot)
+city / country:
 colour:
 size:
-placement:
-ideas for customising the design or creating a custom design:`,
+placement:`,
     ko: `이름 및 생년월일:
-원하시는 도안: (메세지에 이미지를 첨부해주세요)
-색상, 크기, 부위:
-(선택) 도안 수정 사항:
-(선택) 주문 제작 아이디어:`
+도시 / 국가:
+색상:
+크기:
+부위:`
 };
 
 // Booking policy shown on the Book screen (no pricing). Edit freely; keep the
@@ -132,14 +130,14 @@ function dateInfoFor(sched, year, month, day) {
     return (sched.dates || []).find(x => x.date === key) || null;
 }
 
-// Go to the booking page for a chosen design (name + image).
+// Go to the booking page for a chosen design (its code + cover for preview).
 function bookItem(item) {
     if (!item) return;
     sessionStorage.setItem('announceSeen', '1');
     const q = new URLSearchParams();
-    const cap = captionText(item.caption);
-    if (cap) q.set('design', cap);
-    if (item.src) q.set('img', new URL(item.src, location.href).href);
+    const code = item.code || captionText(item.caption);
+    if (code) q.set('design', code);            // the form quotes this code
+    if (item.src) q.set('img', new URL(item.src, location.href).href); // preview only
     window.location.href = 'booking.html?' + q.toString();
 }
 
@@ -183,6 +181,37 @@ function buildCalMonth(sched, year, month, onPick) {
     });
     wrap.appendChild(head);
 
+    // Guest-spot ranges (Busan/Jeju): a connected line runs from the first to the
+    // last such date in the month, regardless of which days between are bookable.
+    const ranges = {};
+    (sched.dates || []).forEach(x => {
+        const [yy, mm, dd] = String(x.date).split('-').map(Number);
+        if (yy !== year || mm !== month) return;
+        const pl = normPlace(x.place);
+        if (pl === 'seoul') return;
+        if (!ranges[pl]) ranges[pl] = { min: dd, max: dd };
+        else { ranges[pl].min = Math.min(ranges[pl].min, dd); ranges[pl].max = Math.max(ranges[pl].max, dd); }
+    });
+    const rangeFor = (day) => {
+        for (const pl in ranges) {
+            if (day >= ranges[pl].min && day <= ranges[pl].max) return { place: pl, start: day === ranges[pl].min };
+        }
+        return null;
+    };
+    const placeName = (pl) => pl === 'busan' ? (ko ? '부산' : 'busan') : (ko ? '제주' : 'jeju');
+
+    const bindPick = (cell, info) => {
+        cell.dataset.date = info.date;
+        cell.classList.add('is-available');
+        cell.setAttribute('role', 'button');
+        cell.tabIndex = 0;
+        cell.title = info.time ? `${info.date} · ${info.time}` : info.date;
+        cell.addEventListener('click', () => onPick(info));
+        cell.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick(info); }
+        });
+    };
+
     const grid = document.createElement('div');
     grid.className = 'cal-grid';
     const startDay = new Date(year, month - 1, 1).getDay();        // 0 = Sunday
@@ -197,32 +226,28 @@ function buildCalMonth(sched, year, month, onPick) {
     for (let day = 1; day <= daysInMonth; day++) {
         const info = dateInfoFor(sched, year, month, day);
         const isPast = new Date(year, month - 1, day) < today;
+        const range = rangeFor(day);
         const cell = document.createElement('span');
-        if (info && !isPast) {
-            const place = normPlace(info.place);
-            cell.className = `cal-cell is-available cal--${place}`;
-            cell.dataset.date = info.date;
-            // For a guest spot (Busan/Jeju), label the START of each run in small text.
-            let label = '';
-            if (place !== 'seoul') {
-                const prev = dateInfoFor(sched, year, month, day - 1);
-                const prevSame = prev && normPlace(prev.place) === place;
-                if (!prevSame) {
-                    const name = place === 'busan' ? (ko ? '부산' : 'busan') : (ko ? '제주' : 'jeju');
-                    label = `<span class="cal-place">${name}</span>`;
-                }
+
+        if (range && !isPast) {
+            // Connected guest-spot line; the first box shows the place name.
+            cell.className = `cal-cell cal-line cal--${range.place}`;
+            if (range.start) {
+                cell.classList.add('cal-namecell');
+                cell.innerHTML = `<span class="cal-name">${placeName(range.place)}</span>`;
+            } else {
+                cell.innerHTML = `<span class="cal-d">${day}</span>` +
+                    (info && info.time ? '<span class="cal-dot" aria-hidden="true"></span>' : '');
             }
+            if (info) bindPick(cell, info);          // bookable day on the line
+            else cell.classList.add('cal-inrange');  // line continues, not bookable
+        } else if (info && !isPast) {
+            // Seoul (home) available date — individual underline
+            cell.className = 'cal-cell cal--seoul';
             cell.innerHTML = `<span class="cal-d">${day}</span>` +
-                (info.time ? '<span class="cal-dot" aria-hidden="true"></span>' : '') + label;
-            cell.setAttribute('role', 'button');
-            cell.tabIndex = 0;
-            cell.title = info.time ? `${info.date} · ${info.time}` : info.date;
-            cell.addEventListener('click', () => onPick(info));
-            cell.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick(info); }
-            });
+                (info.time ? '<span class="cal-dot" aria-hidden="true"></span>' : '');
+            bindPick(cell, info);
         } else {
-            // not available, or a date that has already passed
             cell.className = isPast ? 'cal-cell cal-off cal-past' : 'cal-cell cal-off';
             cell.textContent = day;
         }
@@ -273,8 +298,6 @@ function bookingContentHTML() {
     return `
         <h1 class="booking-title" data-en="book or enquire" data-ko="예약하기">book or enquire</h1>
 
-        <p class="booking-note" data-en="Booking requests are read by me personally — they are not automated, so please allow up to 48 hours for a reply." data-ko="예약 요청은 자동으로 처리되지 않고 제가 직접 확인합니다. 답변까지 최대 48시간이 걸릴 수 있습니다.">Booking requests are read by me personally — they are not automated, so please allow up to 48 hours for a reply.</p>
-
         <p class="booking-waitlist"><a href="waitlist.html" data-en="No date works for you? Join the waitlist →" data-ko="가능한 날짜가 없으신가요? 대기 신청하기 →">No date works for you? Join the waitlist →</a></p>
 
         <div class="booking-date">
@@ -289,11 +312,7 @@ function bookingContentHTML() {
             <span data-en="I'd like a custom design (you can reference more than one design in your message)" data-ko="주문 제작(커스텀) 도안을 원합니다 (메시지에 여러 도안을 참고로 보내실 수 있어요)">I'd like a custom design (you can reference more than one design in your message)</span>
         </label>
 
-        <div class="booking-policy">
-            <h3 class="booking-policy-h" data-en="booking policy" data-ko="예약 규정">booking policy</h3>
-            <ul class="booking-policy-list">${policyItems}</ul>
-        </div>
-        <p class="modal-intro" data-en="Copy and fill in the form below, then send it to me by DM, KakaoTalk or e-mail. The date and design you picked are already added." data-ko="아래 양식을 복사해 작성하신 뒤 DM, 카카오톡 또는 이메일로 보내주세요. 선택하신 날짜와 도안은 이미 채워져 있습니다.">Copy and fill in the form below, then send it to me by DM, KakaoTalk or e-mail. The date and design you picked are already added.</p>
+        <p class="modal-intro" data-en="Copy the form below and send it to me — or use “send” to share it straight to a chat. Your date(s) and design code are already filled in." data-ko="아래 양식을 복사해 보내주세요 — 또는 ‘보내기’로 채팅에 바로 공유하세요. 선택하신 날짜와 도안 코드는 이미 채워져 있습니다.">Copy the form below and send it to me — or use “send” to share it straight to a chat. Your date(s) and design code are already filled in.</p>
         <div class="booking-template-wrap">
             <textarea id="booking-template" class="booking-template" rows="5" readonly></textarea>
             <div class="copy-row">
@@ -301,9 +320,16 @@ function bookingContentHTML() {
             </div>
         </div>
         <div class="contact-options">
+            <button type="button" class="contact-btn send" onclick="sendBooking()" data-en="send" data-ko="보내기">send</button>
             <a class="contact-btn ig" href="${INSTAGRAM_URL}" target="_blank" rel="noopener" onclick="copyForChat()">dm</a>
             ${kakaoBtn}
             <a class="contact-btn email" href="mailto:${EMAIL}">e-mail</a>
+        </div>
+
+        <div class="booking-policy">
+            <h3 class="booking-policy-h" data-en="booking policy" data-ko="예약 규정">booking policy</h3>
+            <p class="booking-manual" data-en="Booking requests are reviewed manually — please allow up to 48 hours for a reply." data-ko="예약 요청은 직접 검토합니다 — 답변까지 최대 48시간이 걸릴 수 있습니다.">Booking requests are reviewed manually — please allow up to 48 hours for a reply.</p>
+            <ul class="booking-policy-list">${policyItems}</ul>
         </div>`;
 }
 
@@ -324,14 +350,13 @@ function bookingTemplateValue() {
         const list = s.dates.map(d => d.date + (d.time ? ` ${d.time}` : '') + (d.place ? ` (${d.place})` : ''));
         lines.push((ko ? '예약 희망일: ' : 'preferred date(s): ') + list.join(', '));
     }
-    if (s.custom) lines.push(ko ? '주문 제작(커스텀) 원함' : 'custom design: yes');
     if (s.designs && s.designs.length) {
         s.designs.forEach(g => {
-            let line = ko ? '선택한 도안: ' : 'selected design: ';
-            if (g.design) line += g.design;
-            if (g.img) line += (g.design ? ' — ' : '') + g.img;
-            lines.push(line);
+            if (g.design) lines.push((ko ? '도안 코드: ' : 'design code: ') + g.design);
         });
+    }
+    if (s.custom) {
+        lines.push(ko ? '도안 수정 또는 주문 제작 아이디어:' : 'ideas for customising the design or creating a custom design:');
     }
     return lines.length ? lines.join('\n') + '\n' + base : base;
 }
@@ -385,6 +410,18 @@ function copyForChat() {
     showToast(currentLanguage === 'ko' ? '복사됐어요 — 채팅에 붙여넣어 주세요' : 'Copied — paste it into the chat');
 }
 
+// "send" -> native share sheet (mobile): pick KakaoTalk / Instagram / Messages
+// and the filled form goes straight into the chat. Falls back to copy on desktop.
+function sendBooking() {
+    const ta = document.getElementById('booking-template');
+    const text = ta ? ta.value : '';
+    if (navigator.share) {
+        navigator.share({ text }).catch(() => {});
+        return;
+    }
+    copyForChat();
+}
+
 function showToast(msg) {
     let t = document.getElementById('copy-toast');
     if (!t) { t = document.createElement('div'); t.id = 'copy-toast'; t.className = 'copy-toast'; document.body.appendChild(t); }
@@ -415,7 +452,7 @@ function renderBookingPage() {
         fig.className = 'booking-selected';
         fig.innerHTML = `<img src="${thumbURL(img, 700)}" alt="" draggable="false">` +
             `<figcaption data-en="your selected design" data-ko="선택한 도안">your selected design</figcaption>`;
-        mount.insertBefore(fig, mount.querySelector('.booking-note'));
+        mount.insertBefore(fig, mount.querySelector('.booking-waitlist'));
     }
 
     // Inline availability calendar — tap to add/remove dates (multiple allowed).
@@ -616,7 +653,7 @@ function designItems(d) {
     const count = Math.max(0, parseInt(d.count, 10) || 0);
     const items = [];
     for (let i = 1; i <= count; i++) {
-        items.push({ src: `${d.folder}/${pad2(i)}.${ext}`, caption: d.caption || null });
+        items.push({ src: `${d.folder}/${pad2(i)}.${ext}`, caption: d.caption || null, code: d.code || '' });
     }
     return items;
 }
@@ -657,13 +694,15 @@ function loadDesignGrid(grid) {
         const items = designItems(d);
         if (!d.folder || !items.length) return;
         const a = document.createElement('a');
-        a.className = 'image-tile';
+        a.className = 'image-tile loading';
         a.href = `design.html?id=${encodeURIComponent(d.folder)}&c=${coll}`;
         const img = document.createElement('img');
         img.src = thumbURL(items[0].src, 600);   // cover, small/fast thumbnail
         img.alt = (d.caption && (d.caption.en || d.caption.ko)) || 'design';
         img.loading = 'lazy';
         img.decoding = 'async';
+        img.addEventListener('load', () => a.classList.remove('loading'));
+        img.addEventListener('error', () => a.classList.remove('loading'));
         a.appendChild(img);
         frag.appendChild(a);
     });
@@ -708,22 +747,28 @@ function renderDesignPage() {
     const items = designItems(d);
     const title = captionText(d.caption) || 'design';
     const isArchive = (window.GALLERY.archive || []).some(x => x.folder === id);
+    const codeLine = d.code
+        ? `<p class="design-code"><span data-en="design code" data-ko="도안 코드">design code</span>: <strong>${d.code}</strong></p>`
+        : '';
 
     mount.innerHTML =
         '<div class="project-desc"><span class="desc-label"><span class="dot"></span>' +
         `<span>${title}</span></span></div>` +
+        codeLine +
         '<div class="design-images"></div>' +
         '<div class="design-cta"></div>';
 
     const wrap = mount.querySelector('.design-images');
     items.forEach((item, idx) => {
         const fig = document.createElement('figure');
-        fig.className = 'design-img';
+        fig.className = 'design-img loading';
         const img = document.createElement('img');
         img.src = thumbURL(item.src, 900);
         img.alt = title;
         img.loading = 'lazy';
         img.decoding = 'async';
+        img.addEventListener('load', () => fig.classList.remove('loading'));
+        img.addEventListener('error', () => fig.classList.remove('loading'));
         fig.appendChild(img);
         fig.addEventListener('click', () => openLightbox(items, idx));
         wrap.appendChild(fig);
