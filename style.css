@@ -1162,13 +1162,10 @@ body.announce-open .footer { display: none; }
 .lang-pick { display: flex; justify-content: center; }
 .yy { width: min(72vw, 280px); height: auto; }
 .yy-half { cursor: pointer; }
-.yy path { stroke: rgba(255, 255, 255, 0.18); stroke-width: 0.5; }
-.yy-ko path { fill: #0d0d0d; }   /* black half */
-.yy-ko text { fill: #00a878; }   /* jade text */
-.yy-en path { fill: #00a878; }   /* jade half (inverted colours) */
-.yy-en text { fill: #0d0d0d; }   /* black text */
-.yy text { font-size: 7px; font-weight: 600; text-anchor: middle; dominant-baseline: central; letter-spacing: 0.3px; }
-.yy-half:hover path { opacity: 0.88; }
+/* outline only — both halves jade, no fill */
+.yy-shape { fill: none; stroke: var(--jade); stroke-width: 1.4; pointer-events: all; }
+.yy-half:hover .yy-shape { stroke-width: 2.4; }
+.yy text { fill: var(--jade); font-size: 7px; font-weight: 600; letter-spacing: 1.5px; }
 
 /* Footer language switch link */
 .lang-switch {
