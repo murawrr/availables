@@ -642,9 +642,6 @@ body.modal-open { overflow: hidden; }
 }
 .contact-btn.send { order: 0; background: var(--text); color: #fff; border: none; font-family: inherit; cursor: pointer; }
 .contact-btn.send:hover { opacity: 0.88; }
-.booking-waitlist { margin: 0 0 1.3rem; font-size: 0.9rem; }
-.booking-waitlist a { color: var(--text); text-decoration: underline; }
-.booking-waitlist a:hover { opacity: 0.6; }
 
 .booking-custom {
     display: flex;
@@ -659,25 +656,6 @@ body.modal-open { overflow: hidden; }
 }
 .booking-custom input { margin-top: 0.15rem; flex: none; }
 
-/* Inline availability calendar on the booking page */
-.booking-date {
-    margin-bottom: 1.3rem;
-    padding-bottom: 1.2rem;
-    border-bottom: 1px solid var(--line);
-}
-.booking-date-current { font-weight: 600; margin: 0 0 0.7rem; }
-.booking-cal {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1.4rem;
-}
-.booking-date-hint {
-    font-size: 0.76rem;
-    color: var(--muted);
-    text-align: center;
-    margin: 0.7rem 0 0;
-}
 .booking-selected {
     margin: 0 0 1.3rem;
     text-align: center;
@@ -739,21 +717,18 @@ body.modal-open { overflow: hidden; }
     animation: shimmer 1.2s infinite;
 }
 @keyframes shimmer { 100% { transform: translateX(100%); } }
-.design-cta { text-align: center; margin-bottom: 2rem; }
-.design-book {
+.design-cta { text-align: center; margin-bottom: 2.5rem; }
+.design-enquire {
     display: inline-block;
-    padding: 0.85rem 2.2rem;
-    background: var(--mint);
-    color: #111;
-    border: none;
-    font: inherit;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    letter-spacing: 0.4px;
     text-decoration: none;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 2px;
     cursor: pointer;
 }
-.design-book:hover { opacity: 0.88; }
+.design-enquire:hover { color: var(--text); }
 
 /* Booking policy block (no pricing) */
 .booking-policy {
@@ -1112,58 +1087,6 @@ body.announce-open .footer { display: none; }
 .yy-en text { fill: #23271f; }
 .yy text { font-size: 7px; font-weight: 600; text-anchor: middle; dominant-baseline: central; letter-spacing: 0.3px; }
 .yy-half:hover path { opacity: 0.88; }
-
-/* ===== Availability calendar (booking page) ===== */
-.cal-month { width: 230px; max-width: 100%; }
-.cal-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.5rem; text-align: center; }
-.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); column-gap: 0; row-gap: 7px; }
-.cal-dow { margin-bottom: 3px; }
-.cal-dow-cell {
-    text-align: center; font-size: 0.6rem; letter-spacing: 0.3px;
-    color: var(--muted); text-transform: uppercase;
-}
-.cal-cell {
-    position: relative;
-    aspect-ratio: 1 / 1;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.72rem;
-    color: #23271f;
-}
-.cal-blank { background: none; }
-.cal-off { color: #b8beb2; }
-.cal-past { opacity: 0.5; text-decoration: line-through; }
-
-/* available = thin continuous underline in the place colour (no filled square) */
-.cal-cell.is-available { cursor: pointer; font-weight: 600; }
-.cal--seoul { box-shadow: inset 0 -2px 0 #a7c4ac; }
-.cal--busan { box-shadow: inset 0 -2px 0 #e6a279; }
-.cal--jeju  { box-shadow: inset 0 -2px 0 #8fb9d6; }
-.cal-cell.is-available:hover { background: rgba(0, 0, 0, 0.05); }
-
-/* guest-spot line: in-range days that aren't bookable keep the line, muted */
-.cal-inrange { color: #c4cabf; }
-/* the first box of a guest run shows the place name instead of a number */
-.cal-namecell .cal-name {
-    font-size: 0.5rem;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    text-transform: uppercase;
-    white-space: nowrap;
-}
-.cal--busan .cal-name { color: #c9743f; }
-.cal--jeju  .cal-name { color: #4f86ad; }
-
-/* selected = filled in the place colour with a dark ring */
-.cal--seoul.is-selected { background: #a7c4ac; }
-.cal--busan.is-selected { background: #e6a279; }
-.cal--jeju.is-selected  { background: #8fb9d6; }
-.cal-cell.is-selected { border-radius: 4px; box-shadow: inset 0 0 0 2px #23271f; }
-
-/* dot marks days with a set time */
-.cal-dot {
-    position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
-    width: 4px; height: 4px; border-radius: 50%; background: rgba(0, 0, 0, 0.55);
-}
 
 /* Footer language switch link */
 .lang-switch {

@@ -109,27 +109,6 @@ function pickAnnounceLanguage(lang) {
     window.location.href = 'availables.html';
 }
 
-// ===== Availability calendar (used on the booking page) =====
-// Months + available dates come from schedule.js (window.SCHEDULE).
-function getSchedule() {
-    const s = window.SCHEDULE;
-    if (s && Array.isArray(s.months) && s.months.length) {
-        return { months: s.months, dates: Array.isArray(s.dates) ? s.dates : [] };
-    }
-    return { months: ['2026-06', '2026-07'], dates: [] };
-}
-
-function normPlace(p) {
-    p = String(p || '').toLowerCase();
-    return (p === 'busan' || p === 'jeju') ? p : 'seoul';
-}
-
-// Look up an available date entry for a given day, or null.
-function dateInfoFor(sched, year, month, day) {
-    const key = `${year}-${pad2(month)}-${pad2(day)}`;
-    return (sched.dates || []).find(x => x.date === key) || null;
-}
-
 // Go to the booking page for a chosen design (its code + cover for preview).
 function bookItem(item) {
     if (!item) return;
@@ -144,119 +123,6 @@ function bookItem(item) {
 // "book this design" in the viewer.
 function bookCurrentImage() { bookItem(lb.items[lb.index]); }
 
-// onPick(info) runs when an available date is clicked (booking page).
-function buildAnnounceCalendar(container, onPick) {
-    if (!container || typeof onPick !== 'function') return;
-    const pick = onPick;
-    container.innerHTML = '';
-    const sched = getSchedule();
-    sched.months.forEach(ym => {
-        const [year, month] = String(ym).split('-').map(Number);
-        if (year && month) container.appendChild(buildCalMonth(sched, year, month, pick));
-    });
-}
-
-function buildCalMonth(sched, year, month, onPick) {
-    const ko = currentLanguage === 'ko';
-    const monthsEn = ['', 'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'];
-    const dow = ko ? ['일', '월', '화', '수', '목', '금', '토']
-                   : ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-
-    const wrap = document.createElement('div');
-    wrap.className = 'cal-month';
-
-    const title = document.createElement('div');
-    title.className = 'cal-title';
-    title.textContent = ko ? `${year}년 ${month}월` : `${monthsEn[month]} ${year}`;
-    wrap.appendChild(title);
-
-    const head = document.createElement('div');
-    head.className = 'cal-grid cal-dow';
-    dow.forEach(d => {
-        const c = document.createElement('span');
-        c.className = 'cal-dow-cell';
-        c.textContent = d;
-        head.appendChild(c);
-    });
-    wrap.appendChild(head);
-
-    // Guest-spot ranges (Busan/Jeju): a connected line runs from the first to the
-    // last such date in the month, regardless of which days between are bookable.
-    const ranges = {};
-    (sched.dates || []).forEach(x => {
-        const [yy, mm, dd] = String(x.date).split('-').map(Number);
-        if (yy !== year || mm !== month) return;
-        const pl = normPlace(x.place);
-        if (pl === 'seoul') return;
-        if (!ranges[pl]) ranges[pl] = { min: dd, max: dd };
-        else { ranges[pl].min = Math.min(ranges[pl].min, dd); ranges[pl].max = Math.max(ranges[pl].max, dd); }
-    });
-    const rangeFor = (day) => {
-        for (const pl in ranges) {
-            if (day >= ranges[pl].min && day <= ranges[pl].max) return { place: pl, start: day === ranges[pl].min };
-        }
-        return null;
-    };
-    const placeName = (pl) => pl === 'busan' ? (ko ? '부산' : 'busan') : (ko ? '제주' : 'jeju');
-
-    const bindPick = (cell, info) => {
-        cell.dataset.date = info.date;
-        cell.classList.add('is-available');
-        cell.setAttribute('role', 'button');
-        cell.tabIndex = 0;
-        cell.title = info.time ? `${info.date} · ${info.time}` : info.date;
-        cell.addEventListener('click', () => onPick(info));
-        cell.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick(info); }
-        });
-    };
-
-    const grid = document.createElement('div');
-    grid.className = 'cal-grid';
-    const startDay = new Date(year, month - 1, 1).getDay();        // 0 = Sunday
-    const daysInMonth = new Date(year, month, 0).getDate();
-    for (let i = 0; i < startDay; i++) {
-        const blank = document.createElement('span');
-        blank.className = 'cal-cell cal-blank';
-        grid.appendChild(blank);
-    }
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    for (let day = 1; day <= daysInMonth; day++) {
-        const info = dateInfoFor(sched, year, month, day);
-        const isPast = new Date(year, month - 1, day) < today;
-        const range = rangeFor(day);
-        const cell = document.createElement('span');
-
-        if (range && !isPast) {
-            // Connected guest-spot line; the first box shows the place name.
-            cell.className = `cal-cell cal-line cal--${range.place}`;
-            if (range.start) {
-                cell.classList.add('cal-namecell');
-                cell.innerHTML = `<span class="cal-name">${placeName(range.place)}</span>`;
-            } else {
-                cell.innerHTML = `<span class="cal-d">${day}</span>` +
-                    (info && info.time ? '<span class="cal-dot" aria-hidden="true"></span>' : '');
-            }
-            if (info) bindPick(cell, info);          // bookable day on the line
-            else cell.classList.add('cal-inrange');  // line continues, not bookable
-        } else if (info && !isPast) {
-            // Seoul (home) available date — individual underline
-            cell.className = 'cal-cell cal--seoul';
-            cell.innerHTML = `<span class="cal-d">${day}</span>` +
-                (info.time ? '<span class="cal-dot" aria-hidden="true"></span>' : '');
-            bindPick(cell, info);
-        } else {
-            cell.className = isPast ? 'cal-cell cal-off cal-past' : 'cal-cell cal-off';
-            cell.textContent = day;
-        }
-        grid.appendChild(cell);
-    }
-    wrap.appendChild(grid);
-    return wrap;
-}
-
 // ===== Shared header (injected into #site-header on every page) =====
 function renderHeader() {
     const mount = document.getElementById('site-header');
@@ -270,7 +136,7 @@ function renderHeader() {
         </div>
         <span class="header-dots" aria-hidden="true"></span>
         <div class="header-right">
-            <a class="header-action" href="booking.html" data-en="book or enquire" data-ko="예약하기">book or enquire</a>
+            <a class="header-action" href="booking.html" data-en="enquire" data-ko="문의">enquire</a>
         </div>`;
 
     // Back-to-home link, relocated to its own row just below the header.
@@ -296,23 +162,14 @@ function bookingContentHTML() {
         .map((en, i) => `<li data-en="${en}" data-ko="${BOOKING_POLICY.ko[i]}">${en}</li>`)
         .join('');
     return `
-        <h1 class="booking-title" data-en="book or enquire" data-ko="예약하기">book or enquire</h1>
-
-        <p class="booking-waitlist"><a href="waitlist.html" data-en="No date works for you? Join the waitlist →" data-ko="가능한 날짜가 없으신가요? 대기 신청하기 →">No date works for you? Join the waitlist →</a></p>
-
-        <div class="booking-date">
-            <h3 class="booking-policy-h" data-en="availability — pick your date(s)" data-ko="예약 가능 일정 — 날짜 선택 (선택)">availability — pick your date(s)</h3>
-            <p class="booking-date-current"></p>
-            <div class="booking-cal"></div>
-            <p class="booking-date-hint" data-en="optional — tap one or more dates" data-ko="선택사항 — 원하는 날짜를 하나 이상 누르세요">optional — tap one or more dates</p>
-        </div>
+        <h1 class="booking-title" data-en="enquire" data-ko="문의하기">enquire</h1>
 
         <label class="booking-custom">
             <input type="checkbox" id="booking-custom-chk" onchange="setBookingCustom(this.checked)">
             <span data-en="I'd like a custom design (you can reference more than one design in your message)" data-ko="주문 제작(커스텀) 도안을 원합니다 (메시지에 여러 도안을 참고로 보내실 수 있어요)">I'd like a custom design (you can reference more than one design in your message)</span>
         </label>
 
-        <p class="modal-intro" data-en="Copy the form below and send it to me — or use “send” to share it straight to a chat. Your date(s) and design code are already filled in." data-ko="아래 양식을 복사해 보내주세요 — 또는 ‘보내기’로 채팅에 바로 공유하세요. 선택하신 날짜와 도안 코드는 이미 채워져 있습니다.">Copy the form below and send it to me — or use “send” to share it straight to a chat. Your date(s) and design code are already filled in.</p>
+        <p class="modal-intro" data-en="Copy the short form below and send it to me — or use “send” to share it straight to a chat. If you came from a design, its code is already filled in." data-ko="아래 양식을 복사해 보내주세요 — 또는 ‘보내기’로 채팅에 바로 공유하세요. 도안 페이지에서 오셨다면 코드가 이미 채워져 있습니다.">Copy the short form below and send it to me — or use “send” to share it straight to a chat. If you came from a design, its code is already filled in.</p>
         <div class="booking-template-wrap">
             <textarea id="booking-template" class="booking-template" rows="5" readonly></textarea>
             <div class="copy-row">
@@ -336,20 +193,15 @@ function bookingContentHTML() {
 // Booking template text, with "preferred date" and/or "selected design" lines
 // prepended when the user arrived from a calendar date or an image
 // (booking.html?date=...&time=...&place=...  or  ?design=...&img=...).
-// Current booking selection on the booking page. Dates and designs can be
-// multiple; both are optional. { dates: [{date,time,place}], designs: [{design,img}], custom }
-let bookingState = { dates: [], designs: [], custom: false };
+// Current booking selection on the (optional) enquiry form. { designs, custom }
+let bookingState = { designs: [], custom: false };
 
 function bookingTemplateValue() {
     const base = BOOKING_TEMPLATE[currentLanguage] || BOOKING_TEMPLATE.en;
-    const s = bookingState || { dates: [], designs: [] };
+    const s = bookingState || { designs: [] };
     const ko = currentLanguage === 'ko';
     const lines = [];
 
-    if (s.dates && s.dates.length) {
-        const list = s.dates.map(d => d.date + (d.time ? ` ${d.time}` : '') + (d.place ? ` (${d.place})` : ''));
-        lines.push((ko ? '예약 희망일: ' : 'preferred date(s): ') + list.join(', '));
-    }
     if (s.designs && s.designs.length) {
         s.designs.forEach(g => {
             if (g.design) lines.push((ko ? '도안 코드: ' : 'design code: ') + g.design);
@@ -361,30 +213,10 @@ function bookingTemplateValue() {
     return lines.length ? lines.join('\n') + '\n' + base : base;
 }
 
-function bookingDatesLabel() {
-    const s = bookingState || {};
-    const ko = currentLanguage === 'ko';
-    if (!s.dates || !s.dates.length) return ko ? '선택된 날짜 없음 (선택사항)' : 'no dates selected (optional)';
-    return s.dates.map(d => d.date + (d.time ? ` · ${d.time}` : '') + (d.place ? ` (${d.place})` : '')).join('   ·   ');
-}
-
 function refreshBookingForm() {
-    const disp = document.querySelector('.booking-date-current');
-    if (disp) disp.textContent = bookingDatesLabel();
     const ta = document.getElementById('booking-template');
     if (ta) { ta.value = bookingTemplateValue(); autosizeTemplate(); }
     updateBookingContactLinks();
-}
-
-// Tap a date -> toggle it in/out of the selection (multiple allowed).
-function setBookingDate(info) {
-    if (!bookingState.dates) bookingState.dates = [];
-    const i = bookingState.dates.findIndex(d => d.date === info.date);
-    if (i >= 0) bookingState.dates.splice(i, 1);
-    else bookingState.dates.push({ date: info.date, time: info.time || '', place: info.place || '' });
-    const cell = document.querySelector(`.booking-cal .cal-cell[data-date="${info.date}"]`);
-    if (cell) cell.classList.toggle('is-selected', i < 0);
-    refreshBookingForm();
 }
 
 function setBookingCustom(on) {
@@ -438,32 +270,18 @@ function renderBookingPage() {
     const p = new URLSearchParams(location.search);
     const design = p.get('design') || '';
     const img = p.get('img') || '';
-    bookingState = {
-        dates: p.get('date') ? [{ date: p.get('date'), time: p.get('time') || '', place: p.get('place') || '' }] : [],
-        designs: (design || img) ? [{ design, img }] : [],
-        custom: false
-    };
+    bookingState = { designs: (design || img) ? [{ design, img }] : [], custom: false };
 
     mount.innerHTML = bookingContentHTML();
 
-    // Show the chosen design (if the user came from "book this design").
+    // Show the chosen design (if the visitor came from a design's enquiry link).
     if (img) {
         const fig = document.createElement('figure');
         fig.className = 'booking-selected';
         fig.innerHTML = `<img src="${thumbURL(img, 700)}" alt="" draggable="false">` +
-            `<figcaption data-en="your selected design" data-ko="선택한 도안">your selected design</figcaption>`;
-        mount.insertBefore(fig, mount.querySelector('.booking-waitlist'));
+            `<figcaption data-en="the design you're asking about" data-ko="문의하시는 도안">the design you're asking about</figcaption>`;
+        mount.insertBefore(fig, mount.querySelector('.booking-custom'));
     }
-
-    // Inline availability calendar — tap to add/remove dates (multiple allowed).
-    const calEl = mount.querySelector('.booking-cal');
-    buildAnnounceCalendar(calEl, setBookingDate);
-    bookingState.dates.forEach(d => {
-        const c = calEl.querySelector(`.cal-cell[data-date="${d.date}"]`);
-        if (c) c.classList.add('is-selected');
-    });
-    const disp = mount.querySelector('.booking-date-current');
-    if (disp) disp.textContent = bookingDatesLabel();
 
     const ta = document.getElementById('booking-template');
     if (ta) ta.value = bookingTemplateValue();
@@ -775,16 +593,17 @@ function renderDesignPage() {
     });
 
     const cta = mount.querySelector('.design-cta');
+    const ko = currentLanguage === 'ko';
     if (isArchive) {
-        const ko = currentLanguage === 'ko';
-        cta.innerHTML = `<a class="design-book" href="availables.html">${ko ? '솔드아웃 — 예약 가능 도안 보기' : 'sold out — see available designs'}</a>`;
+        cta.innerHTML = `<a class="design-enquire" href="availables.html">${ko ? '솔드아웃 — 다른 도안 보기' : 'sold out — see other designs'}</a>`;
     } else {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'design-book';
-        btn.textContent = (currentLanguage === 'ko') ? '이 도안 예약하기' : 'book this design';
-        btn.addEventListener('click', () => bookItem(items[0]));
-        cta.appendChild(btn);
+        // Understated enquiry link (gallery-first; not a hard sell).
+        const a = document.createElement('a');
+        a.className = 'design-enquire';
+        a.textContent = ko ? '이 도안 문의하기 →' : 'enquire about this design →';
+        a.href = '#';
+        a.addEventListener('click', (e) => { e.preventDefault(); bookItem(items[0]); });
+        cta.appendChild(a);
     }
 }
 
