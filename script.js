@@ -39,31 +39,20 @@ const INSTAGRAM_URL = 'https://instagram.com/murarctic';
 const EMAIL = 'murarctic123@gmail.com';
 
 // Opening announcement (shown once per browser session). Bilingual in one box.
+// Opening popup: just a language picker, drawn as a yin-yang. Each half is a
+// button; one half is the inverted colour of the other.
 const ANNOUNCEMENT_HTML = `
-    <img class="announce-cover" alt="" draggable="false" hidden>
-    <!-- Step 1: pick a language -->
-    <div class="announce-step announce-step--lang">
-        <h3 class="announce-h">select language<span class="announce-sub">언어 선택</span></h3>
-        <div class="announce-langs">
-            <button type="button" class="announce-lang" onclick="pickAnnounceLanguage('en')">English</button>
-            <button type="button" class="announce-lang" onclick="pickAnnounceLanguage('ko')">한국어</button>
-        </div>
-    </div>
-
-    <!-- Step 2: available-dates calendar -->
-    <div class="announce-step announce-step--schedule" hidden>
-        <h3 class="announce-h" data-en="available dates" data-ko="예약 가능 날짜">available dates</h3>
-        <p class="announce-hint" data-en="click a date, then choose a design" data-ko="날짜를 고른 뒤 도안을 선택하세요">click a date, then choose a design</p>
-        <div class="announce-cal"></div>
-        <div class="announce-legend">
-            <span class="leg leg--seoul" data-en="Seoul" data-ko="서울">Seoul</span>
-            <span class="leg leg--busan" data-en="Busan" data-ko="부산">Busan</span>
-            <span class="leg leg--jeju" data-en="Jeju" data-ko="제주">Jeju</span>
-        </div>
-        <div class="announce-actions">
-            <button type="button" class="announce-action" onclick="announceWaitlist()" data-en="waitlist" data-ko="대기 신청">waitlist</button>
-            <button type="button" class="announce-action" onclick="announceDesigns()" data-en="browse designs" data-ko="도안 둘러보기">browse designs</button>
-        </div>
+    <div class="lang-pick">
+        <svg class="yy" viewBox="0 0 100 100" role="group" aria-label="Select language">
+            <g class="yy-half yy-ko" role="button" tabindex="0" onclick="pickAnnounceLanguage('ko')" transform="translate(-1.5 0)">
+                <path d="M50,0 A50,50 0 0,0 50,100 A25,25 0 0,0 50,50 A25,25 0 0,1 50,0 Z"/>
+                <text x="27" y="51">한국어</text>
+            </g>
+            <g class="yy-half yy-en" role="button" tabindex="0" onclick="pickAnnounceLanguage('en')" transform="translate(1.5 0)">
+                <path d="M50,0 A50,50 0 0,1 50,100 A25,25 0 0,1 50,50 A25,25 0 0,0 50,0 Z"/>
+                <text x="73" y="51">English</text>
+            </g>
+        </svg>
     </div>`;
 
 // ===== Language switching (English + Korean) =====
@@ -115,29 +104,14 @@ function setLanguageHome(lang) {
 }
 
 // Opening popup step 1 -> apply the chosen language and reveal the calendar.
+// Pick a language -> remember it and go straight to the designs page.
 function pickAnnounceLanguage(lang) {
     setLanguage(lang);
-    const m = document.getElementById('announce-modal');
-    if (!m) return;
-    m.querySelector('.announce-step--lang').hidden = true;
-    m.querySelector('.announce-step--schedule').hidden = false;
-    buildAnnounceCalendar(m.querySelector('.announce-cal'));
-}
-
-// The opening popup's two choices below the calendar.
-function announceWaitlist() {
     sessionStorage.setItem('announceSeen', '1');
-    window.location.href = 'waitlist.html';
-}
-
-// Skip the date and go straight to choosing a design (books with design only).
-function announceDesigns() {
-    sessionStorage.setItem('announceSeen', '1');
-    sessionStorage.removeItem('pendingDate');
     window.location.href = 'availables.html';
 }
 
-// ===== Availability calendar (shown in the opening popup) =====
+// ===== Availability calendar (used on the booking page) =====
 // Months + available dates come from schedule.js (window.SCHEDULE).
 function getSchedule() {
     const s = window.SCHEDULE;
@@ -158,70 +132,24 @@ function dateInfoFor(sched, year, month, day) {
     return (sched.dates || []).find(x => x.date === key) || null;
 }
 
-// Booking flow: pick a date -> pick a design -> the form is filled with both.
-
-// Step A: click an available date -> remember it, then go choose a design.
-function bookDate(info) {
-    sessionStorage.setItem('announceSeen', '1');
-    sessionStorage.setItem('pendingDate', JSON.stringify({
-        date: info.date, place: info.place || '', time: info.time || ''
-    }));
-    window.location.href = 'availables.html';
-}
-
-// Step B: click "book this design" in the viewer -> booking page with the
-// design AND the date they picked earlier pre-filled into the form.
-// True if the visitor picked a date earlier (date-first flow).
-function pendingDate() {
-    try {
-        const p = JSON.parse(sessionStorage.getItem('pendingDate') || 'null');
-        return (p && p.date) ? p : null;
-    } catch (e) { return null; }
-}
-
-// Go to the booking page for a given image, carrying any picked date + the design.
+// Go to the booking page for a chosen design (name + image).
 function bookItem(item) {
     if (!item) return;
     sessionStorage.setItem('announceSeen', '1');
     const q = new URLSearchParams();
-    const pend = pendingDate();
-    if (pend) {
-        q.set('date', pend.date);
-        if (pend.place) q.set('place', pend.place);
-        if (pend.time) q.set('time', pend.time);
-    }
     const cap = captionText(item.caption);
     if (cap) q.set('design', cap);
     if (item.src) q.set('img', new URL(item.src, location.href).href);
-    sessionStorage.removeItem('pendingDate');
     window.location.href = 'booking.html?' + q.toString();
 }
 
 // "book this design" in the viewer.
 function bookCurrentImage() { bookItem(lb.items[lb.index]); }
 
-// On the designs page, if a date was picked, show a reminder to pick a design.
-function showPendingDateBanner() {
-    const grid = document.querySelector('.image-grid[data-collection]');
-    if (!grid) return;
-    let pend;
-    try { pend = JSON.parse(sessionStorage.getItem('pendingDate') || 'null'); } catch (e) { pend = null; }
-    if (!pend || !pend.date) return;
-    const ko = currentLanguage === 'ko';
-    let when = pend.date + (pend.time ? ` ${pend.time}` : '') + (pend.place ? ` (${pend.place})` : '');
-    const bar = document.createElement('div');
-    bar.className = 'pending-banner';
-    bar.textContent = ko
-        ? `선택한 날짜: ${when} — 예약할 도안을 선택하세요`
-        : `Selected: ${when} — now pick a design to book`;
-    grid.parentNode.insertBefore(bar, grid);
-}
-
-// onPick(info) runs when an available date is clicked. Defaults to bookDate
-// (calendar in the opening popup); the booking page passes setBookingDate.
+// onPick(info) runs when an available date is clicked (booking page).
 function buildAnnounceCalendar(container, onPick) {
-    if (!container) return;
-    const pick = onPick || bookDate;
+    if (!container || typeof onPick !== 'function') return;
+    const pick = onPick;
     container.innerHTML = '';
     const sched = getSchedule();
     sched.months.forEach(ym => {
@@ -271,10 +199,21 @@ function buildCalMonth(sched, year, month, onPick) {
         const isPast = new Date(year, month - 1, day) < today;
         const cell = document.createElement('span');
         if (info && !isPast) {
-            cell.className = `cal-cell is-available cal--${normPlace(info.place)}`;
+            const place = normPlace(info.place);
+            cell.className = `cal-cell is-available cal--${place}`;
             cell.dataset.date = info.date;
+            // For a guest spot (Busan/Jeju), label the START of each run in small text.
+            let label = '';
+            if (place !== 'seoul') {
+                const prev = dateInfoFor(sched, year, month, day - 1);
+                const prevSame = prev && normPlace(prev.place) === place;
+                if (!prevSame) {
+                    const name = place === 'busan' ? (ko ? '부산' : 'busan') : (ko ? '제주' : 'jeju');
+                    label = `<span class="cal-place">${name}</span>`;
+                }
+            }
             cell.innerHTML = `<span class="cal-d">${day}</span>` +
-                (info.time ? '<span class="cal-dot" aria-hidden="true"></span>' : '');
+                (info.time ? '<span class="cal-dot" aria-hidden="true"></span>' : '') + label;
             cell.setAttribute('role', 'button');
             cell.tabIndex = 0;
             cell.title = info.time ? `${info.date} · ${info.time}` : info.date;
@@ -306,7 +245,7 @@ function renderHeader() {
         </div>
         <span class="header-dots" aria-hidden="true"></span>
         <div class="header-right">
-            <a class="header-action" href="booking.html" data-en="book or enquire" data-ko="예약 혹은 문의">book or enquire</a>
+            <a class="header-action" href="booking.html" data-en="book or enquire" data-ko="예약하기">book or enquire</a>
         </div>`;
 
     // Back-to-home link, relocated to its own row just below the header.
@@ -332,23 +271,29 @@ function bookingContentHTML() {
         .map((en, i) => `<li data-en="${en}" data-ko="${BOOKING_POLICY.ko[i]}">${en}</li>`)
         .join('');
     return `
-        <h1 class="booking-title" data-en="book or enquire" data-ko="예약 혹은 문의">book or enquire</h1>
+        <h1 class="booking-title" data-en="book or enquire" data-ko="예약하기">book or enquire</h1>
+
+        <p class="booking-note" data-en="Booking requests are read by me personally — they are not automated, so please allow up to 48 hours for a reply." data-ko="예약 요청은 자동으로 처리되지 않고 제가 직접 확인합니다. 답변까지 최대 48시간이 걸릴 수 있습니다.">Booking requests are read by me personally — they are not automated, so please allow up to 48 hours for a reply.</p>
+
+        <p class="booking-waitlist"><a href="waitlist.html" data-en="No date works for you? Join the waitlist →" data-ko="가능한 날짜가 없으신가요? 대기 신청하기 →">No date works for you? Join the waitlist →</a></p>
+
         <div class="booking-date">
-            <h3 class="booking-policy-h" data-en="availability — your date" data-ko="예약 가능 일정 — 날짜 선택">availability — your date</h3>
+            <h3 class="booking-policy-h" data-en="availability — pick your date(s)" data-ko="예약 가능 일정 — 날짜 선택 (선택)">availability — pick your date(s)</h3>
             <p class="booking-date-current"></p>
             <div class="booking-cal"></div>
-            <div class="announce-legend">
-                <span class="leg leg--seoul" data-en="Seoul" data-ko="서울">Seoul</span>
-                <span class="leg leg--busan" data-en="Busan" data-ko="부산">Busan</span>
-                <span class="leg leg--jeju" data-en="Jeju" data-ko="제주">Jeju</span>
-            </div>
-            <p class="booking-date-hint" data-en="tap a date to add it (optional)" data-ko="원하는 날짜를 눌러 추가하세요 (선택)">tap a date to add it (optional)</p>
+            <p class="booking-date-hint" data-en="optional — tap one or more dates" data-ko="선택사항 — 원하는 날짜를 하나 이상 누르세요">optional — tap one or more dates</p>
         </div>
+
+        <label class="booking-custom">
+            <input type="checkbox" id="booking-custom-chk" onchange="setBookingCustom(this.checked)">
+            <span data-en="I'd like a custom design (you can reference more than one design in your message)" data-ko="주문 제작(커스텀) 도안을 원합니다 (메시지에 여러 도안을 참고로 보내실 수 있어요)">I'd like a custom design (you can reference more than one design in your message)</span>
+        </label>
+
         <div class="booking-policy">
             <h3 class="booking-policy-h" data-en="booking policy" data-ko="예약 규정">booking policy</h3>
             <ul class="booking-policy-list">${policyItems}</ul>
         </div>
-        <p class="modal-intro" data-en="To book, copy and fill in the template below — or feel free to ignore it and just ask me a question. Either way, reach me by DM." data-ko="예약을 원하시면 아래 양식을 복사해 작성해 주세요. 양식은 건너뛰고 편하게 질문만 보내주셔도 괜찮습니다. DM 또는 카카오톡으로 연락 주세요.">To book, copy and fill in the template below — or feel free to ignore it and just ask me a question. Either way, reach me by DM.</p>
+        <p class="modal-intro" data-en="Copy and fill in the form below, then send it to me by DM, KakaoTalk or e-mail. The date and design you picked are already added." data-ko="아래 양식을 복사해 작성하신 뒤 DM, 카카오톡 또는 이메일로 보내주세요. 선택하신 날짜와 도안은 이미 채워져 있습니다.">Copy and fill in the form below, then send it to me by DM, KakaoTalk or e-mail. The date and design you picked are already added.</p>
         <div class="booking-template-wrap">
             <textarea id="booking-template" class="booking-template" rows="5" readonly></textarea>
             <div class="copy-row">
@@ -359,58 +304,67 @@ function bookingContentHTML() {
             <a class="contact-btn ig" href="${INSTAGRAM_URL}" target="_blank" rel="noopener" onclick="copyForChat()">dm</a>
             ${kakaoBtn}
             <a class="contact-btn email" href="mailto:${EMAIL}">e-mail</a>
-        </div>
-        <p class="modal-foot en-only"><a href="waitlist.html" data-en="Not in your area yet? Join the waitlist →">Not in your area yet? Join the waitlist →</a></p>`;
+        </div>`;
 }
 
 // Booking template text, with "preferred date" and/or "selected design" lines
 // prepended when the user arrived from a calendar date or an image
 // (booking.html?date=...&time=...&place=...  or  ?design=...&img=...).
-// Current booking selection on the booking page (date + design), editable.
-let bookingState = null;
+// Current booking selection on the booking page. Dates and designs can be
+// multiple; both are optional. { dates: [{date,time,place}], designs: [{design,img}], custom }
+let bookingState = { dates: [], designs: [], custom: false };
 
 function bookingTemplateValue() {
     const base = BOOKING_TEMPLATE[currentLanguage] || BOOKING_TEMPLATE.en;
-    const s = bookingState || {};
+    const s = bookingState || { dates: [], designs: [] };
     const ko = currentLanguage === 'ko';
     const lines = [];
 
-    if (s.date) {
-        let line = (ko ? '예약 희망일: ' : 'preferred date: ') + s.date;
-        if (s.time) line += ` ${s.time}`;
-        if (s.place) line += ` (${s.place})`;
-        lines.push(line);
+    if (s.dates && s.dates.length) {
+        const list = s.dates.map(d => d.date + (d.time ? ` ${d.time}` : '') + (d.place ? ` (${d.place})` : ''));
+        lines.push((ko ? '예약 희망일: ' : 'preferred date(s): ') + list.join(', '));
     }
-    if (s.design || s.img) {
-        let line = ko ? '선택한 도안: ' : 'selected design: ';
-        if (s.design) line += s.design;
-        if (s.img) line += (s.design ? ' — ' : '') + s.img;
-        lines.push(line);
+    if (s.custom) lines.push(ko ? '주문 제작(커스텀) 원함' : 'custom design: yes');
+    if (s.designs && s.designs.length) {
+        s.designs.forEach(g => {
+            let line = ko ? '선택한 도안: ' : 'selected design: ';
+            if (g.design) line += g.design;
+            if (g.img) line += (g.design ? ' — ' : '') + g.img;
+            lines.push(line);
+        });
     }
     return lines.length ? lines.join('\n') + '\n' + base : base;
 }
 
-function bookingDateLabel() {
+function bookingDatesLabel() {
     const s = bookingState || {};
-    if (!s.date) return (currentLanguage === 'ko') ? '아직 선택되지 않음' : 'not selected yet';
-    return s.date + (s.time ? ` · ${s.time}` : '') + (s.place ? ` (${s.place})` : '');
+    const ko = currentLanguage === 'ko';
+    if (!s.dates || !s.dates.length) return ko ? '선택된 날짜 없음 (선택사항)' : 'no dates selected (optional)';
+    return s.dates.map(d => d.date + (d.time ? ` · ${d.time}` : '') + (d.place ? ` (${d.place})` : '')).join('   ·   ');
 }
 
-// Tap a date on the booking-page calendar -> set it and refresh the form live.
-function setBookingDate(info) {
-    if (!bookingState) bookingState = {};
-    bookingState.date = info.date;
-    bookingState.time = info.time || '';
-    bookingState.place = info.place || '';
-    document.querySelectorAll('.booking-cal .cal-cell.is-selected')
-        .forEach(c => c.classList.remove('is-selected'));
-    const cell = document.querySelector(`.booking-cal .cal-cell[data-date="${info.date}"]`);
-    if (cell) cell.classList.add('is-selected');
+function refreshBookingForm() {
     const disp = document.querySelector('.booking-date-current');
-    if (disp) disp.textContent = bookingDateLabel();
+    if (disp) disp.textContent = bookingDatesLabel();
     const ta = document.getElementById('booking-template');
     if (ta) { ta.value = bookingTemplateValue(); autosizeTemplate(); }
     updateBookingContactLinks();
+}
+
+// Tap a date -> toggle it in/out of the selection (multiple allowed).
+function setBookingDate(info) {
+    if (!bookingState.dates) bookingState.dates = [];
+    const i = bookingState.dates.findIndex(d => d.date === info.date);
+    if (i >= 0) bookingState.dates.splice(i, 1);
+    else bookingState.dates.push({ date: info.date, time: info.time || '', place: info.place || '' });
+    const cell = document.querySelector(`.booking-cal .cal-cell[data-date="${info.date}"]`);
+    if (cell) cell.classList.toggle('is-selected', i < 0);
+    refreshBookingForm();
+}
+
+function setBookingCustom(on) {
+    bookingState.custom = !!on;
+    refreshBookingForm();
 }
 
 // E-mail can carry the whole filled form automatically (subject + body).
@@ -445,31 +399,34 @@ function renderBookingPage() {
     if (!mount) return;
 
     const p = new URLSearchParams(location.search);
+    const design = p.get('design') || '';
+    const img = p.get('img') || '';
     bookingState = {
-        date: p.get('date') || '', time: p.get('time') || '', place: p.get('place') || '',
-        design: p.get('design') || '', img: p.get('img') || ''
+        dates: p.get('date') ? [{ date: p.get('date'), time: p.get('time') || '', place: p.get('place') || '' }] : [],
+        designs: (design || img) ? [{ design, img }] : [],
+        custom: false
     };
 
     mount.innerHTML = bookingContentHTML();
 
-    // Show the chosen image (if the user came from "book this design").
-    if (bookingState.img) {
+    // Show the chosen design (if the user came from "book this design").
+    if (img) {
         const fig = document.createElement('figure');
         fig.className = 'booking-selected';
-        fig.innerHTML = `<img src="${thumbURL(bookingState.img, 700)}" alt="" draggable="false">` +
+        fig.innerHTML = `<img src="${thumbURL(img, 700)}" alt="" draggable="false">` +
             `<figcaption data-en="your selected design" data-ko="선택한 도안">your selected design</figcaption>`;
-        mount.insertBefore(fig, mount.querySelector('.booking-date'));
+        mount.insertBefore(fig, mount.querySelector('.booking-note'));
     }
 
-    // Inline availability calendar — tap to set/change the date.
+    // Inline availability calendar — tap to add/remove dates (multiple allowed).
     const calEl = mount.querySelector('.booking-cal');
     buildAnnounceCalendar(calEl, setBookingDate);
-    if (bookingState.date) {
-        const c = calEl.querySelector(`.cal-cell[data-date="${bookingState.date}"]`);
+    bookingState.dates.forEach(d => {
+        const c = calEl.querySelector(`.cal-cell[data-date="${d.date}"]`);
         if (c) c.classList.add('is-selected');
-    }
+    });
     const disp = mount.querySelector('.booking-date-current');
-    if (disp) disp.textContent = bookingDateLabel();
+    if (disp) disp.textContent = bookingDatesLabel();
 
     const ta = document.getElementById('booking-template');
     if (ta) ta.value = bookingTemplateValue();
@@ -513,16 +470,6 @@ function renderAnnouncement() {
             ${ANNOUNCEMENT_HTML}
         </div>`;
     document.body.appendChild(overlay);
-    loadAnnounceCover(overlay);
-}
-
-// Optional popup image: drop a file named cover.* (or 01.*) into images/popup/.
-function loadAnnounceCover(overlay) {
-    const img = overlay.querySelector('.announce-cover');
-    if (!img) return;
-    probeImage('images/popup/cover')
-        .then(r => r || probeImage('images/popup/01'))
-        .then(r => { if (r) { img.src = r.src; img.hidden = false; } });
 }
 
 function openAnnounce() {
@@ -661,25 +608,23 @@ function buildMarquees() {
 }
 
 // ===== Image helpers =====
-const IMG_EXTS = ['png', 'jpg', 'jpeg', 'webp', 'JPG', 'PNG'];
+function pad2(n) { return String(n).padStart(2, '0'); }
 
-// Probe one image path, trying extensions in PARALLEL. Resolves to { src, ext }
-// for the first that loads, or null. Used for the optional opening-popup cover.
-function probeImage(pathNoExt, exts = IMG_EXTS) {
-    return new Promise(resolve => {
-        let pending = exts.length;
-        let done = false;
-        exts.forEach(ext => {
-            const src = `${pathNoExt}.${ext}`;
-            const im = new Image();
-            im.onload = () => { if (!done) { done = true; resolve({ src, ext }); } };
-            im.onerror = () => { if (--pending === 0 && !done) resolve(null); };
-            im.src = src;
-        });
-    });
+// Build a design's full image list from its gallery.js entry.
+function designItems(d) {
+    const ext = d.ext || 'png';
+    const count = Math.max(0, parseInt(d.count, 10) || 0);
+    const items = [];
+    for (let i = 1; i <= count; i++) {
+        items.push({ src: `${d.folder}/${pad2(i)}.${ext}`, caption: d.caption || null });
+    }
+    return items;
 }
 
-function pad2(n) { return String(n).padStart(2, '0'); }
+function allDesigns() {
+    const g = window.GALLERY || {};
+    return [].concat(Array.isArray(g.available) ? g.available : [], Array.isArray(g.archive) ? g.archive : []);
+}
 
 // Grid images are routed through a free image-resizing CDN so the page loads
 // small, fast thumbnails instead of the full 1-2 MB originals. The viewer
@@ -700,41 +645,27 @@ function thumbURL(src, w) {
     }
 }
 
-// ===== Config-driven design grid (fast: no probing) =====
-// Reads window.GALLERY from gallery.js. Each design becomes one square; tapping
-// it opens that design's own images in the viewer.
+// ===== Config-driven design grid (Instagram-style: one post per design) =====
+// Reads window.GALLERY from gallery.js. Each design is one square (its cover);
+// tapping it opens that design's own page (design.html).
 function loadDesignGrid(grid) {
     const coll = grid.getAttribute('data-collection');
     const designs = (window.GALLERY && Array.isArray(window.GALLERY[coll])) ? window.GALLERY[coll] : [];
     const frag = document.createDocumentFragment();
 
     designs.forEach(d => {
-        const ext = d.ext || 'png';
-        const count = Math.max(0, parseInt(d.count, 10) || 0);
-        if (!d.folder || !count) return;
-        // Build this design's full image list once; every image is its own square,
-        // and clicking any of them opens the viewer scoped to THIS design only.
-        const items = [];
-        for (let i = 1; i <= count; i++) {
-            items.push({ src: `${d.folder}/${pad2(i)}.${ext}`, caption: d.caption || null });
-        }
-        items.forEach((item, idx) => {
-            const fig = document.createElement('figure');
-            fig.className = 'image-tile';
-            const img = document.createElement('img');
-            img.src = thumbURL(item.src, 600);     // small, fast thumbnail
-            img.alt = (d.caption && (d.caption.en || d.caption.ko)) || 'design';
-            img.loading = 'lazy';
-            img.decoding = 'async';
-            fig.appendChild(img);
-            fig.addEventListener('click', () => {
-                // With a date chosen, one tap books an AVAILABLE design; archive
-                // items (sold out) and the no-date case open the viewer to browse.
-                if (pendingDate() && coll === 'available') bookItem(item);
-                else openLightbox(items, idx);
-            });
-            frag.appendChild(fig);
-        });
+        const items = designItems(d);
+        if (!d.folder || !items.length) return;
+        const a = document.createElement('a');
+        a.className = 'image-tile';
+        a.href = `design.html?id=${encodeURIComponent(d.folder)}&c=${coll}`;
+        const img = document.createElement('img');
+        img.src = thumbURL(items[0].src, 600);   // cover, small/fast thumbnail
+        img.alt = (d.caption && (d.caption.en || d.caption.ko)) || 'design';
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        a.appendChild(img);
+        frag.appendChild(a);
     });
 
     if (!frag.childNodes.length) {
@@ -762,6 +693,54 @@ function setupGridTabs() {
             });
         });
     });
+}
+
+// ===== Design page (design.html?id=<folder>) =====
+// Shows one design's images (tap to zoom/swipe) + a "book this design" button.
+function renderDesignPage() {
+    const mount = document.getElementById('design-page');
+    if (!mount) return;
+    const p = new URLSearchParams(location.search);
+    const id = p.get('id');
+    const d = allDesigns().find(x => x.folder === id) || allDesigns()[0];
+    if (!d) { mount.innerHTML = '<p class="modal-intro">Design not found.</p>'; return; }
+
+    const items = designItems(d);
+    const title = captionText(d.caption) || 'design';
+    const isArchive = (window.GALLERY.archive || []).some(x => x.folder === id);
+
+    mount.innerHTML =
+        '<div class="project-desc"><span class="desc-label"><span class="dot"></span>' +
+        `<span>${title}</span></span></div>` +
+        '<div class="design-images"></div>' +
+        '<div class="design-cta"></div>';
+
+    const wrap = mount.querySelector('.design-images');
+    items.forEach((item, idx) => {
+        const fig = document.createElement('figure');
+        fig.className = 'design-img';
+        const img = document.createElement('img');
+        img.src = thumbURL(item.src, 900);
+        img.alt = title;
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        fig.appendChild(img);
+        fig.addEventListener('click', () => openLightbox(items, idx));
+        wrap.appendChild(fig);
+    });
+
+    const cta = mount.querySelector('.design-cta');
+    if (isArchive) {
+        const ko = currentLanguage === 'ko';
+        cta.innerHTML = `<a class="design-book" href="availables.html">${ko ? '솔드아웃 — 예약 가능 도안 보기' : 'sold out — see available designs'}</a>`;
+    } else {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'design-book';
+        btn.textContent = (currentLanguage === 'ko') ? '이 도안 예약하기' : 'book this design';
+        btn.addEventListener('click', () => bookItem(items[0]));
+        cta.appendChild(btn);
+    }
 }
 
 // ===== Lightbox carousel (swipe versions, zoom, caption) =====
@@ -896,11 +875,11 @@ function renderBackToTop() {
 function init() {
     renderHeader();
     renderBookingPage();
+    renderDesignPage();
     renderFooter();
     renderBackToTop();
 
-    // Build + show the opening popup only when it will actually appear
-    // (once per session) — avoids needlessly probing for the popup cover image.
+    // Build + show the opening popup only when it will actually appear.
     if (!sessionStorage.getItem('announceSeen')) {
         renderAnnouncement();
         openAnnounce();
@@ -910,7 +889,6 @@ function init() {
     buildMarquees();
     document.querySelectorAll('.image-grid[data-collection]').forEach(loadDesignGrid);
     setupGridTabs();
-    showPendingDateBanner();
 }
 
 if (document.readyState === 'loading') {
