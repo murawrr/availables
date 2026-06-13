@@ -42,13 +42,17 @@ const EMAIL = 'murarctic123@gmail.com';
 const ANNOUNCEMENT_HTML = `
     <div class="lang-pick">
         <svg class="yy" viewBox="0 0 100 100" role="group" aria-label="Select language">
+            <defs>
+                <path id="yy-arc-en" d="M50,4 A46,46 0 0,0 50,96"/>
+                <path id="yy-arc-ko" d="M50,4 A46,46 0 0,1 50,96"/>
+            </defs>
             <g class="yy-half yy-ko" role="button" tabindex="0" onclick="pickAnnounceLanguage('ko')">
-                <path d="M50,0 A25,25 0 0,1 50,50 A25,25 0 0,0 50,100 A50,50 0 0,0 50,0 Z"/>
-                <text x="72" y="50">한국어</text>
+                <path class="yy-shape" d="M50,0 A25,25 0 0,1 50,50 A25,25 0 0,0 50,100 A50,50 0 0,0 50,0 Z"/>
+                <text text-anchor="middle"><textPath href="#yy-arc-ko" startOffset="50%">한국어</textPath></text>
             </g>
             <g class="yy-half yy-en" role="button" tabindex="0" onclick="pickAnnounceLanguage('en')">
-                <path d="M50,0 A25,25 0 0,1 50,50 A25,25 0 0,0 50,100 A50,50 0 0,1 50,0 Z"/>
-                <text x="28" y="50">English</text>
+                <path class="yy-shape" d="M50,0 A25,25 0 0,1 50,50 A25,25 0 0,0 50,100 A50,50 0 0,1 50,0 Z"/>
+                <text text-anchor="middle"><textPath href="#yy-arc-en" startOffset="50%">English</textPath></text>
             </g>
         </svg>
     </div>`;
